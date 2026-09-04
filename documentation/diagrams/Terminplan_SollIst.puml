@@ -1,0 +1,61 @@
+@startgantt
+' Soll/Ist-Vergleich auf Phasenebene, fuer das Kapitel Reflexion.
+' Waehrend des Projekts laufend nachfuehren: pro Arbeitspaket die Ist-Zeile
+' auf die effektiven Start- und Enddaten setzen. Quelle ist die Tabelle
+' "Detailplanung und Aufwanderfassung" im Anhang.
+' Rendern: plantuml -tpng -charset UTF-8 Terminplan_SollIst.puml
+
+<style>
+ganttDiagram {
+  task { FontSize 20 }
+  milestone { FontSize 20 }
+  separator { FontSize 20 }
+  timeline { FontSize 15 }
+  closed { BackGroundColor MistyRose }
+}
+</style>
+
+projectscale daily zoom 1
+project starts 2026-09-04
+
+monday are closed
+tuesday are closed
+wednesday are closed
+sunday are closed
+
+2026-09-05 to 2026-09-06 are closed
+2026-09-17 to 2026-09-20 are closed
+2026-10-03 to 2026-10-04 are closed
+2026-10-26 to 2026-10-28 are open
+
+-- AP1 Projektinitialisierung --
+[Soll AP1] as [S1] starts 2026-09-04 and requires 7 days
+[Ist AP1] as [I1] starts 2026-09-04 and requires 1 day
+
+-- AP2 Konzept --
+[Soll AP2] as [S2] starts 2026-10-01 and requires 5 days
+
+-- AP3 Realisierung --
+[Soll AP3] as [S3] starts 2026-10-15 and requires 6 days
+
+-- AP4 Endspurt --
+[Soll AP4] as [S4] starts 2026-10-26 and requires 3 days
+
+-- AP5 Dokumentation finalisieren --
+[Soll AP5] as [S5] starts 2026-10-29 and requires 3 days
+
+-- AP6 Präsentation --
+[Soll AP6] as [S6] starts 2026-11-05 and requires 4 days
+
+-- Meilensteine --
+[M6 Abgabe] happens 2026-11-02
+[M7 Präsentation] happens 2026-11-13
+
+[S1] is colored in LightGray
+[S2] is colored in LightGray
+[S3] is colored in LightGray
+[S4] is colored in LightGray
+[S5] is colored in LightGray
+[S6] is colored in LightGray
+[I1] is colored in LightBlue
+@endgantt

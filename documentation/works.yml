@@ -1,0 +1,16 @@
+# Literaturverzeichnis (Hayagriva-Format)
+# Beispiel-Eintrag, kann als Vorlage verwendet und ersetzt werden.
+#
+# platzhalter-quelle:
+#   type: Web
+#   title: "TODO: Titel der Quelle"
+#   author: TODO
+#   url: https://example.com
+#   date: 2026
+
+platzhalter-quelle:
+  type: Web
+  title: "TODO"
+  author: TODO
+  url: https://example.com
+  date: 2026

@@ -1,0 +1,86 @@
+@startgantt
+' Soll-Terminplan Diplomarbeit, Detailplanung auf Tagesebene
+' Arbeitstage Do/Fr/Sa, Mo-Mi Erwerbstaetigkeit, So blockiert
+' Rendern: plantuml -tpng -charset UTF-8 Terminplan_Soll.puml
+
+<style>
+ganttDiagram {
+  task { FontSize 20 }
+  milestone { FontSize 20 }
+  separator { FontSize 20 }
+  timeline { FontSize 15 }
+  closed { BackGroundColor MistyRose }
+}
+</style>
+
+projectscale daily zoom 1
+project starts 2026-09-04
+
+monday are closed
+tuesday are closed
+wednesday are closed
+sunday are closed
+
+2026-09-05 to 2026-09-06 are closed
+2026-09-17 to 2026-09-20 are closed
+2026-10-03 to 2026-10-04 are closed
+2026-10-26 to 2026-10-28 are open
+
+-- AP1 Projektinitialisierung --
+[1.1 Setup Toolchain, Dokumentationsgerüst, Terminplanung] as [T11] starts 2026-09-04 and requires 1 day
+[1.2 Ausgangslage, Situationsanalyse, Aufgabenstellung] as [T12] starts 2026-09-10 and requires 1 day
+[1.3 Zieldefinition, Abgrenzung, Stakeholder-Analyse] as [T13] starts 2026-09-11 and requires 1 day
+[1.4 Rahmenbedingungen, grobe Anforderungen] as [T14] starts 2026-09-12 and requires 1 day
+[1.5 Varianten, Machbarkeit, Variantenentscheid] as [T15] starts 2026-09-24 and requires 1 day
+[1.6 Risikoanalyse, Qualitäts- und Konfigurationsmanagement] as [T16] starts 2026-09-25 and requires 1 day
+[1.7 Review Initialisierung] as [T17] starts 2026-09-26 and requires 1 day
+
+-- AP2 Konzept --
+[2.1 Kontextdiagramm, Geschäftsprozessanalyse] as [T21] starts 2026-10-01 and requires 1 day
+[2.2 Detailanforderungen] as [T22] starts 2026-10-02 and requires 1 day
+[2.3 Use Cases, Sequenzdiagramme] as [T23] starts 2026-10-08 and requires 1 day
+[2.4 Klassenmodell, Datenmodell, Systemarchitektur] as [T24] starts 2026-10-09 and requires 1 day
+[2.5 Testkonzept, GUI-Design, Review Konzept] as [T25] starts 2026-10-10 and requires 1 day
+
+-- AP3 Realisierung --
+[3.1 Setup Projektstruktur, Build- und Test-Toolchain] as [T31] starts 2026-10-15 and requires 1 day
+[3.2 Datenmodell und Persistenz] as [T32] starts 2026-10-16 and requires 1 day
+[3.3 Business Logic Teil 1] as [T33] starts 2026-10-17 and requires 1 day
+[3.4 Business Logic Teil 2] as [T34] starts 2026-10-22 and requires 1 day
+[3.5 GUI implementieren] as [T35] starts 2026-10-23 and requires 1 day
+[3.6 Integration und externe Anbindung] as [T36] starts 2026-10-24 and requires 1 day
+
+-- AP4 Endspurt Realisierung und Test --
+[4.1 Restarbeiten und Bugfixing] as [T41] starts 2026-10-26 and requires 1 day
+[4.2 Unit- und Integration-Tests, Testprotokoll] as [T42] starts 2026-10-27 and requires 1 day
+[4.3 Code Freeze, Deployment] as [T43] starts 2026-10-28 and requires 1 day
+
+-- AP5 Dokumentation finalisieren --
+[5.1 Kapitel Realisierung und Testprotokoll] as [T51] starts 2026-10-29 and requires 1 day
+[5.2 Management Summary, Reflexion, Schlusswort] as [T52] starts 2026-10-30 and requires 1 day
+[5.3 Gesamtreview, Verzeichnisse, Korrektorat, PDF] as [T53] starts 2026-10-31 and requires 1 day
+
+-- AP6 Präsentation --
+[6.1 Storyline und Foliengerüst] as [T61] starts 2026-11-05 and requires 1 day
+[6.2 Folien ausarbeiten] as [T62] starts 2026-11-06 and requires 1 day
+[6.3 Onlinepublikation] as [T63] starts 2026-11-07 and requires 1 day
+[6.4 Generalprobe] as [T64] starts 2026-11-12 and requires 1 day
+
+-- Durchgehend --
+[AP0 Dokumentation laufend] as [T00] starts 2026-09-04 and ends 2026-10-31
+
+-- Meilensteine --
+[M2 1. Vorzeigetermin Betreuung] happens 2026-10-07
+[M4 2. Vorzeigetermin (zu vereinbaren)] happens 2026-10-22
+[M6 Abgabe 17.00 Uhr] happens 2026-11-02
+[M7 Präsentation] happens 2026-11-13
+
+[T00] is colored in LightGray
+[T41] is colored in Bisque
+[T42] is colored in Bisque
+[T43] is colored in Bisque
+[T61] is colored in LightBlue
+[T62] is colored in LightBlue
+[T63] is colored in LightBlue
+[T64] is colored in LightBlue
+@endgantt
