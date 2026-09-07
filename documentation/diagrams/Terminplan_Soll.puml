@@ -24,7 +24,7 @@ sunday are closed
 2026-09-05 to 2026-09-06 are closed
 2026-09-17 to 2026-09-20 are closed
 2026-10-03 to 2026-10-04 are closed
-2026-10-26 to 2026-10-28 are open
+2026-10-19 to 2026-10-21 are open
 
 -- AP1 Projektinitialisierung --
 [1.1 Setup Toolchain, Dokumentationsgerüst, Terminplanung] as [T11] starts 2026-09-04 and requires 1 day
@@ -46,14 +46,14 @@ sunday are closed
 [3.1 Setup Projektstruktur, Build- und Test-Toolchain] as [T31] starts 2026-10-15 and requires 1 day
 [3.2 Datenmodell und Persistenz] as [T32] starts 2026-10-16 and requires 1 day
 [3.3 Business Logic Teil 1] as [T33] starts 2026-10-17 and requires 1 day
-[3.4 Business Logic Teil 2] as [T34] starts 2026-10-22 and requires 1 day
-[3.5 GUI implementieren] as [T35] starts 2026-10-23 and requires 1 day
-[3.6 Integration und externe Anbindung] as [T36] starts 2026-10-24 and requires 1 day
+[3.4 Business Logic Teil 2] as [T34] starts 2026-10-19 and requires 1 day
+[3.5 GUI implementieren] as [T35] starts 2026-10-20 and requires 1 day
+[3.6 Integration und externe Anbindung] as [T36] starts 2026-10-21 and requires 1 day
 
--- AP4 Endspurt Realisierung und Test --
-[4.1 Restarbeiten und Bugfixing] as [T41] starts 2026-10-26 and requires 1 day
-[4.2 Unit- und Integration-Tests, Testprotokoll] as [T42] starts 2026-10-27 and requires 1 day
-[4.3 Code Freeze, Deployment] as [T43] starts 2026-10-28 and requires 1 day
+-- AP4 Tests und Abschluss Realisierung --
+[4.1 Restarbeiten und Bugfixing] as [T41] starts 2026-10-22 and requires 1 day
+[4.2 Unit- und Integration-Tests, Testprotokoll] as [T42] starts 2026-10-23 and requires 1 day
+[4.3 Code Freeze, Deployment] as [T43] starts 2026-10-24 and requires 1 day
 
 -- AP5 Dokumentation finalisieren --
 [5.1 Kapitel Realisierung und Testprotokoll] as [T51] starts 2026-10-29 and requires 1 day

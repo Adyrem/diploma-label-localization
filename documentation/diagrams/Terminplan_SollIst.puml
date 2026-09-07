@@ -26,7 +26,7 @@ sunday are closed
 2026-09-05 to 2026-09-06 are closed
 2026-09-17 to 2026-09-20 are closed
 2026-10-03 to 2026-10-04 are closed
-2026-10-26 to 2026-10-28 are open
+2026-10-19 to 2026-10-21 are open
 
 -- AP1 Projektinitialisierung --
 [Soll AP1] as [S1] starts 2026-09-04 and requires 7 days
@@ -38,8 +38,8 @@ sunday are closed
 -- AP3 Realisierung --
 [Soll AP3] as [S3] starts 2026-10-15 and requires 6 days
 
--- AP4 Endspurt --
-[Soll AP4] as [S4] starts 2026-10-26 and requires 3 days
+-- AP4 Tests und Abschluss --
+[Soll AP4] as [S4] starts 2026-10-22 and requires 3 days
 
 -- AP5 Dokumentation finalisieren --
 [Soll AP5] as [S5] starts 2026-10-29 and requires 3 days

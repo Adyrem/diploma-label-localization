@@ -187,7 +187,7 @@ regulär Donnerstag, Freitag und Samstag zur Verfügung.
       [05.09. -- 06.09.2026], [Harter Blocker, nicht erreichbar],
       [17.09. -- 20.09.2026], [Harter Blocker, nicht erreichbar],
       [03.10. -- 04.10.2026], [Harter Blocker, nicht erreichbar],
-      [26.10. -- 28.10.2026], [Ferien, zusätzlich verfügbar (Endspurt)],
+      [19.10. -- 21.10.2026], [Ferien, zusätzlich verfügbar],
     ),
     caption: [Verfügbarkeit im Projektzeitraum]
   ) <verfuegbarkeit>
@@ -197,6 +197,11 @@ Daraus ergeben sich im Zeitraum vom 04.09.2026 bis zur Abgabe am 02.11.2026
 insgesamt 24 verfügbare Arbeitstage. Bei einem angenommenen Tagespensum von rund
 acht Stunden entspricht dies einem Gesamtaufwand von etwa 192 Stunden und liegt
 damit innerhalb der in den Richtlinien genannten Bandbreite von 150 bis 250 Stunden.
+
+Durch die Ferien vom 19.10. bis 21.10.2026 entsteht mit dem 15.10. bis 24.10.2026
+der längste zusammenhängende Arbeitsblock des Projekts. Er ist deshalb der
+Realisierung zugeteilt, bei der ein durchgehendes Arbeiten den grössten Nutzen
+bringt.
 
 === Terminplan (Soll)
 
@@ -209,10 +214,9 @@ damit innerhalb der in den Richtlinien genannten Bandbreite von 150 bis 250 Stun
 
 Schraffierte Bereiche im Terminplan kennzeichnen nicht verfügbare Tage. Die
 Meilensteine M0, M1, M3 und M5 sind aus den Balken direkt ablesbar und daher nicht
-zusätzlich eingezeichnet. Die
-Dokumentation läuft bewusst parallel zu den übrigen Arbeitspaketen, damit die
-Ergebnisse direkt festgehalten werden und am Schluss keine geschlossene
-Schreibphase notwendig ist.
+zusätzlich eingezeichnet. Die Dokumentation läuft bewusst parallel zu den übrigen
+Arbeitspaketen, damit die Ergebnisse direkt festgehalten werden und am Schluss
+keine geschlossene Schreibphase notwendig ist.
 
 === Arbeitspakete (Soll/Ist)
 
@@ -235,8 +239,8 @@ Schreibphase notwendig ist.
       [AP0], [Dokumentation laufend], [04.09.], [31.10.], [--], [], [], [],
       [AP1], [Projektinitialisierung], [04.09.], [26.09.], [7], [], [], [],
       [AP2], [Konzept], [01.10.], [10.10.], [5], [], [], [],
-      [AP3], [Realisierung], [15.10.], [24.10.], [6], [], [], [],
-      [AP4], [Endspurt Realisierung und Test], [26.10.], [28.10.], [3], [], [], [],
+      [AP3], [Realisierung], [15.10.], [21.10.], [6], [], [], [],
+      [AP4], [Tests und Abschluss Realisierung], [22.10.], [24.10.], [3], [], [], [],
       [AP5], [Dokumentation finalisieren und Review], [29.10.], [31.10.], [3], [], [], [],
       [AP6], [Präsentation vorbereiten], [05.11.], [12.11.], [4], [], [], [],
     ),
@@ -264,7 +268,7 @@ Schreibphase notwendig ist.
       [M2], [1. Vorzeigetermin Betreuung], [07.10.2026], [], [],
       [M3], [Konzept abgeschlossen], [10.10.2026], [], [],
       [M4], [2. Vorzeigetermin Betreuung (zu vereinbaren)], [22.10.2026], [], [],
-      [M5], [Code Freeze], [28.10.2026], [], [],
+      [M5], [Code Freeze], [24.10.2026], [], [],
       [M6], [Abgabe Diplomarbeit, 17.00 Uhr], [02.11.2026], [], [],
       [M7], [Präsentation], [13.11.2026], [], [],
     ),
