@@ -32,7 +32,7 @@
         [*Zeitraum*], [*Funktion*], [*Arbeitgeber*],
       ),
       [2016-2020], [Lehrling Applikationsentwickler], [Ammann Schweiz AG],
-      [2021-Heute], [Solution Engineer], [BE-terna GmBH],
+      [2021-Heute], [Solution Engineer], [BE-terna AG],
     ),
     caption: [Beruflicher Werdegang (eigene Darstellung)]
   ) <beruflicher_werdegang>

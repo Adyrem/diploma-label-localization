@@ -10,9 +10,14 @@
         [*Abkürzung*],
         [*Bedeutung*],
       ),
-      [], [],
-      [], [],
-      [], [],
+      [API], [Application Programming Interface],
+      [CI/CD], [Continuous Integration / Continuous Deployment],
+      [D365], [Microsoft Dynamics 365],
+      [ERD], [Entity Relationship Diagram],
+      [GUI], [Graphical User Interface],
+      [IDE], [Integrated Development Environment],
+      [REST], [Representational State Transfer],
+      [VSIX], [Visual Studio Extension],
     ),
     caption: [Abkürzungsverzeichnis]
   ) <abkuerzungsverzeichnis>
@@ -22,12 +27,143 @@
 
 == Ausgangslage
 
+Bei der Entwicklung für Microsoft Dynamics 365 werden angezeigte Texte nicht direkt
+im Code hinterlegt, sondern als Labels. Ein Label ist ein Platzhalter mit einer
+eindeutigen ID, den die Anwendung zur Laufzeit durch die Übersetzung in der Sprache
+des Benutzers ersetzt. Für jede unterstützte Sprache existiert eine eigene
+Label-Datei.
+
+Die von Microsoft mitgelieferte Verwaltung dieser Labels wurde bei BE-terna als
+unzureichend beurteilt. Aus diesem Grund entstand intern ein eigenes Werkzeug, der
+BE-LabelEditor. Es handelt sich um eine eigenständige Desktop-Anwendung, mit der
+Labels gesucht, erstellt und bearbeitet werden können. Ebenso lassen sich die
+Verwendungen eines Labels im Quellcode auffinden.
+
+Die Entwicklung für Dynamics 365 findet in Visual Studio statt, weil Microsoft dort
+das gesamte Tooling für die Plattform bereitstellt. Der BE-LabelEditor läuft daneben
+als zweite Anwendung. Wer ein Label sucht oder anlegt, verlässt also die IDE,
+erledigt die Arbeit im separaten Fenster und kehrt mit der kopierten Label-ID
+zurück.
+
 == Situationsanalyse (IST-Zustand)
+
+Der bestehende BE-LabelEditor deckt den Lokalisierungsprozess funktional bereits
+weitgehend ab. @ist_screenshot zeigt die Hauptansicht der aktuellen Version 1.8.3
+mit einem synthetischen Demo-Datensatz.
+
+#figure(
+  image("../screenshots/GUI_full.png", width: 100%),
+  caption: [BE-LabelEditor 1.8.3, Hauptansicht (eigene Darstellung)]
+) <ist_screenshot>
+
+Die Gruppe Tracing (Preview) im Ribbon ist eine interne Vorschaufunktion, die sich
+bei BE-terna noch in Entwicklung befindet. Sie wird von dieser Arbeit ausgegrenzt.
+Eine spätere Übernahme in die Extension bleibt möglich, sobald die Funktion intern
+abgeschlossen ist.
+
+Die folgende Übersicht fasst zusammen, was das Werkzeug heute leistet.
+
+#[
+  #show figure: set align(left)
+  #figure(
+    table(
+      align: left,
+      columns: (auto, 1fr),
+      table.header(
+        [*Funktion*], [*Beschreibung*],
+      ),
+      [Suche],
+      [Acht Suchmodi. Exact match, Substring und Anything like that jeweils mit und
+       ohne Beachtung der Gross- und Kleinschreibung, dazu Label id und MatchWord.
+       Die Treffer erscheinen nach Relevanz sortiert in einer Liste.],
+      [Detailansicht],
+      [Zu einem ausgewählten Label werden die Übersetzungen aller konfigurierten
+       Sprachen angezeigt, etwa de-CH, en-US, fr-CH und it-CH. Text und Kommentar
+       sind direkt editierbar.],
+      [Erstellen],
+      [Ein neues Label wird im gewählten Model angelegt und in allen zu erstellenden
+       Sprachen mit dem zuletzt eingegebenen Suchbegriff vorbelegt.],
+      [Löschen, Kopieren, Verschieben],
+      [Kopieren legt eine Kopie in einem Ziel-Model an, Verschieben löscht
+       anschliessend das Original. Bestehende Referenzen im Code lassen sich dabei
+       optional aktualisieren.],
+      [Ersetzen],
+      [Alle Verwendungen des markierten Labels werden im Code durch eine andere,
+       bereits bestehende Label-ID ersetzt.],
+      [Verwendungssuche],
+      [Listet alle Fundstellen einer Label-ID mit Model, Datei, Zeile und Spalte
+       auf.],
+      [Apply],
+      [Kopiert die vollständige Label-ID in die Zwischenablage und minimiert das
+       Fenster, damit der Entwickler zurück nach Visual Studio wechseln kann.],
+      [Einstellungen],
+      [Auswahl der User-ID sowie Konfiguration der zu ladenden und der beim Erstellen
+       anzulegenden Sprachen. Eine Änderung der geladenen Sprachen wird erst nach
+       einem Neustart wirksam.],
+      [Konsole],
+      [Meldungsprotokoll mit den Kategorien Errors, Warnings und Messages.],
+    ),
+    caption: [Funktionsumfang des bestehenden BE-LabelEditors]
+  ) <ist_funktionen>
+]
+
+#figure(
+  image("../screenshots/search_options.png", width: 7cm),
+  caption: [Auswahl der Suchmodi (eigene Darstellung)]
+) <ist_suchmodi>
+
+#figure(
+  image("../screenshots/create_label.png", width: 7cm),
+  caption: [Leiste zum Anlegen neuer Labels, ein Knopf je beschreibbares Model
+            (eigene Darstellung)]
+) <ist_erstellen>
+
+#figure(
+  image("../screenshots/find_references.png", width: 100%),
+  caption: [Ergebnis der Verwendungssuche (eigene Darstellung)]
+) <ist_verwendungssuche>
+
+#figure(
+  image("../screenshots/settings.png", width: 11cm),
+  caption: [Einstellungsseite, im Demo-Datensatz ohne hinterlegte User-IDs
+            (eigene Darstellung)]
+) <ist_einstellungen>
+
+#figure(
+  image("../screenshots/console.png", width: 100%),
+  caption: [Konsole beim Laden der Label-Dateien (eigene Darstellung)]
+) <ist_konsole>
+
+Aus dem Aufbau als eigenständige Anwendung ergeben sich mehrere Schwachstellen. Der
+Wechsel zwischen IDE und Werkzeug unterbricht den Arbeitsfluss bei jedem
+Lokalisierungsvorgang. Visual Studio zeigt beim Überfahren einer Label-ID mit der
+Maus nur die englische Übersetzung an, die übrigen Sprachen bleiben verborgen. Eine
+Suche lässt sich nicht aus dem Editor heraus starten. Hardcodierte Texte, die
+eigentlich als Label hinterlegt sein müssten, muss der Entwickler von Hand
+herauslösen und ersetzen. Neue Labels werden in allen Sprachen mit demselben
+Ausgangstext vorbelegt, übersetzt wird anschliessend manuell.
 
 == Aufgabenstellung
 
-// Der Auftrag in eigenen Worten. Die formale Aufgabenstellung (Themeneingabe)
-// und ein allfälliges Lastenheft liegen im Anhang.
+Das bestehende Werkzeug soll durch eine Extension für Visual Studio abgelöst werden.
+Visual Studio ist dabei gesetzt, weil dort bereits das gesamte Tooling für Dynamics
+365 liegt und die Entwickler ohnehin darin arbeiten.
+
+Die Extension muss den Funktionsumfang des BE-LabelEditors vollständig übernehmen.
+Dazu kommen die Möglichkeiten, die sich erst durch die Anbindung an die IDE
+ergeben.
+
+- Übersetzungen direkt im Code anzeigen und durchsuchen, statt nur die Label-ID zu
+  sehen
+- Übersetzungen neu erstellter Labels über einen externen Service automatisieren
+- Hardcodierte Texte aus dem Code oder dem Eigenschaftsfenster extrahieren und durch
+  ein übersetztes Label ersetzen
+
+Auftraggeberin ist die BE-terna AG, mein aktueller Arbeitgeber. Die Arbeit gilt als
+erfolgreich, wenn die Funktionalität des bestehenden Werkzeugs vollumfänglich
+übernommen und um die genannten IDE-Funktionen erweitert wird.
+
+Die eingereichte Themeneingabe liegt im Anhang.
 
 == Zieldefinition
 
@@ -63,14 +199,21 @@
 
 === Prozessbezogene Rahmenbedingungen
 
-Die Arbeit entsteht im Umfeld von Microsoft Dynamics 365 und der Programmiersprache
-X++. Quellcode und Dokumentation werden in einem öffentlichen Repository
-versioniert. Daraus ergibt sich die Auflage, dass weder Bestandteile der
-Standardanwendung von Microsoft noch Betriebsdaten des Arbeitgebers veröffentlicht
-werden dürfen. Der Umfang der Arbeit beschränkt sich deshalb auf selbst erstellte
-Erweiterungen. Das Vorgehen ist in @konfigurationsmanagement beschrieben.
+Die Entwicklung erfolgt ausserhalb der Unternehmenssysteme auf einem privaten Gerät.
+Für die Dauer des Projekts wird der Code über ein öffentliches GitHub-Repository
+bereitgestellt. Nach Abschluss der Arbeit soll die Extension in die bestehende
+CI/CD-Pipeline von BE-terna integriert werden.
+
+Aus der öffentlichen Ablage ergeben sich zwei Auflagen. Der Quellcode des
+bestehenden BE-LabelEditors ist Eigentum von BE-terna und wird nicht veröffentlicht.
+Ebenso wenig veröffentlicht werden Quellcode und Metadaten der Standardanwendung von
+Dynamics 365, die in der Entwicklungsumgebung zwar einsehbar sind, aber Microsoft
+gehören. Das Vorgehen ist in @konfigurationsmanagement beschrieben.
 
 === Produktbezogene Rahmenbedingungen
+
+Es werden keine kundenbezogenen Daten verwendet. Für Entwicklung und Tests dient ein
+synthetischer Datensatz.
 
 == Stakeholder-Analyse
 
@@ -366,18 +509,19 @@ der Versionierung ausgenommen und werden bei Bedarf neu gebaut.
 Änderungen werden in nachvollziehbaren Commits festgehalten, damit der Verlauf der
 Arbeit für die Betreuung jederzeit einsehbar ist.
 
-Die Arbeit entsteht im Umfeld von Microsoft Dynamics 365 und X++. Der Quellcode
-und die Metadaten der Standardanwendung sind in der Entwicklungsumgebung zwar
-einsehbar, bleiben aber Eigentum von Microsoft. Weil das Repository öffentlich ist,
-gelten daraus abgeleitet die folgenden Einschränkungen.
+Weil das Repository öffentlich ist, gelten für den Inhalt die folgenden
+Einschränkungen.
 
-- Quellcode und Metadaten der Standardanwendung werden nicht veröffentlicht. Im
-  Repository liegen ausschliesslich selbst erstellte Erweiterungen.
-- Auf Standardobjekte wird über ihren Namen und die öffentliche Dokumentation von
-  Microsoft verwiesen, nicht über kopierten Quellcode.
-- Betriebsdaten des Arbeitgebers werden nicht veröffentlicht. Für Beispiele und
-  Screenshots dient der Demodatensatz Contoso.
-- Zugangsdaten, Umgebungs-URLs und Lizenzangaben werden nicht abgelegt.
+- Der Quellcode des bestehenden BE-LabelEditors wird nicht veröffentlicht. Er ist
+  Eigentum von BE-terna und dient ausschliesslich als Referenz.
+- Quellcode und Metadaten der Standardanwendung von Dynamics 365 werden nicht
+  veröffentlicht. Sie sind in der Entwicklungsumgebung einsehbar, gehören aber
+  Microsoft. Auf Standardobjekte wird über ihren Namen und die öffentliche
+  Dokumentation von Microsoft verwiesen.
+- Es werden keine kundenbezogenen Daten verwendet. Für Entwicklung, Tests und
+  Screenshots dient ein synthetischer Datensatz.
+- Zugangsdaten, API-Schlüssel, Umgebungs-URLs und Lizenzangaben werden nicht
+  abgelegt.
 
 Arbeitsstände, die nicht veröffentlicht werden sollen, bleiben ausserhalb des
 Repositories in einem lokalen Ordner.

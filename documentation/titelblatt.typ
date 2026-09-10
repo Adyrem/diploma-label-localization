@@ -41,7 +41,7 @@
       _Betreuende Person:_\
       Stefan Canobbio\
       _Experte/Expertin:_\
-      TODO
+      Raphael Bucher
     ]
   )
 ]
