@@ -7,6 +7,9 @@
 #set par(leading: 0.5em)
 #set text(font: "DM Sans")
 
+// Lange Tabellen dürfen über Seiten umbrechen, sonst entstehen grosse Lücken.
+#show figure: set block(breakable: true)
+
 // ---------------------------------------------------------------------------
 // Deckblatt
 // ---------------------------------------------------------------------------

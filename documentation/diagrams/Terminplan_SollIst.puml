@@ -1,6 +1,6 @@
 @startgantt
-' Soll/Ist-Vergleich auf Phasenebene, fuer das Kapitel Reflexion.
-' Waehrend des Projekts laufend nachfuehren: pro Arbeitspaket die Ist-Zeile
+' Soll/Ist-Vergleich auf Phasenebene, für das Kapitel Reflexion.
+' Während des Projekts laufend nachführen: pro Arbeitspaket die Ist-Zeile
 ' auf die effektiven Start- und Enddaten setzen. Quelle ist die Tabelle
 ' "Detailplanung und Aufwanderfassung" im Anhang.
 ' Rendern: plantuml -tpng -charset UTF-8 Terminplan_SollIst.puml

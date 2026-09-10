@@ -181,19 +181,115 @@ Die eingereichte Themeneingabe liegt im Anhang.
   #figure(
     table(
       align: left,
-      columns: (auto, 1fr, 1fr),
+      columns: (auto, 1fr, 1.7fr, auto),
       table.header(
-        [*ID*], [*Ziel*], [*Messkriterium*],
+        [*ID*], [*Ziel*], [*Messkriterium*], [*Reihen-\ folge*],
       ),
-      [], [], [],
-      [], [], [],
-      [], [], [],
+      [Z1], [Funktionale Parität zum bestehenden Werkzeug],
+      [Alle in @ist_funktionen aufgeführten Funktionen stehen in der Extension zur
+       Verfügung.],
+      [1],
+
+      [Z2], [Übersetzungen im Code einsehbar],
+      [Zu einer Label-ID im Editor lassen sich alle konfigurierten Sprachen
+       einsehen, ohne den Editor zu verlassen, und nicht mehr nur Englisch wie
+       bisher.],
+      [2],
+
+      [Z3], [Suche aus dem Editor],
+      [Eine Label-Suche lässt sich aus dem geöffneten Editor starten, ohne das
+       Extension-Fenster von Hand zu öffnen.],
+      [2],
+
+      [Z4], [Bearbeiten aus dem Code heraus],
+      [Ein im Code referenziertes Label lässt sich im Extension-Panel öffnen und
+       bearbeiten. Die Änderung steht nach dem Speichern in der Label-Datei.],
+      [2],
+
+      [Z5], [Verwendungssuche in der IDE],
+      [Die Suche liefert alle Fundstellen mit Model, Datei, Zeile und Spalte. Ein
+       Klick auf einen Treffer springt an die Stelle im Code.],
+      [2],
+
+      [Z6], [Extraktion hardcodierter Texte],
+      [Ein markierter Text wird auf Befehl als neues Label angelegt und die Stelle
+       im Code durch die Label-ID ersetzt.],
+      [3],
+
+      [Z7], [Automatische Übersetzung],
+      [Beim Anlegen eines Labels schlägt ein externer Dienst die Übersetzungen für
+       alle konfigurierten Sprachen vor. Sie lassen sich vor dem Speichern ändern.],
+      [3],
+
+      [Z8], [Erweiterbare Architektur],
+      [Die Kernlogik liegt in einer Komponente ohne Abhängigkeit zum Visual Studio
+       SDK und ist ohne laufende IDE testbar.],
+      [laufend],
     ),
     caption: [Projektziele]
   ) <projektziele>
 ]
 
+Die Spalte Reihenfolge gibt die Abfolge der Umsetzung an und folgt der
+Priorisierung aus der Themeneingabe. Stufe 1 ist die funktionale Parität, ohne die
+der bestehende Editor nicht abgelöst ist. Stufe 2 baut darauf auf und beseitigt den
+Kontextwechsel. Stufe 3 trägt die grösste technische Unsicherheit, weil die
+Textextraktion und die Anbindung eines externen Dienstes am wenigsten erprobt sind.
+Z8 gilt laufend. Die Einteilung regelt die Abfolge und nicht den Verzicht, denn die
+Erfolgskriterien verlangen alle acht Ziele.
+
+
 === Nichtziele / Abgrenzung
+
+Der Fokus der Arbeit liegt auf der Lokalisierung. Die folgenden Punkte sind
+bewusst nicht Bestandteil des Projekts.
+
+#[
+  #show figure: set align(left)
+  #figure(
+    table(
+      align: left,
+      columns: (1fr, 1.4fr),
+      table.header(
+        [*Nicht Bestandteil der Arbeit*], [*Begründung*],
+      ),
+      [Tracing-Funktionen des bestehenden Werkzeugs],
+      [Interne Vorschaufunktion, die bei BE-terna noch in Entwicklung ist. Eine
+       Übernahme bleibt möglich, sobald sie dort abgeschlossen ist.],
+
+      [Weitere Entwicklungsprozesse ausserhalb der Lokalisierung],
+      [Die Architektur soll spätere Ergänzungen zulassen, umgesetzt werden sie in
+       dieser Arbeit nicht.],
+
+      [Integration in die CI/CD-Pipeline von BE-terna],
+      [Erfolgt nach Abschluss der Arbeit.],
+
+      [Produktive Einführung bei BE-terna],
+      [Entscheid der Auftraggeberin nach Projektabschluss.],
+
+      [Veröffentlichung des bestehenden BE-LabelEditors],
+      [Der Quellcode ist Eigentum von BE-terna und dient ausschliesslich als
+       Referenz.],
+
+      [Betrieb des externen Übersetzungsdienstes],
+      [Die Extension bindet einen bestehenden Dienst über dessen Schnittstelle an.
+       Ein eigener Übersetzungsdienst wird nicht entwickelt.],
+    ),
+    caption: [Abgrenzung]
+  ) <abgrenzung>
+]
+
+Welche weiteren Möglichkeiten die Extension-API eröffnet, ist noch nicht
+vollständig untersucht. Diese Analyse gehört ins Konzept. Funktionen, die dabei
+hinzukommen, sind Kann-Anforderungen und zählen nicht zu den Erfolgskriterien.
+
+Ausser der Themeneingabe bestehen keine Vorarbeiten. Die Extension entsteht
+vollständig im Rahmen dieser Arbeit. Der bestehende BE-LabelEditor dient als
+fachliche Referenz. Er zeigt, welches Verhalten die Anwender gewohnt sind,
+insbesondere beim Suchen und Anlegen von Labels. Ob die Verfahren gleich umgesetzt
+oder überarbeitet werden, entscheidet sich im Konzept. Gerade bei der Suche ist eine
+Überarbeitung wahrscheinlich, weil sich im Editor andere Möglichkeiten bieten als in
+einem eigenständigen Fenster.
 
 == Rahmenbedingungen
 
@@ -217,25 +313,53 @@ synthetischer Datensatz.
 
 == Stakeholder-Analyse
 
+Das Projekt betrifft ein internes Entwicklerwerkzeug. Der Kreis der Betroffenen ist
+deshalb klein und liegt vollständig innerhalb von BE-terna. Externe Kunden sind
+nicht betroffen, weil das Werkzeug die Entwicklung unterstützt und nicht in
+ausgelieferte Lösungen eingreift.
+
 #[
   #show figure: set align(left)
   #figure(
     table(
       align: left,
-      columns: (1fr, 1fr, auto),
+      columns: (auto, 1.4fr, auto, 1.4fr),
       table.header(
         [*Stakeholder*],
         [*Interesse am Projekt*],
         [*Einfluss*],
+        [*Einbindung*],
       ),
-      [], [], [],
-      [], [], [],
-      [], [], [],
-      [], [], [],
+      [BE-terna AG als Auftraggeberin],
+      [Alle Entwickler sollen beim Lokalisieren schneller arbeiten.],
+      [Hoch],
+      [Gibt die Aufgabenstellung vor und entscheidet über die produktive Einführung
+       nach Projektabschluss.],
+
+      [Entwickler als Anwender],
+      [Zeitersparnis beim Suchen und Anlegen von Labels sowie eine angenehmere
+       Developer Experience durch den Wegfall des Kontextwechsels.],
+      [Mittel],
+      [Liefern Rückmeldungen zur Bedienung. Ihre Akzeptanz entscheidet darüber, ob
+       die Extension das bestehende Werkzeug tatsächlich ablöst.],
+
+      [Maintainer],
+      [Die Architektur soll das Ergänzen weiterer Funktionen erlauben, ohne dass
+       grundlegend umgebaut werden muss.],
+      [Hoch],
+      [Trifft die Architekturentscheide und verantwortet die Weiterentwicklung über
+       die Diplomarbeit hinaus.],
     ),
     caption: [Stakeholderanalyse]
   ) <stakeholderanalyse>
 ]
+
+Zwei der drei Rollen nehme ich selbst ein, einerseits als Entwickler, der das
+Werkzeug täglich benutzt, andererseits als Maintainer, der es weiterentwickelt und
+bereitstellt. Auch die Rolle des Firmenbetreuers liegt bei mir. Das verkürzt die
+Abstimmungswege erheblich, birgt aber die Gefahr, dass Anforderungen aus meiner
+eigenen Arbeitsweise heraus formuliert werden und nicht aus der Sicht der übrigen
+Entwickler. Diesem Punkt wird in der Risikoanalyse Rechnung getragen.
 
 == Grobe Anforderungen an das neue System
 

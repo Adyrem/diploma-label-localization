@@ -1,6 +1,6 @@
 @startgantt
 ' Soll-Terminplan Diplomarbeit, Detailplanung auf Tagesebene
-' Arbeitstage Do/Fr/Sa, Mo-Mi Erwerbstaetigkeit, So blockiert
+' Arbeitstage Do/Fr/Sa, Mo-Mi Erwerbstätigkeit, So blockiert
 ' Rendern: plantuml -tpng -charset UTF-8 Terminplan_Soll.puml
 
 <style>
