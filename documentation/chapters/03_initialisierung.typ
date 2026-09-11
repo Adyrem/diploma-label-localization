@@ -33,6 +33,13 @@ eindeutigen ID, den die Anwendung zur Laufzeit durch die Übersetzung in der Spr
 des Benutzers ersetzt. Für jede unterstützte Sprache existiert eine eigene
 Label-Datei.
 
+Erweiterungen für Dynamics 365 werden in Models ausgeliefert. Ein Model bündelt
+Code, Metadaten und die zugehörigen Label-Dateien und ist die Einheit, die bei einem
+Kunden installiert wird. Jedes Label gehört damit zu einer Label-Datei innerhalb
+eines Models, was sich an der Label-ID ablesen lässt. Bei `@BDM1:BDM110000003` steht
+`BDM1` für die Label-Datei und der Rest für das Label selbst. Nicht jedes Model ist
+beschreibbar, Models von Microsoft oder von Drittanbietern sind schreibgeschützt.
+
 Die von Microsoft mitgelieferte Verwaltung dieser Labels wurde bei BE-terna als
 unzureichend beurteilt. Aus diesem Grund entstand intern ein eigenes Werkzeug, der
 BE-LabelEditor. Es handelt sich um eine eigenständige Desktop-Anwendung, mit der
@@ -230,8 +237,7 @@ Die eingereichte Themeneingabe liegt im Anhang.
   ) <projektziele>
 ]
 
-Die Spalte Reihenfolge gibt die Abfolge der Umsetzung an und folgt der
-Priorisierung aus der Themeneingabe. Stufe 1 ist die funktionale Parität, ohne die
+Die Spalte Reihenfolge gibt die Abfolge der Umsetzung an. Stufe 1 ist die funktionale Parität, ohne die
 der bestehende Editor nicht abgelöst ist. Stufe 2 baut darauf auf und beseitigt den
 Kontextwechsel. Stufe 3 trägt die grösste technische Unsicherheit, weil die
 Textextraktion und die Anbindung eines externen Dienstes am wenigsten erprobt sind.
@@ -308,6 +314,23 @@ gehören. Das Vorgehen ist in @konfigurationsmanagement beschrieben.
 
 === Produktbezogene Rahmenbedingungen
 
+Die Zielplattform ist primär Visual Studio 2026. Visual Studio 2022 wird bald
+abgelöst, deshalb findet die Entwicklung in 2026 statt. Bietet 2026
+Erweiterungspunkte, die in 2022 fehlen, werden sie genutzt, auch wenn die Extension
+dadurch unter 2022 nicht den vollen Funktionsumfang hat. Die Einbindung erfolgt über
+das Visual Studio SDK als VSIX-Paket. Damit sind der Weg der Integration und die
+verfügbaren Erweiterungspunkte vorgegeben.
+
+In den Label-Prozess von Dynamics 365 lässt sich nicht eingreifen. Das Format der
+Label-Dateien ist damit vorgegeben. Die Extension liest und schreibt diese Dateien
+direkt auf dem Dateisystem und muss sie so hinterlassen, dass Dynamics 365 sie
+weiterhin verwenden kann. Zusätzliche Daten lassen sich daneben ablegen, die
+Label-Datei bleibt aber die Source of Truth.
+
+Der externe Übersetzungsdienst wird über eine REST-Schnittstelle angebunden. Der
+Anbieter soll konfigurierbar und austauschbar sein, damit die Extension nicht an
+einen einzelnen Dienst gebunden ist.
+
 Es werden keine kundenbezogenen Daten verwendet. Für Entwicklung und Tests dient ein
 synthetischer Datensatz.
 
@@ -363,18 +386,86 @@ Entwickler. Diesem Punkt wird in der Risikoanalyse Rechnung getragen.
 
 == Grobe Anforderungen an das neue System
 
+Die groben Anforderungen fassen zusammen, was die Extension leisten muss. Die Spalte
+Ziel nennt das Projektziel, zu dem eine Anforderung gehört. Die Verfeinerung mit
+Akzeptanzkriterien und Abhängigkeiten folgt in @detailanforderungen.
+
 #[
   #show figure: set align(left)
+  #set text(size: 10pt)
   #figure(
     table(
       align: left,
-      columns: (auto, 1fr, 1fr),
+      columns: (auto, auto, 1fr, auto),
       table.header(
-        [*ID*], [*Anforderung*], [*Beschreibung*],
+        [*ID*], [*Anforderung*], [*Beschreibung*], [*Ziel*],
       ),
-      [], [], [],
-      [], [], [],
-      [], [], [],
+      table.cell(colspan: 4)[*Funktionale Anforderungen*],
+      [FA01], [Label-Suche],
+      [Suchen anhand eines Suchbegriffs, mindestens Exact match, Substring und
+       Label-ID, je mit und ohne Beachtung der Gross- und Kleinschreibung.], [Z1],
+      [FA02], [Label-Erstellung],
+      [Neue Labels anlegen, vorbelegt mit dem Suchbegriff in allen konfigurierten
+       Sprachen.], [Z1],
+      [FA03], [Label-Bearbeitung],
+      [Bearbeiten, Löschen, Kopieren und Verschieben, mit Angabe eines Ziel-Models
+       und optionaler Aktualisierung der Referenzen im Code.], [Z1],
+      [FA04], [Verwendungssuche],
+      [Alle Verwendungen eines Labels mit Model, Datei, Zeile und Spalte auffinden.
+       Die Treffer sind anklickbar.], [Z1, Z5],
+      [FA05], [Hover-Tooltip],
+      [Beim Überfahren einer Label-ID alle konfigurierten Sprachübersetzungen
+       anzeigen.], [Z2],
+      [FA06], [Inline-Anzeige],
+      [Die Übersetzung dauerhaft im Code einblenden, ein- und ausschaltbar.], [Z2],
+      [FA07], [Inline-Suche],
+      [Eine Label-Suche aus dem Editor starten, ohne das Extension-Fenster von Hand
+       zu öffnen.], [Z3],
+      [FA08], [Im Extension-Panel öffnen],
+      [Ein im Code referenziertes Label im Panel öffnen und bearbeiten.], [Z4],
+      [FA09], [Extraktion hardcodierter Texte],
+      [Markierten Text als neues Label anlegen und die Stelle im Code durch die
+       Label-ID ersetzen.], [Z6],
+      [FA10], [Automatische Übersetzung],
+      [Übersetzungen über einen externen Dienst vorschlagen. Sie sind vor dem
+       Speichern prüf- und änderbar.], [Z7],
+      [FA11], [Einstellungen],
+      [Zu ladende und beim Erstellen anzulegende Sprachen konfigurieren,
+       API-Schlüssel für externe Dienste hinterlegen.], [Z1, Z7],
+
+      table.cell(colspan: 4)[*Nicht-funktionale Anforderungen*],
+      [NFA01], [Kompatibilität],
+      [Primär lauffähig unter Visual Studio 2026. Visual Studio 2022 wird
+       unterstützt, soweit die verwendeten Erweiterungspunkte dort verfügbar sind.
+       Spätere Versionen sollen nicht ausgeschlossen sein.], [--],
+      [NFA02], [Performance],
+      [Suchvorgänge in wenigen hundert Millisekunden. Das Laden der Label-Dateien
+       blockiert den Editor nicht.], [--],
+      [NFA03], [Erweiterbarkeit],
+      [Weitere Features lassen sich ohne grundlegende Umstrukturierung
+       ergänzen.], [Z8],
+      [NFA04], [Stabilität],
+      [Fehler innerhalb der Extension werden abgefangen und führen nicht zum
+       Absturz von Visual Studio.], [--],
+      [NFA05], [Wartbarkeit],
+      [Der Code ist verständlich strukturiert und dokumentiert, sodass Dritte ihn
+       weiterentwickeln können.], [Z8],
+
+      table.cell(colspan: 4)[*Organisatorische Anforderungen*],
+      [OA01], [Bereitstellung],
+      [Die Extension liegt als installierbares VSIX-Paket vor und lässt sich ohne
+       manuelle Nacharbeit auf einem Entwicklerrechner einrichten.], [--],
+      [OA02], [Dokumentation],
+      [Aufbau und Erweiterungspunkte sind so dokumentiert, dass eine andere Person
+       die Weiterentwicklung übernehmen kann.], [Z8],
+      [OA03], [Quellcodeablage],
+      [Während des Projekts liegt der Code in einem öffentlichen Repository.
+       Bestandteile der Standardanwendung von Dynamics 365 und des bestehenden
+       BE-LabelEditors bleiben ausgeschlossen.], [--],
+      [OA04], [Ablösung des bestehenden Werkzeugs],
+      [Der Umstieg erfolgt erst, wenn die Extension den Funktionsumfang des
+       BE-LabelEditors abdeckt. Bis dahin bleibt das bestehende Werkzeug in
+       Gebrauch.], [Z1],
     ),
     caption: [Grobe Anforderungen]
   ) <grobe_anforderungen>

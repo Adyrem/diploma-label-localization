@@ -26,7 +26,7 @@ Stunden.
       [1.1], [04.09.], [Setup Toolchain, Dokumentationsgerüst, Terminplanung], [8], [4], [Richtlinien ausgewertet, Typst-Gerüst und Repository aufgesetzt, Soll-Terminplan erstellt], [Erledigt],
       [1.2], [10.09.], [Ausgangslage, Situationsanalyse, Aufgabenstellung], [8], [4], [Kapitel geschrieben, IST-Zustand mit sechs Abbildungen belegt. Titel und Klasse ergänzt, Rahmenbedingungen und Konfigurationsmanagement vorgezogen], [Erledigt],
       [1.3], [11.09.], [Zieldefinition, Abgrenzung, Stakeholder-Analyse], [8], [3], [Ziele mit Messkriterien, Abgrenzung und Stakeholder-Analyse geschrieben. Auf den 10.09. vorgezogen], [Erledigt],
-      [1.4], [12.09.], [Rahmenbedingungen, grobe Anforderungen], [8], [], [], [],
+      [1.4], [12.09.], [Rahmenbedingungen, grobe Anforderungen], [8], [5], [Grobe Anforderungen FA, NFA und OA mit Zielbezug erfasst, produktbezogene Rahmenbedingungen ausgebaut, Model-Begriff eingeführt. Auf den 10.09. vorgezogen], [Erledigt],
       [1.5], [24.09.], [Varianten, Machbarkeit, Variantenentscheid], [8], [], [], [],
       [1.6], [25.09.], [Risikoanalyse, Qualitäts- und Konfigurationsmanagement], [8], [], [], [],
       [1.7], [26.09.], [Review Initialisierung], [8], [], [], [],

@@ -14,7 +14,7 @@
 //   caption: [Geschäftsprozess]
 // ) <geschaeftsprozess>
 
-== Detailanforderungen an das neue System
+== Detailanforderungen an das neue System <detailanforderungen>
 
 === Funktionale Anforderungen
 
