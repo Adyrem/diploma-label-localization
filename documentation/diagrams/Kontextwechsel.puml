@@ -1,0 +1,28 @@
+@startuml
+' Heutiger Ablauf beim Suchen oder Anlegen eines Labels.
+' Die Swimlanes zeigen, wie oft die Anwendung gewechselt wird.
+' Rendern: plantuml -tpng -charset UTF-8 Kontextwechsel.puml
+
+skinparam defaultFontSize 13
+skinparam ActivityBackgroundColor White
+skinparam ActivityBorderColor Black
+skinparam ArrowColor Black
+
+|Visual Studio|
+start
+:Text im Code benötigt ein Label;
+|#F5DDDD|BE-LabelEditor|
+:BE-LabelEditor in den Vordergrund holen;
+:Suchbegriff eingeben und Suchmodus wählen;
+if (Label vorhanden?) then (ja)
+  :Label in der Trefferliste auswählen;
+else (nein)
+  :Neues Label im Ziel-Model anlegen;
+  :Übersetzungen von Hand erfassen;
+endif
+:Speichern;
+:Apply, Label-ID in die Zwischenablage;
+|Visual Studio|
+:Label-ID im Code einfügen;
+stop
+@enduml

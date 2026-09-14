@@ -108,9 +108,21 @@
         [*Wozu wurde das Hilfsmittel eingesetzt?*],
         [*Betroffene Stellen*],
       ),
-      [], [], [],
-      [], [], [],
-      [], [], [],
+      [Claude Code (Anthropic)],
+      [Analysieren und Überarbeiten der Kapiteltexte nach inhaltlichen Vorgaben des
+       Autors, Erstellen der Diagramme als PlantUML-Quelltext, Recherche zu den
+       Schnittstellen von Visual Studio und Dynamics 365.],
+      [Kapitel 1 und 2, sämtliche Abbildungen ausser den Screenshots],
+      [Claude Code (Anthropic)],
+      [Durchführung der Machbarkeitsstudie zum Extension-Modell in einer eigenen
+       Session, Bau der drei Prototypen und Erstellen des Befundprotokolls.],
+      [Abschnitt 2.8.2, @befundprotokoll],
+      [Typst],
+      [Formatierung und Erzeugung des Dokuments.],
+      [Gesamtes Dokument],
+      [PlantUML],
+      [Rendern der Diagramme aus dem Quelltext.],
+      [Abbildungen],
     ),
     caption: [Hilfsmittel (eigene Darstellung)]
   ) <hilfsmittelverzeichnis>
@@ -127,9 +139,46 @@
       table.header(
         [*Fachwort*], [*Bedeutung*],
       ),
-      [], [],
-      [], [],
-      [], [],
+      [Add-in],
+      [Komponente, die Visual Studio lädt und die an fest vorgegebenen Stellen der
+       Oberfläche erscheint. Dynamics 365 stellt dafür ein eigenes Modell bereit.],
+      [CodeLens],
+      [Einblendung oberhalb einer Codezeile, die zusätzliche Angaben zu dieser Zeile
+       anzeigt.],
+      [Content Type],
+      [Kennzeichnung, mit der Visual Studio den Inhalt einer Datei einordnet. Sie
+       bestimmt, welche Editor-Erweiterungen in einer Datei greifen.],
+      [Cross-Reference-Datenbank],
+      [Datenbank von Dynamics 365, die beim Build gefüllt wird und festhält, wo ein
+       Element verwendet wird. Visual Studio nutzt sie für die Referenzsuche.],
+      [Disk-Provider],
+      [Zugangspunkt der Metadata-API. Er richtet den Zugriff auf ein
+       Package-Verzeichnis auf der Festplatte, sodass sich die dort abgelegten
+       Models lesen und schreiben lassen, ohne dass ein Anwendungsserver oder eine
+       Datenbank läuft.],
+      [Label],
+      [Platzhalter mit einer eindeutigen ID, den die Anwendung zur Laufzeit durch die
+       Übersetzung in der Sprache des Benutzers ersetzt.],
+      [MEF],
+      [Managed Extensibility Framework. Mechanismus, über den Visual Studio
+       Erweiterungen zur Laufzeit einsammelt und einbindet.],
+      [Metadata-API],
+      [Von Microsoft ausgelieferte Assemblies, über die sich die Elemente eines
+       Models lesen und schreiben lassen, ohne die Dateien selbst zu kennen.],
+      [Model],
+      [Einheit, in der Erweiterungen für Dynamics 365 ausgeliefert werden. Bündelt
+       Code, Metadaten und Label-Dateien.],
+      [QuickInfo],
+      [Fenster im Editor, das beim Überfahren einer Stelle mit der Maus erscheint.],
+      [Tagger],
+      [Bestandteil einer Editor-Erweiterung, der Textbereiche mit
+       Zusatzinformationen verknüpft, auf die andere Funktionen aufbauen.],
+      [VSIX],
+      [Paketformat, in dem eine Erweiterung für Visual Studio ausgeliefert und
+       installiert wird.],
+      [VSSDK],
+      [Ursprüngliches Erweiterungspaket von Visual Studio mit Zugriff auf alle
+       internen Dienste.],
     ),
     caption: [Glossar (eigene Darstellung)]
   ) <glossar>

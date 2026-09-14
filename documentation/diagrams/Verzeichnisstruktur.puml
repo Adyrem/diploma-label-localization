@@ -1,0 +1,21 @@
+@startsalt
+' Ablage der Label-Dateien im Package-Verzeichnis der lokalen Installation.
+' Pfade entsprechen dem synthetischen Demo-Datensatz.
+' Rendern: plantuml -tpng -charset UTF-8 Verzeichnisstruktur.puml
+{
+{T
++ PackagesLocalDirectory
+++ BEDemo1                       | Package
++++ Descriptor
+++++ BDM1.xml                    | beschreibt das Model und dessen Referenzen
++++ BDM1                         | Model
+++++ AxLabelFile
++++++ LabelResources
+++++++ de
++++++++ BDM1.de.label.txt        | Labels auf Deutsch
+++++++ en-us
++++++++ BDM1.en-us.label.txt     | Labels auf Englisch
+++ BEDemo2                       | weiteres Package
+}
+}
+@endsalt

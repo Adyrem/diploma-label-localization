@@ -1,16 +1,74 @@
 # Literaturverzeichnis (Hayagriva-Format)
-# Beispiel-Eintrag, kann als Vorlage verwendet und ersetzt werden.
-#
-# platzhalter-quelle:
-#   type: Web
-#   title: "TODO: Titel der Quelle"
-#   author: TODO
-#   url: https://example.com
-#   date: 2026
 
-platzhalter-quelle:
+ms-addins:
   type: Web
-  title: "TODO"
-  author: TODO
-  url: https://example.com
-  date: 2026
+  title: Tools add-ins for Visual Studio
+  author: Microsoft
+  publisher: Microsoft Learn
+  url:
+    value: https://learn.microsoft.com/en-us/dynamics365/fin-ops-core/dev-itpro/dev-tools/developer-tools-add-ins
+    date: 2026-09-10
+  date: 2026-03-30
+
+ms-editor-extension-points:
+  type: Web
+  title: Language Service and Editor Extension Points
+  author: Microsoft
+  publisher: Microsoft Learn
+  url:
+    value: https://learn.microsoft.com/en-us/visualstudio/extensibility/language-service-and-editor-extension-points
+    date: 2026-09-10
+
+ms-editor-extensibility:
+  type: Web
+  title: Editor Overview, VisualStudio.Extensibility
+  author: Microsoft
+  publisher: Microsoft Learn
+  url:
+    value: https://learn.microsoft.com/en-us/visualstudio/extensibility/visualstudio.extensibility/editor/editor
+    date: 2026-09-10
+
+ms-devtools-overview:
+  type: Web
+  title: Development tools in Visual Studio
+  author: Microsoft
+  publisher: Microsoft Learn
+  url:
+    value: https://learn.microsoft.com/en-us/dynamics365/fin-ops-core/dev-itpro/dev-tools/development-tools-overview
+    date: 2026-09-10
+
+meyer-labels-net:
+  type: Web
+  title: Getting D365FO Object Labels in .NET
+  author: Meyer, Alex
+  url:
+    value: https://alexdmeyer.com/2018/03/20/getting-d365fo-object-labels-in-net/
+    date: 2026-09-10
+  date: 2018-03-20
+
+ms-extensibility-models:
+  type: Web
+  title: Choose the right Visual Studio extensibility model for you
+  author: Microsoft
+  publisher: Microsoft Learn
+  url:
+    value: https://learn.microsoft.com/en-us/visualstudio/extensibility/visualstudio.extensibility/extensibility-models
+    date: 2026-09-10
+
+ms-inproc-extensions:
+  type: Web
+  title: VSSDK-compatible VisualStudio.Extensibility extensions
+  author: Microsoft
+  publisher: Microsoft Learn
+  url:
+    value: https://learn.microsoft.com/en-us/visualstudio/extensibility/visualstudio.extensibility/get-started/in-proc-extensions
+    date: 2026-09-10
+
+saxblog-xref:
+  type: Web
+  title: Code to build cross reference data without a full compile
+  author: Ievgen Miroshnikov
+  url:
+    value: https://ievgensaxblog.wordpress.com/2018/12/09/msdyn365fo-code-to-build-cross-reference-data-without-a-full-compile/
+    date: 2026-09-10
+  date: 2018-12-09

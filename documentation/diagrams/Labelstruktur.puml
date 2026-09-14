@@ -1,0 +1,39 @@
+@startuml
+' Zusammenhang von Model, Label-Datei, Label und Übersetzung.
+' Rendern: plantuml -tpng -charset UTF-8 Labelstruktur.puml
+
+skinparam defaultFontSize 13
+skinparam classAttributeIconSize 0
+hide circle
+
+class Model {
+  Name
+  schreibgeschützt
+}
+class "Label-Datei" as LabelFile {
+  Kürzel
+}
+class Label {
+  ID
+}
+class "Übersetzung" as Uebersetzung {
+  Sprache
+  Text
+  Kommentar
+}
+
+Model "1" *-- "0..*" LabelFile
+LabelFile "1" *-- "0..*" Label
+Label "1" *-- "1..*" Uebersetzung
+
+note right of Label
+  Beispiel @BDM1:BDM110000003
+  BDM1 ist die Label-Datei,
+  BDM110000003 das Label
+end note
+
+note right of Uebersetzung
+  de     Lieferadresse
+  en-us  Delivery address
+end note
+@enduml

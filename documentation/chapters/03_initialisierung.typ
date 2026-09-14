@@ -1,3 +1,5 @@
+#import "../helpers.typ": todo
+
 = Abkürzungsverzeichnis
 
 #[
@@ -39,6 +41,11 @@ Kunden installiert wird. Jedes Label gehört damit zu einer Label-Datei innerhal
 eines Models, was sich an der Label-ID ablesen lässt. Bei `@BDM1:BDM110000003` steht
 `BDM1` für die Label-Datei und der Rest für das Label selbst. Nicht jedes Model ist
 beschreibbar, Models von Microsoft oder von Drittanbietern sind schreibgeschützt.
+
+#figure(
+  image("../diagrams/Labelstruktur.png", width: 7.5cm),
+  caption: [Model, Label-Datei, Label und Übersetzung (eigene Darstellung)]
+) <labelstruktur>
 
 Die von Microsoft mitgelieferte Verwaltung dieser Labels wurde bei BE-terna als
 unzureichend beurteilt. Aus diesem Grund entstand intern ein eigenes Werkzeug, der
@@ -140,6 +147,13 @@ Die folgende Übersicht fasst zusammen, was das Werkzeug heute leistet.
   image("../screenshots/console.png", width: 100%),
   caption: [Konsole beim Laden der Label-Dateien (eigene Darstellung)]
 ) <ist_konsole>
+
+@kontextwechsel zeigt den heutigen Ablauf, wenn im Code ein Label gebraucht wird.
+
+#figure(
+  image("../diagrams/Kontextwechsel.png", width: 100%),
+  caption: [Ablauf beim Suchen oder Anlegen eines Labels (eigene Darstellung)]
+) <kontextwechsel>
 
 Aus dem Aufbau als eigenständige Anwendung ergeben sich mehrere Schwachstellen. Der
 Wechsel zwischen IDE und Werkzeug unterbricht den Arbeitsfluss bei jedem
@@ -292,16 +306,24 @@ hinzukommen, sind Kann-Anforderungen und zählen nicht zu den Erfolgskriterien.
 Ausser der Themeneingabe bestehen keine Vorarbeiten. Die Extension entsteht
 vollständig im Rahmen dieser Arbeit. Der bestehende BE-LabelEditor dient als
 fachliche Referenz. Er zeigt, welches Verhalten die Anwender gewohnt sind,
-insbesondere beim Suchen und Anlegen von Labels. Ob die Verfahren gleich umgesetzt
-oder überarbeitet werden, entscheidet sich im Konzept. Gerade bei der Suche ist eine
-Überarbeitung wahrscheinlich, weil sich im Editor andere Möglichkeiten bieten als in
-einem eigenständigen Fenster.
+insbesondere beim Suchen und Anlegen von Labels. Sein Code wird nicht übernommen.
+Die Verfahren werden analysiert und dort überarbeitet, wo sich Verbesserungen
+anbieten. Gerade bei der Referenzsuche ist das wahrscheinlich, weil sich im Editor andere
+Möglichkeiten bieten als in einem eigenständigen Fenster.
 
 == Rahmenbedingungen
 
 === Prozessbezogene Rahmenbedingungen
 
-Die Entwicklung erfolgt ausserhalb der Unternehmenssysteme auf einem privaten Gerät.
+Die Entwicklung erfolgt ausschliesslich auf einem privaten Gerät und ausserhalb der
+Unternehmenssysteme. Eine Entwicklungsumgebung von Dynamics 365 steht dort nicht zur
+Verfügung, nachgestellt wird sie durch einen synthetischen Datensatz. Die im Projekt eingesetzten
+KI-Werkzeuge dürfen auf den Systemen des Arbeitgebers nicht betrieben werden, und
+diese Systeme werden auch anderweitig genutzt. Deshalb findet die Entwicklung
+ausschliesslich privat statt. Eine Testumgebung des Arbeitgebers darf verwendet
+werden, um die Extension auszuführen und zu beobachten. Einzelne Assemblies lassen
+sich auf das private Gerät kopieren, ein vollständiges Abbild der Umgebung nicht.
+
 Für die Dauer des Projekts wird der Code über ein öffentliches GitHub-Repository
 bereitgestellt. Nach Abschluss der Arbeit soll die Extension in die bestehende
 CI/CD-Pipeline von BE-terna integriert werden.
@@ -475,53 +497,544 @@ Akzeptanzkriterien und Abhängigkeiten folgt in @detailanforderungen.
 
 === Varianten
 
+Die Wahl der IDE ist durch die Aufgabenstellung vorgegeben. Offen sind drei
+technische Entscheidungen, die den Aufbau der Extension prägen.
+
+#heading(outlined: false, level: 4)[V1 Zugriff auf die Label-Dateien]
+
+Microsoft liefert mit der Entwicklungsumgebung eine Metadata-API aus. Das ist eine
+Sammlung von Assemblies, über die sich die Elemente eines Models lesen und schreiben
+lassen, ohne die Dateien selbst zu kennen. Ein Disk-Provider richtet diesen Zugriff
+auf das Package-Verzeichnis, also den Ordner, in dem die lokale Installation ihre
+Models ablegt. @verzeichnisstruktur zeigt den Aufbau dieses Ordners.
+
+#figure(
+  image("../diagrams/Verzeichnisstruktur.png", width: 9cm),
+  caption: [Ablage der Label-Dateien im Package-Verzeichnis (eigene Darstellung)]
+) <verzeichnisstruktur>
+
 #[
   #show figure: set align(left)
+  #set text(size: 10pt)
   #figure(
     table(
       align: left,
-      columns: (1fr, 1fr, 1fr, auto),
+      columns: (auto, 1fr, 1fr),
       table.header(
         [*Kriterium*],
-        [*Variante A*],
-        [*Variante B*],
-        [*Bewertung*],
+        [*A Direkter Dateizugriff*],
+        [*B Metadata-API von Microsoft*],
       ),
-      [], [], [], [],
-      [], [], [], [],
-      [], [], [], [],
-      [], [], [], [],
+      [Vorgehen],
+      [Models über die Descriptor-Dateien finden, Label-Dateien selbst parsen und
+       schreiben. So arbeitet der bestehende BE-LabelEditor.],
+      [Zugriff über `MetadataProviderFactory` und einen Disk-Provider auf das
+       Package-Verzeichnis @meyer-labels-net.],
+      [Abhängigkeiten],
+      [Keine. Die Kernlogik läuft ohne installierte Entwicklungsumgebung.],
+      [Bindet die Extension an die Assemblies der lokalen D365-Installation.],
+      [Formatänderungen],
+      [Muss selbst nachgezogen werden, wenn Microsoft das Format ändert.],
+      [Werden von der API abgefangen.],
+      [Testbarkeit],
+      [Unit Tests gegen Beispieldateien möglich, ohne D365.],
+      [Tests brauchen die Assemblies und ein Package-Verzeichnis.],
+      [Erfahrung],
+      [Das Verfahren ist im bestehenden Werkzeug erprobt.],
+      [Neu zu erarbeiten.],
+      [Zielframework],
+      [Frei wählbar.],
+      [Zwingend .NET Framework 4.8, die Assemblies lassen sich unter 4.7.2 nicht
+       referenzieren.],
+      [Geschwindigkeit],
+      [Beim ersten Zugriff deutlich schneller.],
+      [Beim ersten Zugriff langsamer wegen des Startaufwands, danach gleich
+       schnell.],
+      [Parsen der Labels],
+      [Eigene Arbeit.],
+      [Ebenfalls eigene Arbeit, die API liefert den Dateiinhalt unverarbeitet.],
     ),
-    caption: [Variantenvergleich]
-  ) <variantenvergleich>
+    caption: [Variantenvergleich Zugriff auf die Label-Dateien]
+  ) <variante_dateizugriff>
+]
+
+#heading(outlined: false, level: 4)[V2 Zusätzliches Add-in]
+
+Die Extension wird als VSIX-Paket ausgeliefert und klinkt sich über die
+Erweiterungspunkte von Visual Studio ein. Für die Entwicklungswerkzeuge von
+Dynamics 365 besteht daneben ein eigenes Add-in-Modell @ms-addins. Ein Add-in ist
+keine VSIX-Datei, sondern eine Klassenbibliothek, die in den Installationsordner
+dieser Werkzeuge kopiert und von ihnen geladen wird. Zu entscheiden ist, ob ein
+solches Add-in zusätzlich gebaut wird.
+
+Die Erweiterungspunkte von Visual Studio, um die es dabei geht, tragen eigene
+Namen. QuickInfo ist das Fenster, das beim Überfahren mit der Maus erscheint. Ein
+Tagger verknüpft Textbereiche mit Zusatzinformationen, auf die andere Funktionen
+aufbauen. CodeLens blendet Angaben oberhalb einer Codezeile ein. Welche dieser
+Erweiterungen in einer Datei greifen, entscheidet der Content Type, also die
+Kennzeichnung, mit der Visual Studio den Inhalt einer Datei einordnet
+@ms-editor-extension-points @ms-editor-extensibility. Über die Selection Tracking
+erfährt eine Extension zudem, welches Element im Designer gerade gewählt ist.
+
+@demo_inline und @demo_quickinfo zeigen, wie die beiden Anzeigen aussehen
+könnten. Beide Abbildungen beruhen auf erfundenen Beispieldaten und nicht auf einem
+Lauf gegen echte Label-Dateien.
+
+#figure(
+  image("../screenshots/demo-codelens-uebersetzungen.png", width: 100%),
+  caption: [Einblendung der Übersetzungen oberhalb der Label-Zeile, Demonstration
+            mit Beispieldaten (eigene Darstellung)]
+) <demo_inline>
+
+#figure(
+  image("../screenshots/demo-quickinfo-uebersetzungen.png", width: 100%),
+  caption: [Tooltip mit allen konfigurierten Sprachen, Demonstration mit
+            Beispieldaten (eigene Darstellung)]
+) <demo_quickinfo>
+
+#[
+  #show figure: set align(left)
+  #set text(size: 10pt)
+  #figure(
+    table(
+      align: left,
+      columns: (auto, 1fr, 1fr),
+      table.header(
+        [*Kriterium*],
+        [*A Nur die Extension*],
+        [*B Extension und Add-in*],
+      ),
+      [Zugang],
+      [Alles, was Visual Studio bietet, also Anzeigen im Editor, eigene Fenster
+       und die Selection Tracking im Designer.],
+      [Zusätzlich zwei Menüeinträge, im Menü Dynamics 365 und im Kontextmenü des
+       Element-Designers.],
+      [Auslieferung],
+      [Ein VSIX-Paket.],
+      [Zusätzlich eine Bibliothek, die in den Installationsordner der
+       Entwicklungswerkzeuge kopiert wird.],
+      [Abhängigkeit],
+      [Keine zu den Entwicklungswerkzeugen.],
+      [Das Add-in wird von diesen geladen und hängt an ihrer Version.],
+    ),
+    caption: [Variantenvergleich Add-in]
+  ) <variante_anbindung>
+]
+
+#heading(outlined: false, level: 4)[V3 Ablage der Label-Daten zur Laufzeit]
+
+#[
+  #show figure: set align(left)
+  #set text(size: 10pt)
+  #figure(
+    table(
+      align: left,
+      columns: (auto, 1fr, 1fr, 1fr),
+      table.header(
+        [*Kriterium*],
+        [*A Direkt aus den Dateien*],
+        [*B Einmal in den Arbeitsspeicher*],
+        [*C Eigener Index*],
+      ),
+      [Vorgehen],
+      [Jede Suche liest die Label-Dateien.],
+      [Beim Start einmal laden, danach im Speicher suchen. So arbeitet der
+       bestehende BE-LabelEditor.],
+      [Zusätzliche Ablage in einer Datenbank oder einem eigenen Format, inkrementell
+       nachgeführt.],
+      [Startzeit], [Keine], [Rund zwei Sekunden, siehe @ist_konsole], [Einmalig
+       hoch, danach gering],
+      [Suchgeschwindigkeit], [Gering], [Hoch], [Hoch],
+      [Metadaten], [Nicht möglich], [Nur flüchtig], [Dauerhaft speicherbar],
+      [Aktualität], [Immer aktuell], [Braucht eine Überwachung der Dateien],
+      [Braucht Überwachung und Abgleich],
+      [Aufwand], [Gering], [Mittel], [Hoch],
+    ),
+    caption: [Variantenvergleich Ablage der Label-Daten]
+  ) <variante_ablage>
+]
+
+#heading(outlined: false, level: 4)[V4 Extension-Modell]
+
+Visual Studio bietet drei Wege, eine Extension zu bauen @ms-extensibility-models
+@ms-inproc-extensions. Sie unterscheiden sich im Zielframework, im Zugriff auf die
+bestehenden Dienste und darin, was ein Fehler in der Extension anrichtet.
+
+Das VSSDK ist das ursprüngliche Erweiterungspaket
+von Visual Studio und gibt Zugriff auf alle internen Dienste. MEF steht für Managed
+Extensibility Framework und ist der Mechanismus, über den Visual Studio
+Erweiterungen zur Laufzeit einsammelt und einbindet. Die Editor-Erweiterungen aus V2
+melden sich über MEF an, weshalb der Zugriff darauf die Voraussetzung für Hover und
+Inline-Anzeige ist.
+
+#[
+  #show figure: set align(left)
+  #set text(size: 9.5pt)
+  #figure(
+    table(
+      align: left,
+      columns: (auto, 1fr, 1fr, 1fr),
+      table.header(
+        [*Kriterium*],
+        [*A VSSDK, in-process*],
+        [*B VS.Extensibility, out-of-process*],
+        [*C VS.Extensibility, in-process*],
+      ),
+      [Zielframework], [.NET Framework], [.NET 8], [.NET Framework],
+      [VSSDK und MEF], [Voller Zugriff], [Kein Zugriff], [Voller Zugriff],
+      [Fehler in der Extension],
+      [Kann Visual Studio mitreissen],
+      [Bleibt auf die Extension beschränkt],
+      [Kann Visual Studio mitreissen],
+      [Tooltip am Token für FA05],
+      [Über MEF möglich],
+      [Nicht möglich. Ein Tooltip lässt sich nur an ein CodeLens-Label hängen,
+       nicht an beliebigen Text],
+      [Über MEF möglich],
+      [Einblendung im Code für FA06],
+      [Freie Einblendung über MEF],
+      [Nur über CodeLens oder die Marginalspalte, keine freie Einblendung],
+      [Freie Einblendung über MEF],
+      [Reifegrad der benötigten API],
+      [Stabil],
+      [Tagger und CodeLens sind als Vorschau markiert],
+      [Stabil],
+      [D365-Add-in-Modell], [Möglich], [Nicht möglich], [Möglich],
+      [Empfehlung von Microsoft],
+      [Weiterhin unterstützt, für neue Extensions nicht mehr erste Wahl],
+      [Für neue Extensions ohne Bedarf an VSSDK-Diensten],
+      [Für neue Extensions mit Bedarf an VSSDK-Diensten],
+    ),
+    caption: [Variantenvergleich Extension-Modell]
+  ) <variante_extensionmodell>
+]
+
+#figure(
+  image("../diagrams/Extensionmodelle.png", width: 100%),
+  caption: [Prozessgrenze der drei Extension-Modelle (eigene Darstellung)]
+) <extensionmodelle>
+
+Die Entscheidung steht im Zielkonflikt mit NFA04. Ein Fehler in der Extension soll
+Visual Studio nicht zum Absturz bringen, was für den out-of-process-Betrieb
+spricht. QuickInfo und die Anbindung an das D365-Add-in-Modell verlangen aber
+Zugriff auf VSSDK und MEF und damit den Betrieb im selben Prozess.
+
+#heading(outlined: false, level: 4)[V6 Verfahren der Verwendungssuche]
+
+FA04 verlangt Fundstellen mit Model, Datei, Zeile und Spalte. Dynamics 365 führt
+dafür eine Cross-Reference-Datenbank, die beim Build mit der entsprechenden Option
+gefüllt wird und die Visual Studio für die eigene Referenzsuche nutzt
+@saxblog-xref.
+
+#[
+  #show figure: set align(left)
+  #set text(size: 9.5pt)
+  #figure(
+    table(
+      align: left,
+      columns: (auto, 1fr, 1fr, 1fr),
+      table.header(
+        [*Kriterium*],
+        [*A Textsuche in den XML-Dateien*],
+        [*B Cross-Reference-Datenbank*],
+        [*C Metadata-API durchlaufen*],
+      ),
+      [Vorgehen],
+      [Suchpfade nach der Label-ID durchsuchen. So arbeitet der bestehende
+       BE-LabelEditor.],
+      [Abfrage der beim Build erzeugten Referenzdaten.],
+      [Alle Elemente über die API durchlaufen und auf Label-Verweise prüfen.],
+      [Genauigkeit],
+      [Findet jedes Vorkommen im Text, auch in Kommentaren.],
+      [Semantisch korrekt, dieselbe Grundlage wie die Referenzsuche der IDE.],
+      [Semantisch korrekt.],
+      [Aktualität],
+      [Immer aktuell.],
+      [Nur so aktuell wie der letzte Build mit Referenzdaten.],
+      [Immer aktuell.],
+      [Voraussetzungen],
+      [Keine.],
+      [Gefüllte Datenbank und Zugriff darauf.],
+      [Assemblies der lokalen Installation.],
+      [Aufwand], [Gering], [Mittel], [Hoch],
+    ),
+    caption: [Variantenvergleich Verwendungssuche]
+  ) <variante_verwendungssuche>
 ]
 
 === Machbarkeitsbeurteilung
 
-=== Variantenentscheid
+Die Beurteilung stützt sich auf die Dokumentation von Microsoft, auf das bestehende
+Werkzeug und auf die Erfahrung aus der täglichen Arbeit mit Dynamics 365. Ein
+lauffähiger Versuchsaufbau liegt noch nicht vor.
+
+#heading(outlined: false, level: 4)[Technisch geklärt]
+
+Der Zugriff auf die Label-Dateien ist auf beiden Wegen machbar. Der direkte Weg ist
+im bestehenden BE-LabelEditor seit Jahren im Einsatz, die Metadata-API ist
+dokumentiert und wird in vergleichbaren Werkzeugen verwendet.
+
+Das Add-in-Modell für die Entwicklungswerkzeuge ist dokumentiert und liefert die
+beiden genannten Einstiegspunkte. Die Editor-Erweiterbarkeit von Visual Studio mit
+QuickInfo, Taggern und CodeLens ist ebenfalls dokumentiert.
+
+Die Verwendungssuche ist über die Textsuche gesichert, weil das bestehende Werkzeug
+genau so arbeitet. Die Cross-Reference-Datenbank ist eine Verbesserung, kein
+Risiko.
+
+#heading(outlined: false, level: 4)[Prototypenvergleich zum Extension-Modell]
+
+Zu V4 wurden drei Prototypen gebaut, je einer pro Modell. Sie übersetzen und
+paketieren reproduzierbar unter Visual Studio Community 2026 in der Version 18.9.2
+mit dem .NET SDK 10.0.400. Keiner der Prototypen wurde in einer laufenden
+Visual-Studio-Instanz geladen. Belegt ist damit, dass sich die jeweiligen
+Schnittstellen ansprechen und übersetzen lassen, nicht dass sie zur Laufzeit
+funktionieren. Aussagen darüber, dass etwas fehlt, stützen sich auf die
+Schnittstellen des SDK und auf fehlgeschlagene Kompilierversuche.
+
+Der wichtigste Befund betrifft den Betrieb ausserhalb des Prozesses. Die
+WPF-Editor-Typen existieren dort nicht. Derselbe Quelltext, der im klassischen
+Modell übersetzt, scheitert mit der Meldung, dass `IWpfTextViewCreationListener`
+nicht gefunden wird. An deren Stelle tritt eine eigene, deutlich kleinere
+Oberfläche mit Listenern für das Öffnen und Ändern einer Ansicht, einer
+Marginalspalte und einem Tagger.
+
+Daraus folgt für die beiden Anzeigeziele, dass CodeLens ausserhalb des Prozesses
+erreichbar ist. Ein QuickInfo-Typ kommt in der Oberfläche dagegen nicht vor, eine
+Suche über alle Assemblies des gebauten Pakets lieferte keinen Treffer. Ein
+Tooltip existiert dort nur als Eigenschaft eines CodeLens-Labels, hängt also an
+der CodeLens-Zeile und nicht am Text selbst. Freie Einblendungen mitten im Text
+sind ebenfalls nicht möglich, es bleiben Marginalspalte, Einfärbung und
+CodeLens.
+
+Am Text selbst können ausserhalb des Prozesses überhaupt nur vier Dinge ansetzen.
+Zwei Tag-Arten, die einfärben oder die Darstellung ändern, aber keinen Text tragen,
+dazu CodeLens oberhalb der Zeile und die Marginalspalte am Rand. Keines davon zeigt
+beim Überfahren eines Tokens Text an.
+
+Tagger und CodeLens sind in dieser Fassung des SDK als Vorschau markiert. Der
+Compiler verweigert die Übersetzung, bis die entsprechende Warnung ausdrücklich
+unterdrückt wird, und weist darauf hin, dass die Schnittstelle sich ändern oder
+obsolet werden kann.
+
+Zum Modell im selben Prozess ergab der Versuch zwei Punkte. Erstens lässt es sich
+mit klassischem MEF-Code in einer einzigen Assembly verbinden, beides übersetzt
+gemeinsam. Zweitens bringt es gegenüber dem klassischen Modell keinen Gewinn bei
+der Ausfallsicherheit, denn es läuft im selben Prozess und trägt damit dasselbe
+Absturzrisiko.
+
+#heading(outlined: false, level: 4)[Befunde aus der Entwicklungsumgebung]
+
+In einer zweiten Runde wurden die Werkzeuge von Dynamics 365 statisch ausgewertet
+und eine Testerweiterung auf der Entwicklungsumgebung ausgeführt. Die Ergebnisse
+stehen in @befundprotokoll.
+
+Der X++-Editor meldet einen gewöhnlichen Content Type und ist nicht abgeschottet.
+Eine eigene Erweiterung kann sich daran anhängen, was der Versuch auf der
+Entwicklungsumgebung bestätigt hat. Damit sind Z2 und Z3 umsetzbar. Der Klassifizierer von Dynamics 365
+kennzeichnet Label-Token bereits selbst, unter anderem als "X++ Modern Label".
+Eine Erweiterung findet Label-IDs damit über die vorhandene Klassifizierung,
+statt X++ selbst zerlegen zu müssen. Das senkt den Aufwand für Z2 und Z3
+erheblich.
+
+Die eigene QuickInfo-Quelle wird beim Überfahren von X++-Code gefragt und erkennt
+Label-Token. Ihr Eintrag erscheint im selben Tooltip wie der von Dynamics 365.
+Der Mechanismus für FA05 ist damit belegt, das Auflösen eines Labels in alle
+konfigurierten Sprachen dagegen noch nicht erprobt.
+
+Für CodeLens verwenden die Werkzeuge von Dynamics 365 nicht die Infrastruktur von
+Visual Studio, sondern eine eigene Nachbildung. Ein Aufruf der
+CodeLens-Schnittstelle wurde zur Laufzeit nie beobachtet. Die von Dynamics 365
+verwendete Technik beruht aber auf öffentlichen Typen des Editors und steht einer
+eigenen Erweiterung im gleichen Prozess ebenfalls offen. FA06 ist damit
+umsetzbar, jedoch nicht über CodeLens.
+
+Für das Eigenschaftsfenster bietet das Add-in-Modell keinen Erweiterungspunkt.
+Über die Selection Tracking von Visual Studio lässt sich das im Designer gewählte
+Element jedoch lesen, einschliesslich seiner Label-Eigenschaften. Für Z6 genügt
+das, um ausgewählte Elemente heranzuziehen. Das Schreiben über den Designer wurde
+nicht erprobt und wird nicht weiter verfolgt, weil Änderungen bei Bedarf direkt in
+den Dateien erfolgen können.
+
+Die Metadata-API lief auf einem privaten Gerät ohne Anwendungsserver, Datenbank
+und Entwicklungswerkzeuge. Im warmen Zustand sind beide Zugriffsarten gleich
+schnell, weil das Zerlegen der Dateien den Aufwand bestimmt. Die API liefert den
+Dateiinhalt unverarbeitet, das Zerlegen bleibt in beiden Fällen eigene Arbeit.
+
+Belegt ist ausserdem, dass eine klassische Erweiterung mit MEF-Anteilen in Visual
+Studio 2026 lädt und neben den Werkzeugen von Dynamics 365 läuft, ohne diese
+erkennbar zu stören.
+
+#heading(outlined: false, level: 4)[Offen]
+
+Nicht geprüft wurde das Auflösen eines Labels in alle konfigurierten Sprachen
+innerhalb des Tooltips. Ebenso wenig, ob sich Eigenschaften über den Designer
+schreiben lassen, was aber bewusst nicht weiter verfolgt wird. Die Prototypen des
+neuen Modells wurden nie in einer laufenden Instanz geladen, belegt ist dort nur
+das Kompilieren und Paketieren.
+
+#heading(outlined: false, level: 4)[Zielkonflikt aus V4]
+
+Der Betrieb ausserhalb des Visual-Studio-Prozesses würde NFA04 am besten erfüllen,
+denn ein Fehler bliebe auf die Extension beschränkt. Er schliesst aber den Zugriff
+auf VSSDK und MEF aus. Davon betroffen sind QuickInfo, freie Einblendungen im Code
+und die Anbindung an das Add-in-Modell. CodeLens bleibt erreichbar, allerdings über
+eine als Vorschau markierte Schnittstelle. Damit stehen Z2 und Z6 gegen NFA04. Der
+Entscheid dazu steht in @variantenentscheid.
+
+#heading(outlined: false, level: 4)[Zeitliche Machbarkeit]
+
+Der kritische Punkt ist nicht die Technik, sondern der Umfang. Z1 verlangt die
+funktionale Parität zu einem Werkzeug, das über Jahre gewachsen ist. Neben der
+Suche enthält es eine Bewertung, welche die Treffer nach Relevanz sortiert, die
+Aktualisierung der Referenzen im Code beim Kopieren und Verschieben sowie eine
+Überwachung der Label-Dateien auf Änderungen von aussen. Dafür stehen in der Realisierung sechs Arbeitstage zur Verfügung, für alle
+weiteren Ziele neun.
+
+Entlastend wirkt ein Befund aus der zweiten Runde. Weil der Klassifizierer von
+Dynamics 365 Label-Token bereits selbst kennzeichnet, entfällt das Zerlegen von
+X++ für Z2 und Z3. Das war vorher der grösste Unsicherheitsposten der beiden
+Ziele.
+
+Die Ziele sind damit erreichbar, aber ohne Reserve. Die Reihenfolge aus
+@projektziele ist die Vorkehrung dagegen. Fällt Zeit aus, wird an den Zielen der
+Stufe 3 gekürzt.
+
+=== Variantenentscheid <variantenentscheid>
+
+Alle fünf Varianten sind entschieden. Wo die Befunde keinen eindeutigen Vorteil
+zeigen, fällt die Wahl auf das einfachere oder bereits erprobte Verfahren. Die
+jeweils andere Möglichkeit bleibt vorgemerkt.
+
+Der Betrieb ausserhalb des Visual-Studio-Prozesses scheidet aus, aus zwei
+voneinander unabhängigen Gründen.
+
+FA05 verlangt die Anzeige beim Überfahren einer Label-ID, also am Token im
+Editortext. Ausserhalb des Prozesses gibt es dafür keine Möglichkeit. Ein Tooltip
+lässt sich dort nur an ein CodeLens-Label hängen, was den Benutzer zwingen würde,
+statt des Labels die CodeLens-Zeile zu überfahren. Das erfüllt FA05 nicht und wäre für die Benutzererfahrung schlechter.
+
+Unabhängig davon bliebe ausserhalb des Prozesses nur CodeLens als Anzeigeform.
+Die Entwicklungswerkzeuge von Dynamics 365 verwenden für X++ aber eine eigene
+Nachbildung von CodeLens und nicht die Infrastruktur von Visual Studio. Der
+Versuch auf der Entwicklungsumgebung hat entsprechend nie einen Aufruf dieser
+Infrastruktur beobachtet. Damit fiele auch die letzte verbleibende Anzeigeform
+für X++ aus.
+
+Der Zielkonflikt mit NFA04 wird damit zugunsten der Ziele aufgelöst, weil diese in
+den Erfolgskriterien stehen.
+
+Zwischen dem klassischen VSSDK und dem neuen Modell im selben Prozess fällt die
+Wahl auf das neue Modell. Beide bieten dieselben Möglichkeiten, weil in beiden
+Fällen MEF zur Verfügung steht, und beide teilen dasselbe Absturzrisiko. Den
+Ausschlag gibt die Empfehlung von Microsoft, die das neue Modell für neue
+Erweiterungen nennt, welche auf Dienste des VSSDK angewiesen sind
+@ms-inproc-extensions. Der Prototyp hat gezeigt, dass sich der MEF-Anteil für
+QuickInfo und die Einblendung im Code darin unverändert mitverwenden lässt.
+Microsoft verwendet für die eigenen Werkzeuge von Dynamics 365 dieselbe Mischform,
+was die Wahl zusätzlich stützt.
+
+Drei Folgen sind dabei in Kauf zu nehmen. Das Zielframework bleibt .NET Framework,
+und die Erweiterung trägt zwei Manifeste, weil sie ihre Identität aus dem
+klassischen Manifest bezieht. Sie ist damit strukturell eine Mischform und kein
+reiner Vertreter des neuen Modells.
+
+Die dritte Folge betrifft NFA04. Der Betrieb im selben Prozess bietet keinen
+strukturellen Schutz davor, dass ein Fehler in der Extension Visual Studio
+mitreisst. Die Anforderung bleibt im Wortlaut bestehen und wird über die Umsetzung
+so weit abgedeckt, wie es ohne Prozesstrennung möglich ist. Wie das geschieht und
+wie es nachgewiesen wird, legt das Konzept fest.
+
+Bei V2 entscheiden die Befunde gegen ein zusätzliches Add-in. Es brächte nur zwei
+Menüeinträge, und für das Eigenschaftsfenster besteht darin kein
+Erweiterungspunkt. Was die Ziele verlangen, deckt die Extension selbst ab, denn
+das im Designer gewählte Element lässt sich über die Selection Tracking lesen. Ein
+Add-in würde ausserdem eine zweite Auslieferungsform nötig machen und die Arbeit
+an die Version der Entwicklungswerkzeuge binden.
+
+Bei V1 fällt die Wahl auf den direkten Dateizugriff mit eigenem Parser. Die
+Messung zeigt im warmen Zustand keinen Unterschied, und die Metadata-API zerlegt
+die Label-Dateien nicht, sondern liefert deren Inhalt unverarbeitet. Der Vorteil
+der API bleibt damit gering, weil das Zerlegen ohnehin selbst zu schreiben ist.
+
+Den Ausschlag gibt die Abhängigkeit. Ohne die API bleibt die Kernlogik frei von
+Assemblies der lokalen Installation. Das vereinfacht die Tests und macht die
+Arbeit auf einem anderen System nachvollziehbar, auf dem diese Assemblies
+voraussichtlich fehlen. Z8 verlangt genau das.
+
+Bei V3 fällt die Wahl auf das einmalige Laden in den Arbeitsspeicher, also auf das
+Verfahren des bestehenden Werkzeugs. Es ist erprobt, die gemessene Ladezeit von
+rund zwei Sekunden geht überwiegend auf das Auffinden der Dateien zurück und nicht
+auf deren Menge. Ein eigener Index brächte dauerhaften Zustand mit sich, der mit
+den Dateien abgeglichen werden müsste, ohne dass ein Bedarf dafür belegt wäre. Er
+bleibt als Möglichkeit vorgemerkt, falls sich die Suche in der Realisierung als zu
+langsam erweist.
+
+Bei V6 fällt die Wahl aus demselben Grund auf die Textsuche in den XML-Dateien.
+Sie ist im bestehenden Werkzeug erprobt und setzt nichts voraus. Die
+Cross-Reference-Datenbank liefert zwar genauere Treffer, ist aber nur so aktuell
+wie der letzte Build mit Referenzdaten und damit von einem Schritt abhängig, den
+die Extension nicht auslöst. Auch sie bleibt als Möglichkeit vorgemerkt.
+
+Eine Aufteilung in zwei Erweiterungen, also die inhaltliche Arbeit ausserhalb des
+Prozesses und eine bewusst dünne Anzeigeschicht darin, würde beide Anliegen
+teilweise erfüllen. Sie wurde nicht erprobt und ist eine Ableitung aus den
+Befunden, kein Ergebnis. Der Preis wäre ein zusätzlicher Kommunikationsweg und
+eine doppelte Auslieferung.
 
 == Projektmanagement
 
 === Projektorganisation
 
+Die Diplomarbeit wird als Einzelarbeit durchgeführt. Projektleitung, Entwicklung,
+Test und Dokumentation liegen bei derselben Person.
+
 #[
   #show figure: set align(left)
   #figure(
     table(
       align: left,
-      columns: (1fr, 1fr, 1fr),
+      columns: (auto, auto, 1fr),
       table.header(
-        [*Rolle*], [*Person*], [*Aufgaben / Verantwortung*],
+        [*Rolle*], [*Person*], [*Aufgaben und Verantwortung*],
       ),
-      [], [], [],
-      [], [], [],
-      [], [], [],
+      [Projektleitung], [Adrian Aeschlimann],
+      [Planung, Steuerung und Terminüberwachung, Nachführen von Aufwand und
+       Terminplan.],
+      [Entwicklung und Test], [Adrian Aeschlimann],
+      [Konzept, Implementierung, Testdurchführung und Dokumentation.],
+      [Firmenbetreuung], [Adrian Aeschlimann],
+      [Fachliche Vertretung der Auftraggeberin gegenüber der Schule.],
+      [Betreuende Person], [Stefan Canobbio],
+      [Fachliche Begleitung, Vorzeigetermine, Bewertung der Arbeit.],
+      [Experte], [Raphael Bucher],
+      [Zweitbewertung der Arbeit und Abnahme der Präsentation.],
     ),
     caption: [Projektorganisation]
   ) <projektorganisation>
 ]
 
+Während der Diplomarbeit findet keine Abnahme durch BE-terna statt. Vorgesehen ist
+höchstens, die Arbeit einem Experten im Unternehmen vorzuzeigen und Rückmeldungen
+einzuholen.
+
 === Projektplanung
+
+Das Projekt folgt dem Wasserfallmodell. Die Phasen Initialisierung, Konzept,
+Realisierung sowie Test und Abschluss werden nacheinander durchlaufen, wobei eine
+Phase vor dem Beginn der nächsten abgeschlossen wird.
+
+Zwei Gründe sprechen für dieses Vorgehen. Der Umfang steht durch die
+Aufgabenstellung fest, es gibt keinen Auftraggeber, der während der Umsetzung neue
+Anforderungen einbringt. Die Richtlinien verlangen eine durchgehende
+Dokumentation von der Initialisierung bis zur Abnahme, was ein phasenweises
+Vorgehen ohnehin nahelegt.
+
+Innerhalb der Realisierung wird nach der Reihenfolge aus @projektziele umgesetzt.
+Zuerst entsteht die funktionale Parität zum bestehenden Werkzeug, danach folgen die
+Funktionen, die den Kontextwechsel beseitigen, zuletzt die Textextraktion und die
+Anbindung des Übersetzungsdienstes. Die Dokumentation läuft über alle Phasen
+hinweg mit.
 
 === Verfügbarkeit und Kapazität
 

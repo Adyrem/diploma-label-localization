@@ -1,0 +1,31 @@
+@startuml
+' Prozessgrenze der drei Extension-Modelle aus V4.
+' Zeigt, warum der Betrieb ausserhalb des Prozesses den Zugriff
+' auf VSSDK und MEF ausschliesst.
+' Rendern: plantuml -tpng -charset UTF-8 Extensionmodelle.puml
+
+skinparam defaultFontSize 13
+skinparam componentStyle rectangle
+skinparam rectangleBackgroundColor White
+skinparam componentBackgroundColor White
+
+rectangle "Prozess devenv.exe" as proc #F5F5F5 {
+  component "Code-Editor" as editor
+  component "Element-Designer" as designer
+  component "VSSDK und MEF" as sdk
+  component "Entwicklungswerkzeuge\nDynamics 365" as d365
+  component "A  VSSDK, in-process" as a #E8E8F5
+  component "C  VS.Extensibility,\nin-process" as c #E8E8F5
+}
+
+component "B  VS.Extensibility,\nout-of-process" as b #D6ECF5
+
+editor -- sdk
+designer -- d365
+d365 -- sdk
+
+a -- sdk
+c -- sdk
+b ..> proc : eigene API, kein Zugriff\nauf VSSDK und MEF
+
+@enduml
