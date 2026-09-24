@@ -35,7 +35,7 @@
       _Autor:_\
       Adrian Aeschlimann\
       _Klasse:_\
-      B-TIA-23-T
+      B-TIA-23-T-a
     ],
     align(right)[
       _Betreuende Person:_\

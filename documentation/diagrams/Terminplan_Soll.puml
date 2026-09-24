@@ -36,19 +36,19 @@ sunday are closed
 [1.7 Review Initialisierung] as [T17] starts 2026-09-26 and requires 1 day
 
 -- AP2 Konzept --
-[2.1 Kontextdiagramm, Geschäftsprozessanalyse] as [T21] starts 2026-10-01 and requires 1 day
-[2.2 Detailanforderungen] as [T22] starts 2026-10-02 and requires 1 day
-[2.3 Use Cases, Sequenzdiagramme] as [T23] starts 2026-10-08 and requires 1 day
-[2.4 Klassenmodell, Datenmodell, Systemarchitektur] as [T24] starts 2026-10-09 and requires 1 day
-[2.5 Testkonzept, GUI-Design, Review Konzept] as [T25] starts 2026-10-10 and requires 1 day
+[2.1 Kontextdiagramm, Geschäftsprozesse, Detailanforderungen] as [T21] starts 2026-10-01 and requires 1 day
+[2.2 Use Cases, Sequenzdiagramme, Klassen, Architektur] as [T22] starts 2026-10-02 and requires 1 day
+[2.3 Testkonzept, GUI-Design, Review Konzept] as [T23] starts 2026-10-08 and requires 1 day
 
 -- AP3 Realisierung --
-[3.1 Setup Projektstruktur, Build- und Test-Toolchain] as [T31] starts 2026-10-15 and requires 1 day
-[3.2 Datenmodell und Persistenz] as [T32] starts 2026-10-16 and requires 1 day
-[3.3 Business Logic Teil 1] as [T33] starts 2026-10-17 and requires 1 day
-[3.4 Business Logic Teil 2] as [T34] starts 2026-10-19 and requires 1 day
-[3.5 GUI implementieren] as [T35] starts 2026-10-20 and requires 1 day
-[3.6 Integration und externe Anbindung] as [T36] starts 2026-10-21 and requires 1 day
+[3.1 Grundgerüst, Build- und Test-Toolchain] as [T31] starts 2026-10-09 and requires 1 day
+[3.2 Parser, Laden, Dateiüberwachung (Stufe 1)] as [T32] starts 2026-10-10 and requires 1 day
+[3.3 Suche und Ranking (Stufe 1)] as [T33] starts 2026-10-15 and requires 1 day
+[3.4 Tool Window, Trefferliste, Detailansicht (Stufe 1)] as [T34] starts 2026-10-16 and requires 1 day
+[3.5 Bearbeiten, Verschieben, Ersetzen, Einstellungen (Stufe 1)] as [T35] starts 2026-10-17 and requires 1 day
+[3.6 QuickInfo, Inline-Anzeige, Inline-Suche (Stufe 2)] as [T36] starts 2026-10-19 and requires 1 day
+[3.7 Öffnen im Panel, Verwendungssuche (Stufe 2)] as [T37] starts 2026-10-20 and requires 1 day
+[3.8 Extraktion, automatische Übersetzung (Stufe 3)] as [T38] starts 2026-10-21 and requires 1 day
 
 -- AP4 Tests und Abschluss Realisierung --
 [4.1 Restarbeiten und Bugfixing] as [T41] starts 2026-10-22 and requires 1 day

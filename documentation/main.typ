@@ -72,6 +72,10 @@
 
 #pagebreak()
 
+#bibliography("works.yml", title: [Literaturverzeichnis], style: "ieee")
+
+#pagebreak()
+
 #include "chapters/06_reflexion.typ"
 
 #pagebreak()
@@ -80,15 +84,30 @@
 
 #pagebreak()
 
-#include "chapters/08_anhang.typ"
+// ---------------------------------------------------------------------------
+// Eigenständigkeitserklärung
+// ---------------------------------------------------------------------------
+#heading(numbering: none)[Eigenständigkeitserklärung]
+
+Hiermit bestätige ich, dass ich die vorliegende Diplomarbeit selbstständig erstellt habe und nur die angegebenen Quellen und Hilfsmittel verwendet wurden.
+
+#v(1cm)
+
+Ort, Datum:
+
+#v(1.5cm)
+
+Unterschrift:
+
+#v(1cm)
+
+#align(left)[Adrian Aeschlimann]
 
 #pagebreak()
 
 // ---------------------------------------------------------------------------
 // Verzeichnisse
 // ---------------------------------------------------------------------------
-#bibliography("works.yml", title: [Literaturverzeichnis], style: "ieee")
-
 #heading(numbering: none)[Tabellenverzeichnis]
 #outline(title: none, target: figure.where(kind: table))
 
@@ -112,11 +131,12 @@
       [Analysieren und Überarbeiten der Kapiteltexte nach meinen inhaltlichen
        Vorgaben, Erstellen der Diagramme als PlantUML-Quelltext, Recherche zu den
        Schnittstellen von Visual Studio und Dynamics 365.],
-      [Kapitel 1 und 2, sämtliche Abbildungen ausser den Screenshots],
+      [@initialisierung, Abkürzungsverzeichnis, Glossar, sämtliche Abbildungen
+       ausser den Screenshots],
       [Claude Code (Anthropic)],
       [Durchführung der Machbarkeitsstudie zum Extension-Modell in einer eigenen
-       Session, Bau der drei Prototypen und Erstellen des Befundprotokolls.],
-      [Abschnitt 2.8.2, @befundprotokoll],
+       Session, Bau der fünf Prototypen und Erstellen des Befundprotokolls.],
+      [@machbarkeitsbeurteilung, @befundprotokoll],
       [Typst],
       [Formatierung und Erzeugung des Dokuments.],
       [Gesamtes Dokument],
@@ -126,6 +146,42 @@
     ),
     caption: [Hilfsmittel (eigene Darstellung)]
   ) <hilfsmittelverzeichnis>
+]
+
+#heading(numbering: none)[Abkürzungsverzeichnis]
+
+#[
+  #show figure: set align(left)
+  #figure(
+    table(
+      align: left,
+      columns: (auto, 1fr),
+      table.header(
+        [*Abkürzung*],
+        [*Bedeutung*],
+      ),
+      [AP], [Arbeitspaket],
+      [API], [Application Programming Interface],
+      [CI/CD], [Continuous Integration / Continuous Deployment],
+      [D365], [Microsoft Dynamics 365],
+      [EFZ], [Eidgenössisches Fähigkeitszeugnis],
+      [ERD], [Entity Relationship Diagram],
+      [FA], [Funktionale Anforderung],
+      [GUI], [Graphical User Interface],
+      [HF], [Höhere Fachschule],
+      [IDE], [Integrated Development Environment],
+      [MEF], [Managed Extensibility Framework],
+      [NFA], [Nicht-funktionale Anforderung],
+      [OA], [Organisatorische Anforderung],
+      [REST], [Representational State Transfer],
+      [SDK], [Software Development Kit],
+      [VSIX], [Visual Studio Extension],
+      [VSSDK], [Visual Studio Software Development Kit],
+      [WPF], [Windows Presentation Foundation],
+      [XML], [Extensible Markup Language],
+    ),
+    caption: [Abkürzungsverzeichnis (eigene Darstellung)]
+  ) <abkuerzungsverzeichnis>
 ]
 
 #heading(numbering: none)[Glossar]
@@ -142,6 +198,10 @@
       [Add-in],
       [Komponente, die Visual Studio lädt und die an fest vorgegebenen Stellen der
        Oberfläche erscheint. Dynamics 365 stellt dafür ein eigenes Modell bereit.],
+      [Classifier],
+      [Komponente des Editors, die Textbereichen eine Klassifizierung zuweist, etwa
+       Schlüsselwort oder Label. Die Developer Tools bringen einen eigenen
+       Classifier für X++ mit.],
       [CodeLens],
       [Einblendung oberhalb einer Codezeile, die zusätzliche Angaben zu dieser Zeile
        anzeigt.],
@@ -151,14 +211,27 @@
       [Cross-Reference-Datenbank],
       [Datenbank von Dynamics 365, die beim Build gefüllt wird und festhält, wo ein
        Element verwendet wird. Visual Studio nutzt sie für die Referenzsuche.],
+      [Developer Tools],
+      [Erweiterung von Microsoft, die Visual Studio für die Entwicklung mit
+       Dynamics 365 ausstattet, unter anderem mit dem X++-Editor, den Designern
+       und dem Build.],
       [Disk-Provider],
       [Zugangspunkt der Metadata-API. Er richtet den Zugriff auf ein
        Package-Verzeichnis auf der Festplatte, sodass sich die dort abgelegten
        Models lesen und schreiben lassen, ohne dass ein Anwendungsserver oder eine
        Datenbank läuft.],
+      [Feature Parity],
+      [Gleicher Funktionsumfang wie ein bestehendes System. In dieser Arbeit der
+       Funktionsumfang des BE-LabelEditors.],
       [Label],
       [Platzhalter mit einer eindeutigen ID, den die Anwendung zur Laufzeit durch die
        Übersetzung in der Sprache des Benutzers ersetzt.],
+      [Label-ID],
+      [Eindeutiger Bezeichner eines Labels aus Label-Datei und Label, etwa
+       `@BDM1:BDM110000003`.],
+      [Margin],
+      [Leiste am Rand des Editors, in der eine Extension Symbole oder Angaben zu
+       einer Zeile anzeigen kann.],
       [MEF],
       [Managed Extensibility Framework. Mechanismus, über den Visual Studio
        Erweiterungen zur Laufzeit einsammelt und einbindet.],
@@ -168,8 +241,17 @@
       [Model],
       [Einheit, in der Erweiterungen für Dynamics 365 ausgeliefert werden. Bündelt
        Code, Metadaten und Label-Dateien.],
+      [Package-Verzeichnis],
+      [Ordner, in dem eine Installation von Dynamics 365 ihre Models mit Code,
+       Metadaten und Label-Dateien ablegt.],
+      [Properties Window],
+      [Fenster von Visual Studio, das die Eigenschaften des gewählten Elements
+       anzeigt und bearbeiten lässt.],
       [QuickInfo],
       [Fenster im Editor, das beim Überfahren einer Stelle mit der Maus erscheint.],
+      [Selection Tracking],
+      [Mechanismus von Visual Studio, über den eine Extension erfährt, welches
+       Element gerade gewählt ist, etwa im Designer.],
       [Spike],
       [Zeitlich begrenzte Wegwerfarbeit, die eine offene technische Frage
        beantwortet. Das Ergebnis ist Wissen und nicht Software, der dabei
@@ -190,21 +272,4 @@
 
 #pagebreak()
 
-// ---------------------------------------------------------------------------
-// Eigenständigkeitserklärung
-// ---------------------------------------------------------------------------
-#heading(numbering: none)[Eigenständigkeitserklärung]
-
-Hiermit bestätige ich, dass ich die vorliegende Diplomarbeit selbstständig erstellt habe und nur die angegebenen Quellen und Hilfsmittel verwendet wurden.
-
-#v(1cm)
-
-Ort, Datum:
-
-#v(1.5cm)
-
-Unterschrift:
-
-#v(1cm)
-
-#align(left)[Adrian Aeschlimann]
+#include "chapters/08_anhang.typ"

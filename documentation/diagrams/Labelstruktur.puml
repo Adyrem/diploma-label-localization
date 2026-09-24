@@ -26,6 +26,12 @@ Model "1" *-- "0..*" LabelFile
 LabelFile "1" *-- "0..*" Label
 Label "1" *-- "1..*" Uebersetzung
 
+note left of LabelFile
+  logische Einheit,
+  abgelegt als eine Datei
+  pro Sprache
+end note
+
 note right of Label
   Beispiel @BDM1:BDM110000003
   BDM1 ist die Label-Datei,

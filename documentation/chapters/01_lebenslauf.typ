@@ -31,8 +31,8 @@
       table.header(
         [*Zeitraum*], [*Funktion*], [*Arbeitgeber*],
       ),
-      [2016-2020], [Lehrling Applikationsentwickler], [Ammann Schweiz AG],
-      [2021-Heute], [Solution Engineer], [BE-terna AG],
+      [2016 -- 2020], [Lehrling Applikationsentwickler], [Ammann Schweiz AG],
+      [2021 -- heute], [Solution Engineer], [BE-terna AG],
     ),
     caption: [Beruflicher Werdegang (eigene Darstellung)]
   ) <beruflicher_werdegang>
@@ -49,8 +49,8 @@
       table.header(
         [*Zeitraum*], [*Ausbildung / Abschluss*], [*Institution*],
       ),
-      [2016-2020], [Informatiker EFZ Applikationsentwickler], [GIBB],
-      [2023-2026], [Dipl. Informatiker/in HF Fachrichtung Applikation], [TEKO Bern],
+      [2016 -- 2020], [Informatiker EFZ Applikationsentwickler], [GIBB],
+      [2023 -- 2026], [Dipl. Informatiker/in HF Fachrichtung Applikationsentwicklung], [TEKO Bern],
     ),
     caption: [Aus- und Weiterbildung (eigene Darstellung)]
   ) <ausbildung>
