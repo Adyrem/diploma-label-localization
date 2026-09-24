@@ -109,8 +109,8 @@
         [*Betroffene Stellen*],
       ),
       [Claude Code (Anthropic)],
-      [Analysieren und Überarbeiten der Kapiteltexte nach inhaltlichen Vorgaben des
-       Autors, Erstellen der Diagramme als PlantUML-Quelltext, Recherche zu den
+      [Analysieren und Überarbeiten der Kapiteltexte nach meinen inhaltlichen
+       Vorgaben, Erstellen der Diagramme als PlantUML-Quelltext, Recherche zu den
        Schnittstellen von Visual Studio und Dynamics 365.],
       [Kapitel 1 und 2, sämtliche Abbildungen ausser den Screenshots],
       [Claude Code (Anthropic)],
@@ -170,6 +170,10 @@
        Code, Metadaten und Label-Dateien.],
       [QuickInfo],
       [Fenster im Editor, das beim Überfahren einer Stelle mit der Maus erscheint.],
+      [Spike],
+      [Zeitlich begrenzte Wegwerfarbeit, die eine offene technische Frage
+       beantwortet. Das Ergebnis ist Wissen und nicht Software, der dabei
+       entstandene Code wird nicht weiterverwendet.],
       [Tagger],
       [Bestandteil einer Editor-Erweiterung, der Textbereiche mit
        Zusatzinformationen verknüpft, auf die andere Funktionen aufbauen.],

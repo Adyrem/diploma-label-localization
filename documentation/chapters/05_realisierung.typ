@@ -11,7 +11,7 @@
       align: left,
       columns: (1fr, auto, 1fr),
       table.header(
-        [*Werkzeug / Technologie*], [*Version*], [*Verwendungszweck*],
+        [*Tool / Technologie*], [*Version*], [*Verwendungszweck*],
       ),
       [], [], [],
       [], [], [],

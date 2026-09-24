@@ -30,7 +30,7 @@ Stunden.
       [1.3], [11.09.], [Zieldefinition, Abgrenzung, Stakeholder-Analyse], [8], [3], [Ziele mit Messkriterien, Abgrenzung und Stakeholder-Analyse geschrieben. Auf den 10.09. vorgezogen], [Erledigt],
       [1.4], [12.09.], [Rahmenbedingungen, grobe Anforderungen], [8], [5], [Grobe Anforderungen FA, NFA und OA mit Zielbezug erfasst, produktbezogene Rahmenbedingungen ausgebaut, Model-Begriff eingeführt. Auf den 10.09. vorgezogen], [Erledigt],
       [1.5], [24.09.], [Varianten, Machbarkeit, Variantenentscheid], [8], [16], [Sechs Variantenvergleiche, Machbarkeitsbeurteilung mit Prototypen-Spike und Laufzeitprobe auf der Entwicklungsumgebung, alle Varianten entschieden, Befundprotokoll als Anhang. Auf den 14.09. vorgezogen, doppelter Aufwand wegen des Spikes], [Erledigt],
-      [1.6], [25.09.], [Risikoanalyse, Qualitäts- und Konfigurationsmanagement], [8], [], [], [],
+      [1.6], [25.09.], [Risikoanalyse, Qualitäts- und Konfigurationsmanagement], [8], [6], [Neun Risiken mit Matrix und Bewertungsschema, Qualitätsmanagement mit sieben Massnahmen. Konfigurationsmanagement bereits in AP1.2 erledigt. Englische Fachbegriffe im Kapitel vereinheitlicht. Auf den 24.09. vorgezogen], [Erledigt],
       [1.7], [26.09.], [Review Initialisierung], [8], [], [], [],
       table.cell(colspan: 7)[*AP2 Konzept*],
       [2.1], [01.10.], [Kontextdiagramm, Geschäftsprozessanalyse], [8], [], [], [],
