@@ -4,7 +4,10 @@
 
 == Aufgabenstellung / Themeneingabe <anhang_themeneingabe>
 
-Die Themeneingabe vom 26.05.2026 wird als separates Dokument abgegeben.
+#todo[Themeneingabe vom 26.05.2026 hier einbinden. Die Richtlinien verlangen die
+Abgabe in einer einzigen PDF-Datei, ein separates Dokument genügt nicht. Vorher
+Adresse und Telefonnummer im öffentlichen Repo entfernen und die Screenshots auf interne
+Model-Kürzel und Label-IDs prüfen, weil das Repository öffentlich ist.]
 
 == Controlling-Berichte <controlling>
 
@@ -50,9 +53,9 @@ Der Soll-Aufwand beträgt pro Arbeitstag acht Stunden.
       [1.2], [10.09.], [Ausgangslage, Situationsanalyse, Aufgabenstellung], [8], [4], [Kapitel geschrieben, IST-Zustand mit sechs Abbildungen belegt. Titel und Klasse ergänzt, Rahmenbedingungen und Konfigurationsmanagement vorgezogen], [Erledigt],
       [1.3], [11.09.], [Zieldefinition, Abgrenzung, Stakeholder-Analyse], [8], [3], [Ziele mit Messkriterien, Abgrenzung und Stakeholder-Analyse geschrieben. Auf den 10.09. vorgezogen], [Erledigt],
       [1.4], [12.09.], [Rahmenbedingungen, grobe Anforderungen], [8], [5], [Grobe Anforderungen FA, NFA und OA mit Zielbezug erfasst, produktbezogene Rahmenbedingungen ausgebaut, Model-Begriff eingeführt. Auf den 10.09. vorgezogen], [Erledigt],
-      [1.5], [24.09.], [Varianten, Machbarkeit, Variantenentscheid], [8], [16], [Fünf Variantenvergleiche, Machbarkeitsbeurteilung mit Prototypen-Spike und Laufzeitprobe auf der Testumgebung, alle Varianten entschieden, Befundprotokoll als Anhang. Auf den 14.09. vorgezogen, doppelter Aufwand wegen des Spikes], [Erledigt],
-      [1.6], [25.09.], [Risikoanalyse, Qualitäts- und Konfigurationsmanagement], [8], [6], [Neun Risiken mit Matrix und Bewertungsschema, Qualitätsmanagement mit sieben Massnahmen. Konfigurationsmanagement bereits in AP1.2 erledigt. Englische Fachbegriffe im Kapitel vereinheitlicht. Auf den 24.09. vorgezogen], [Erledigt],
-      [1.7], [26.09.], [Review Initialisierung], [8], [], [], [],
+      [1.5], [24.09.], [Varianten, Machbarkeit, Variantenentscheid], [8], [16], [Fünf Variantenvergleiche, Machbarkeitsbeurteilung mit Prototypen-Spike und Laufzeitprobe auf der Testumgebung, alle Varianten entschieden, Befundprotokoll als Anhang. Auf den 11.09. und 14.09. vorgezogen, doppelter Aufwand wegen des Spikes], [Erledigt],
+      [1.6], [25.09.], [Risikoanalyse, Qualitäts- und Konfigurationsmanagement], [8], [6], [Neun Risiken mit Matrix und Bewertungsschema, Qualitätsmanagement mit Massnahmen je Gegenstand. Konfigurationsmanagement bereits in AP1.2 erledigt. Englische Fachbegriffe im Kapitel vereinheitlicht. Auf den 24.09. vorgezogen], [Erledigt],
+      [1.7], [26.09.], [Review Initialisierung], [8], [4], [Zwei Reviews gegen Themeneingabe und Richtlinien eingearbeitet. Terminplan überarbeitet, FA12 bis FA17 und NFA06 ergänzt, Abweichungen von der Themeneingabe erfasst, Gliederung nach Richtlinien umgestellt. Auf den 24.09. vorgezogen], [Erledigt],
       table.cell(colspan: 7)[*AP2 Konzept*],
       [2.1], [01.10.], [Kontextdiagramm, Geschäftsprozessanalyse, Detailanforderungen], [8], [], [], [],
       [2.2], [02.10.], [Use Cases, Sequenzdiagramme, Klassenmodell, Systemarchitektur], [8], [], [], [],

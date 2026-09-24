@@ -47,14 +47,7 @@
 //   caption: [GUI]
 // ) <gui_01>
 
-== Datenbankimplementierung und -anbindung
-
-=== Datenbankschema
-
-// #figure(
-//   image("../diagrams/ERD_Realisierung.png", width: 100%),
-//   caption: [ERD (Realisierung)]
-// ) <erd_realisierung>
+== Datenzugriff und externe Anbindung
 
 === Designentscheidungen
 

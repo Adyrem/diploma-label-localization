@@ -201,41 +201,6 @@
   ) <fachklassen>
 ]
 
-== Zustandsdiagramme
-
-// #figure(
-//   image("../diagrams/lifecycle.png", width: 100%),
-//   caption: [Zustandsdiagramm]
-// ) <zustandsdiagramm>
-
-== Modellierung der Datenbank
-
-=== ERD
-
-// #figure(
-//   image("../diagrams/ERD_Konzept.png", width: 100%),
-//   caption: [ERD (Konzept)]
-// ) <erd_konzept>
-
-=== Beschreibung der Fachentitäten, Beziehungen und der referenziellen Integritätsbedingungen
-
-#[
-  #show figure: set align(left)
-  #figure(
-    table(
-      align: left,
-      columns: (1fr, 2fr, 1fr),
-      table.header(
-        [*Entität*], [*Beschreibung*], [*Beziehungen / Integritätsbedingungen*],
-      ),
-      [], [], [],
-      [], [], [],
-      [], [], [],
-    ),
-    caption: [Fachentitäten]
-  ) <fachentitaeten>
-]
-
 == Systemarchitektur
 
 // #figure(
@@ -290,10 +255,10 @@
   ) <testfaelle>
 ]
 
-== Einführungskonzept
+== Einführung und Betrieb
 
-== Migrationskonzept
-
-== Betriebskonzept
+// Einführungs-, Migrations- und Betriebskonzept bewusst in einem kurzen
+// Abschnitt. Eine Datenmigration entfällt, weil die Label-Dateien unverändert
+// bleiben. Die produktive Einführung entscheidet BE-terna nach Projektabschluss.
 
 == GUI-Design

@@ -189,8 +189,8 @@ erfolgreich, wenn die Funktionalität des bestehenden Tools vollumfänglich
       ),
       [Z1], [Feature Parity zum bestehenden Tool],
       [Alle in @ist_funktionen aufgeführten Funktionen stehen in der Extension
-       gleichwertig zur Verfügung. Was gleichwertig heisst, legen FA01 bis FA04
-       und FA11 bis FA17 fest.],
+       gleichwertig zur Verfügung, ausser den in @abgrenzung ausgenommenen. Was
+       gleichwertig heisst, legen FA01 bis FA04 und FA11 bis FA17 fest.],
       [1],
 
       [Z2], [Übersetzungen im Code einsehbar],
@@ -278,8 +278,9 @@ bewusst nicht Bestandteil des Projekts.
        Ein eigener Übersetzungsdienst wird nicht entwickelt.],
 
       [Auswahl der User-ID],
-      [Wird im bestehenden Tool vollständig zurückgebaut und ist nicht mehr
-       nötig.],
+      [Diente zur Vermeidung von Konflikten zwischen Label-IDs. Eine eindeutige ID
+       nach Art einer GUID löst das inzwischen, das bestehende Tool baut die
+       User-ID vollständig zurück.],
     ),
     caption: [Abgrenzung (eigene Darstellung)]
   ) <abgrenzung>
@@ -326,8 +327,8 @@ Entwickelt wird für Visual Studio 2026, getestet zusätzlich unter Visual Studi
 2022. Bietet 2026 Erweiterungspunkte, die in 2022 fehlen, werden sie genutzt, auch
 wenn die Extension dadurch unter 2022 nicht den vollen Funktionsumfang hat. Fehler,
 die nur unter 2022 auftreten, werden mit tiefer Priorität behoben. Die Extension wird als VSIX-Paket
-ausgeliefert. Damit sind der Weg der Integration und die
-verfügbaren Erweiterungspunkte vorgegeben.
+ausgeliefert. Welche Erweiterungspunkte ihr zur Verfügung stehen, entscheidet die
+Wahl des Extension-Modells in V4.
 
 In den Label-Prozess von Dynamics 365 lässt sich nicht eingreifen. Das Format der
 Label-Dateien ist damit vorgegeben. Die Extension liest und schreibt diese Dateien
@@ -400,19 +401,20 @@ ausgelieferte Lösungen eingreift.
   ) <stakeholderanalyse>
 ]
 
-Drei der fünf Rollen nehme ich selbst ein, einerseits als Entwickler, der das
-Tool täglich benutzt, andererseits als Maintainer, der es weiterentwickelt und
-bereitstellt. Auch die Rolle des Firmenbetreuers liegt bei mir. Das verkürzt die
+Zwei der fünf Rollen aus der Tabelle nehme ich selbst ein, einerseits als
+Entwickler, der das Tool täglich benutzt, andererseits als Maintainer, der es
+weiterentwickelt und bereitstellt. Dazu kommt die Rolle des Firmenbetreuers. Das verkürzt die
 Abstimmungswege erheblich, birgt aber die Gefahr, dass Anforderungen aus meiner
 eigenen Arbeitsweise heraus formuliert werden und nicht aus der Sicht der übrigen
-Entwickler. Dagegen wird die Arbeit einem Experten im Unternehmen vorgezeigt,
-sobald erste Teile des Konzepts stehen. Der Punkt steht ausserdem als R09 in der
+Entwickler. Dagegen wird die Arbeit dem Experten vorgezeigt, sobald erste
+Teile des Konzepts stehen. Der Punkt steht ausserdem als R09 in der
 Risikoanalyse.
 
 == Grobe Anforderungen an das neue System
 
-Jede Anforderung ist einem Projektziel zugeordnet. Verfeinert werden sie mit
-Akzeptanzkriterien und Abhängigkeiten in @detailanforderungen.
+Die meisten Anforderungen gehören zu einem Projektziel, die übrigen gelten für
+die ganze Extension. Verfeinert werden sie mit Akzeptanzkriterien und
+Abhängigkeiten in @detailanforderungen.
 
 #[
   #show figure: set align(left)
@@ -858,7 +860,7 @@ stehen in @befundprotokoll.
 Der X++-Editor meldet einen gewöhnlichen Content Type und ist nicht abgeschottet.
 Eine eigene Erweiterung kann sich daran anhängen, was der Versuch auf der
 Testumgebung bestätigt hat. Damit sind Z2 und Z3 umsetzbar. Der Classifier von Dynamics 365
-kennzeichnet Label-Token bereits selbst, unter anderem als "X++ Modern Label".
+kennzeichnet Label-Token bereits selbst, unter anderem als `"X++ Modern Label"`.
 Eine Erweiterung findet Label-IDs damit über die vorhandene Klassifizierung,
 statt X++ selbst zerlegen zu müssen. Das senkt den Aufwand für Z2 und Z3
 erheblich.
@@ -1053,8 +1055,8 @@ Test und Dokumentation liegen bei derselben Person.
 ]
 
 Während der Diplomarbeit findet keine Abnahme durch BE-terna statt. Vorgesehen ist,
-die Arbeit einem Experten im Unternehmen vorzuzeigen und Rückmeldungen
-einzuholen, sobald erste Teile des Konzepts stehen.
+die Arbeit dem Experten vorzuzeigen und Rückmeldungen einzuholen, sobald erste
+Teile des Konzepts stehen.
 
 === Projektplanung
 
@@ -1065,7 +1067,7 @@ Phase vor dem Beginn der nächsten abgeschlossen wird.
 Zwei Gründe sprechen für dieses Vorgehen. Der Umfang steht mit der
 Themeneingabe fest. BE-terna bringt während der Umsetzung keine neuen Anforderungen
 ein und entscheidet erst nach Projektabschluss über die Einführung. Die Richtlinien verlangen eine durchgehende
-Dokumentation von der Initialisierung bis zur Abnahme, was ein phasenweises
+Dokumentation von der Initialisierung bis zur Abgabe, was ein phasenweises
 Vorgehen ohnehin nahelegt.
 
 Innerhalb der Realisierung wird nach der Reihenfolge aus @projektziele umgesetzt.
@@ -1154,7 +1156,7 @@ ist.
         [*Ab-\ weichung*],
       ),
       [AP0], [Dokumentation laufend], [04.09.], [31.10.], [--], [04.09.], [], [],
-      [AP1], [Projektinitialisierung], [04.09.], [26.09.], [7], [04.09.], [], [],
+      [AP1], [Projektinitialisierung], [04.09.], [26.09.], [7], [04.09.], [24.09.], [2 Tage früher],
       [AP2], [Konzept], [01.10.], [08.10.], [3], [], [], [],
       [AP3], [Realisierung], [09.10.], [21.10.], [8], [], [], [],
       [AP4], [Tests und Abschluss Realisierung], [22.10.], [24.10.], [3], [], [], [],
@@ -1181,7 +1183,7 @@ ist.
         [*Abweichung*],
       ),
       [M0], [Start Diplomarbeit], [04.09.2026], [04.09.2026], [keine],
-      [M1], [Projektinitialisierung abgeschlossen], [26.09.2026], [], [],
+      [M1], [Projektinitialisierung abgeschlossen], [26.09.2026], [24.09.2026], [2 Tage früher],
       [M2], [1. Vorzeigetermin Betreuung], [07.10.2026], [], [],
       [M3], [Konzept abgeschlossen], [08.10.2026], [], [],
       [M4], [2. Vorzeigetermin Betreuung (zu vereinbaren)], [22.10.2026], [], [],
@@ -1294,7 +1296,7 @@ bewertet. Der Risikowert ist ihr Produkt.
        fallen ohne Blick von aussen erst spät auf.],
       [3], [2], [6],
       [Die beiden Vorzeigetermine mit der Betreuung dienen als Prüfpunkt.
-       Vorgesehen ist zudem, die Arbeit einem Experten im Unternehmen vorzuzeigen.],
+       Vorgesehen ist zudem, die Arbeit dem Experten vorzuzeigen.],
     ),
     caption: [Risikoanalyse (eigene Darstellung)]
   ) <risikoanalyse>
@@ -1407,7 +1409,7 @@ Messkriterium aus @projektziele und nicht der Eindruck beim Ausprobieren.
       ),
       [Dokumentation],
       [Review des Kapitels gegen die Richtlinien und die vorgegebene Gliederung.],
-      [AP1.7, AP2.5, AP5.3],
+      [AP1.7, AP2.3, AP5.3],
       [Dokumentation],
       [Vorzeigen bei der Betreuung und Einarbeiten der Rückmeldungen.],
       [M2, M4],
@@ -1489,8 +1491,8 @@ Repositories in einem lokalen Ordner.
 == Abweichungen von der Themeneingabe <abweichungen_te>
 
 Gegenüber der Themeneingabe vom 26.05.2026 weicht die Planung in den folgenden
-Punkten ab. Die Abweichungen werden der Betreuung am ersten Vorzeigetermin
-vorgelegt.
+Punkten ab. Zur Themeneingabe ging keine Rückmeldung der TEKO ein. Die Abweichungen
+werden der Betreuung deshalb am ersten Vorzeigetermin vorgelegt.
 
 #[
   #show figure: set align(left)
@@ -1527,6 +1529,15 @@ vorgelegt.
       [Nicht enthalten.],
       [Ergänzt.],
       [FA11 legt API-Schlüssel ab.],
+
+      [Auswahl der User-ID],
+      [Teil der Einstellungen des bestehenden Tools, dessen Funktionalität
+       vollumfänglich zu übernehmen ist.],
+      [Entfällt.],
+      [Die User-ID verhinderte Konflikte zwischen den Label-IDs verschiedener
+       Entwickler. Labels erhalten heute eine eindeutige ID nach Art einer GUID,
+       die solche Konflikte bereits ausschliesst. Das bestehende Tool baut die
+       User-ID deshalb vollständig zurück.],
 
       [Phasenplan],
       [Initialisierung 1, Konzept 2, Realisierung 4, Test und Abschluss 1 Woche.],

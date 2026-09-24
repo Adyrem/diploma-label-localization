@@ -10,6 +10,12 @@
 // Lange Tabellen dürfen über Seiten umbrechen, sonst entstehen grosse Lücken.
 #show figure: set block(breakable: true)
 
+// X++ darf nicht zwischen den Pluszeichen umbrechen.
+#show "X++": it => box(it)
+
+// Verweise auf ein Kapitel heissen «Kapitel», nicht «Abschnitt».
+#show heading.where(level: 1): set heading(supplement: [Kapitel])
+
 // ---------------------------------------------------------------------------
 // Deckblatt
 // ---------------------------------------------------------------------------
@@ -137,6 +143,10 @@ Unterschrift:
       [Durchführung der Machbarkeitsstudie zum Extension-Modell in einer eigenen
        Session, Bau der fünf Prototypen und Erstellen des Befundprotokolls.],
       [@machbarkeitsbeurteilung, @befundprotokoll],
+      [Claude (Anthropic)],
+      [Review der Projektinitialisierung gegen Themeneingabe und
+       Richtlinien. Die Befunde wurden geprüft und anschliessend eingearbeitet.],
+      [@initialisierung, Lebenslauf, Verzeichnisse, Anhang],
       [Typst],
       [Formatierung und Erzeugung des Dokuments.],
       [Gesamtes Dokument],
@@ -165,7 +175,6 @@ Unterschrift:
       [CI/CD], [Continuous Integration / Continuous Deployment],
       [D365], [Microsoft Dynamics 365],
       [EFZ], [Eidgenössisches Fähigkeitszeugnis],
-      [ERD], [Entity Relationship Diagram],
       [FA], [Funktionale Anforderung],
       [GUI], [Graphical User Interface],
       [HF], [Höhere Fachschule],

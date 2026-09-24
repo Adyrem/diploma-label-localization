@@ -27,16 +27,21 @@ sunday are closed
 2026-09-17 to 2026-09-20 are closed
 2026-10-03 to 2026-10-04 are closed
 2026-10-19 to 2026-10-21 are open
+' AP1.5 wurde am 11.09. und am Montag, 14.09., bearbeitet
+2026-09-14 is open
 
 -- AP1 Projektinitialisierung --
-[Soll AP1] as [S1] starts 2026-09-04 and requires 7 days
-[Ist AP1] as [I1] starts 2026-09-04 and requires 1 day
+[Soll AP1] as [S1] starts 2026-09-04 and ends 2026-09-26
+' Der 14.09. war nicht eingeplant
+[S1] pauses on 2026-09-14
+[Ist AP1] as [I1] starts 2026-09-04 and ends 2026-09-24
+[I1] pauses on 2026-09-12
 
 -- AP2 Konzept --
-[Soll AP2] as [S2] starts 2026-10-01 and requires 5 days
+[Soll AP2] as [S2] starts 2026-10-01 and requires 3 days
 
 -- AP3 Realisierung --
-[Soll AP3] as [S3] starts 2026-10-15 and requires 6 days
+[Soll AP3] as [S3] starts 2026-10-09 and requires 8 days
 
 -- AP4 Tests und Abschluss --
 [Soll AP4] as [S4] starts 2026-10-22 and requires 3 days
