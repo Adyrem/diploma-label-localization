@@ -137,8 +137,8 @@ Unterschrift:
       [Analysieren und Überarbeiten der Kapiteltexte nach meinen inhaltlichen
        Vorgaben, Erstellen der Diagramme als PlantUML-Quelltext, Recherche zu den
        Schnittstellen von Visual Studio und Dynamics 365.],
-      [@initialisierung, Abkürzungsverzeichnis, Glossar, sämtliche Abbildungen
-       ausser den Screenshots],
+      [@initialisierung, @konzept, Abkürzungsverzeichnis, Glossar, sämtliche
+       Abbildungen ausser den Screenshots],
       [Claude Code (Anthropic)],
       [Durchführung der Machbarkeitsstudie zum Extension-Modell in einer eigenen
        Session, Bau der fünf Prototypen und Erstellen des Befundprotokolls.],
@@ -172,18 +172,25 @@ Unterschrift:
       ),
       [AP], [Arbeitspaket],
       [API], [Application Programming Interface],
+      [BOM], [Byte Order Mark],
       [CI/CD], [Continuous Integration / Continuous Deployment],
       [D365], [Microsoft Dynamics 365],
+      [EDT], [Extended Data Type],
       [EFZ], [Eidgenössisches Fähigkeitszeugnis],
       [FA], [Funktionale Anforderung],
       [GUI], [Graphical User Interface],
       [HF], [Höhere Fachschule],
       [IDE], [Integrated Development Environment],
+      [KA], [Kann-Anforderung],
       [MEF], [Managed Extensibility Framework],
       [NFA], [Nicht-funktionale Anforderung],
       [OA], [Organisatorische Anforderung],
       [REST], [Representational State Transfer],
       [SDK], [Software Development Kit],
+      [UC], [Use Case],
+      [UI], [User Interface],
+      [UTF-8], [Unicode Transformation Format, 8 Bit],
+      [VM], [Virtuelle Maschine],
       [VSIX], [Visual Studio Extension],
       [VSSDK], [Visual Studio Software Development Kit],
       [WPF], [Windows Presentation Foundation],
@@ -208,7 +215,7 @@ Unterschrift:
       [Komponente, die Visual Studio lädt und die an fest vorgegebenen Stellen der
        Oberfläche erscheint. Dynamics 365 stellt dafür ein eigenes Modell bereit.],
       [Classifier],
-      [Komponente des Editors, die Textbereichen eine Klassifizierung zuweist, etwa
+      [Komponente des Editors, die Textbereichen eine Classification zuweist, etwa
        Schlüsselwort oder Label. Die Developer Tools bringen einen eigenen
        Classifier für X++ mit.],
       [CodeLens],
@@ -248,8 +255,11 @@ Unterschrift:
       [Von Microsoft ausgelieferte Assemblies, über die sich die Elemente eines
        Models lesen und schreiben lassen, ohne die Dateien selbst zu kennen.],
       [Model],
-      [Einheit, in der Erweiterungen für Dynamics 365 ausgeliefert werden. Bündelt
-       Code, Metadaten und Label-Dateien.],
+      [Gruppe von Elementen wie Code, Metadaten und Label-Dateien, die eine
+       auslieferbare Lösung bildet. Gehört immer zu einem Package.],
+      [Package],
+      [Einheit aus einem oder mehreren Models, die kompiliert und ausgeliefert
+       wird.],
       [Package-Verzeichnis],
       [Ordner, in dem eine Installation von Dynamics 365 ihre Models mit Code,
        Metadaten und Label-Dateien ablegt.],

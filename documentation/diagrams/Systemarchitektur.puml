@@ -1,0 +1,61 @@
+@startuml
+' Systemarchitektur der Extension: drei Projekte, Laufzeitumgebung und externe Systeme.
+' Rendern: plantuml -tpng -charset UTF-8 Systemarchitektur.puml
+
+skinparam defaultFontSize 13
+skinparam componentStyle rectangle
+skinparam packageStyle rectangle
+skinparam shadowing false
+left to right direction
+
+node "Visual Studio 2026, Prozess devenv.exe" as VS {
+
+  package "Extension (VSIX, .NET Framework 4.8)" as EXT {
+    component "Tool Window" as TW
+    component "Commands und\nShortcuts" as CMD
+    component "Label-Erkennung\n(Classifier)" as REC
+    component "QuickInfo-Quelle\n(MEF)" as QI
+    component "Inline-Anzeige\n(MEF)" as INL
+    component "Auswahl im Designer\n(Selection Tracking)" as SEL
+    component "Einstellungen,\nAPI-Schlüssel" as SET
+    component "Meldungen\n(Output Window)" as OUT
+  }
+
+  package "Kernlogik (.NET Standard 2.0)" as CORE {
+    component "Label Store" as STORE
+    component "Suche und Ranking" as SEARCH
+    component "Label-Dateien\nlesen und schreiben" as IO
+    component "Model-Suche" as MOD
+    component "Verwendungssuche und\nReferenzaktualisierung" as REF
+    component "Dateiüberwachung" as WATCH
+    component "Übersetzungsdienst" as TR
+  }
+
+  component "Developer Tools\nvon Dynamics 365" as D365
+}
+
+package "Testprojekt (.NET 8 und .NET Framework 4.8)" as TEST {
+  component "Unit Tests" as UT
+}
+
+database "Package-Verzeichnis\n(Descriptor, Label-Dateien,\nXML der Elemente)" as PKG
+cloud "Externer\nÜbersetzungsdienst" as SVC
+
+EXT ..> CORE : verwendet
+QI --> REC
+INL --> REC
+REC ..> D365 : Classification\nder Label-Token
+SEL ..> D365 : gewähltes Element
+
+SEARCH --> STORE
+STORE --> IO
+STORE --> MOD
+WATCH --> STORE
+IO --> PKG
+MOD --> PKG
+REF --> PKG
+WATCH ..> PKG
+TR --> SVC
+
+UT ..> CORE
+@enduml

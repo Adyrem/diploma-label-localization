@@ -1,0 +1,29 @@
+@startuml
+' Sollablauf beim Suchen oder Anlegen eines Labels mit der Extension.
+' Gegenstück zu Kontextwechsel.puml, der Wechsel der Anwendung entfällt.
+' Rendern: plantuml -tpng -charset UTF-8 Sollablauf_Label.puml
+
+skinparam defaultFontSize 13
+skinparam ActivityBackgroundColor White
+skinparam ActivityBorderColor Black
+skinparam ArrowColor Black
+
+|Visual Studio mit Extension|
+start
+:Text im Code benötigt ein Label;
+:Suche aus dem Editor starten,
+Suchbegriff aus der Markierung;
+if (Label vorhanden?) then (ja)
+  :Label in der Trefferliste wählen;
+else (nein)
+  :Neues Label anlegen,
+  vorbelegt mit dem Suchbegriff;
+  |#EEEEEE|Übersetzungsdienst|
+  :Übersetzungen vorschlagen;
+  |Visual Studio mit Extension|
+  :Vorschläge prüfen und anpassen;
+endif
+:Speichern und Label-ID an der
+Cursorposition einfügen;
+stop
+@enduml

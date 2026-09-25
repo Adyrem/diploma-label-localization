@@ -1,0 +1,29 @@
+@startuml
+' Sollablauf beim Ersetzen eines hardcodierten Textes durch ein Label.
+' Rendern: plantuml -tpng -charset UTF-8 Sollablauf_Extraktion.puml
+
+skinparam defaultFontSize 13
+skinparam ActivityBackgroundColor White
+skinparam ActivityBorderColor Black
+skinparam ArrowColor Black
+
+|Visual Studio mit Extension|
+start
+:Best-Practice-Check meldet
+einen hardcodierten Text;
+if (Fundort?) then (Code)
+  :Text im Editor markieren;
+else (Designer)
+  :Element im Designer wählen;
+endif
+:Extraktion aufrufen;
+:Label-Datei bestätigen,
+Text als Vorbelegung;
+|#EEEEEE|Übersetzungsdienst|
+:Übersetzungen vorschlagen;
+|Visual Studio mit Extension|
+:Vorschläge prüfen und anpassen;
+:Speichern;
+:Text wird durch die Label-ID ersetzt;
+stop
+@enduml

@@ -9,14 +9,19 @@ im Code hinterlegt, sondern als Labels. Ein Label ist ein Platzhalter mit einer
 eindeutigen ID, den die Anwendung zur Laufzeit durch die Übersetzung in der Sprache
 des Benutzers ersetzt. Labels sind in Label-Dateien zusammengefasst. Eine
 Label-Datei wie `BDM1` ist eine logische Einheit, abgelegt wird sie als eine
-physische Datei pro Sprache.
+physische Datei pro Sprache @ms-field-help.
 
-Erweiterungen für Dynamics 365 werden in Models ausgeliefert. Ein Model bündelt
-Code, Metadaten und die zugehörigen Label-Dateien und ist die Einheit, die bei einem
-Kunden installiert wird. Jedes Label gehört damit zu einer Label-Datei innerhalb
-eines Models, was sich an der Label-ID ablesen lässt. Bei `@BDM1:BDM110000003` steht
-`BDM1` für die Label-Datei und der Rest für das Label selbst. Nicht jedes Model ist
-beschreibbar, Models von Microsoft oder von Drittanbietern sind schreibgeschützt.
+Erweiterungen für Dynamics 365 entstehen in Models. Ein Model bündelt Elemente wie
+Code, Metadaten und die zugehörigen Label-Dateien zu einer auslieferbaren Lösung. Es
+gehört immer zu einem Package, der Einheit, die kompiliert und ausgeliefert wird
+@ms-models. Jedes Label gehört damit zu einer Label-Datei innerhalb eines Models,
+was sich an der Label-ID ablesen lässt. Bei `@BDM1:BDM110000003` steht `BDM1` für
+die Label-Datei und der Rest für das Label selbst @ms-field-help.
+
+Nicht jedes Model ist beschreibbar. Models liegen in Schichten, von den Anbietern
+einer Lösung über Partner bis zum Kunden @ms-overlayering. Das bestehende Tool
+behandelt Models von Microsoft und Drittanbietern sowie gesperrte Models als
+schreibgeschützt.
 
 #figure(
   image("../diagrams/Labelstruktur.png", width: 7.5cm),
@@ -30,7 +35,7 @@ Labels gesucht, erstellt und bearbeitet werden können. Ebenso lassen sich die
 Verwendungen eines Labels im Quellcode auffinden.
 
 Die Entwicklung für Dynamics 365 findet in Visual Studio statt, weil Microsoft dort
-das gesamte Tooling für die Plattform bereitstellt. Der BE-LabelEditor läuft daneben
+das gesamte Tooling für die Plattform bereitstellt @ms-devtools-overview. Der BE-LabelEditor läuft daneben
 als zweite Anwendung. Wer ein Label sucht oder anlegt, verlässt also die IDE,
 erledigt die Arbeit im separaten Fenster und kehrt mit der kopierten Label-ID
 zurück.
@@ -94,10 +99,10 @@ abgeschlossen ist.
       [Dateiüberwachung],
       [Ändert sich eine beschreibbare Label-Datei von aussen, bietet das Tool an, die
        Label-Dateien neu zu laden.],
-      [Tastenkürzel],
+      [Shortcuts],
       [Strg+S speichert, Strg+Shift+A führt Apply aus, Strg+Shift+S beides
        nacheinander. Strg+N legt ein neues Label mit dem letzten Suchbegriff an. Die
-       Kürzel lassen sich nicht ändern.],
+       Shortcuts lassen sich nicht ändern.],
     ),
     caption: [Funktionsumfang des bestehenden BE-LabelEditors (eigene Darstellung)]
   ) <ist_funktionen>
@@ -471,9 +476,9 @@ Abhängigkeiten in @detailanforderungen.
       [FA15], [Dateiüberwachung],
       [Änderungen an beschreibbaren Label-Dateien von aussen erkennen und das
        Neuladen anbieten.], [Z1],
-      [FA16], [Tastenkürzel],
+      [FA16], [Shortcuts],
       [Speichern, Label-ID einfügen, beides kombiniert und neues Label anlegen über
-       Tastenkürzel auslösen, ohne mit Kürzeln von Visual Studio zu kollidieren.],
+       Shortcuts auslösen, ohne mit Shortcuts von Visual Studio zu kollidieren.],
       [Z1],
       [FA17], [Meldungsprotokoll],
       [Fehler, Warnungen und Meldungen der Extension im Output Window von Visual
@@ -534,7 +539,8 @@ aufbauen. CodeLens blendet Angaben oberhalb einer Codezeile ein. Welche dieser
 Erweiterungen in einer Datei greifen, entscheidet der Content Type, also die
 Kennzeichnung, mit der Visual Studio den Inhalt einer Datei einordnet
 @ms-editor-extension-points @ms-editor-extensibility. Über das Selection Tracking
-erfährt eine Extension zudem, welches Element im Designer gerade gewählt ist.
+erfährt eine Extension zudem, welches Element im Designer gerade gewählt ist, siehe
+@befundprotokoll.
 
 @demo_inline und @demo_quickinfo zeigen, wie die beiden Anzeigen aussehen
 könnten. Beide Abbildungen beruhen auf erfundenen Beispieldaten und nicht auf einem
@@ -609,6 +615,9 @@ Models ablegt. @verzeichnisstruktur zeigt den Aufbau dieses Ordners.
     caption: [Variantenvergleich Zugriff auf die Label-Dateien (eigene Darstellung)]
   ) <variante_dateizugriff>
 ]
+
+Die Angaben zu Target Framework, Geschwindigkeit und Parsen stammen aus der
+Machbarkeitsstudie, siehe @befundprotokoll.
 
 #heading(outlined: false, level: 4)[V2 Zusätzliches Add-in]
 
@@ -736,6 +745,9 @@ Inline-Anzeige ist.
   ) <variante_extensionmodell>
 ]
 
+Die Zeilen zu Tooltip, Einblendung, Reifegrad und Add-in-Modell stammen aus der
+Machbarkeitsstudie, siehe @befundprotokoll.
+
 #figure(
   image("../diagrams/Extensionmodelle.png", width: 100%),
   caption: [Prozessgrenze der drei Extension-Modelle (eigene Darstellung)]
@@ -803,8 +815,9 @@ dokumentiert und wird für das Auslesen von Labels bereits eingesetzt
 @meyer-labels-net.
 
 Das Add-in-Modell für die Developer Tools ist dokumentiert und liefert die
-beiden genannten Einstiegspunkte. Die Editor-Erweiterbarkeit von Visual Studio mit
-QuickInfo, Taggern und CodeLens ist ebenfalls dokumentiert.
+beiden genannten Einstiegspunkte @ms-addins. Die Editor-Erweiterbarkeit von Visual
+Studio mit QuickInfo, Taggern und CodeLens ist ebenfalls dokumentiert
+@ms-editor-extension-points.
 
 Die Verwendungssuche ist über die Textsuche gesichert, weil das bestehende Tool
 genau so arbeitet. Die Cross-Reference-Datenbank ist eine Verbesserung, kein
@@ -861,7 +874,7 @@ Der X++-Editor meldet einen gewöhnlichen Content Type und ist nicht abgeschotte
 Eine eigene Erweiterung kann sich daran anhängen, was der Versuch auf der
 Testumgebung bestätigt hat. Damit sind Z2 und Z3 umsetzbar. Der Classifier von Dynamics 365
 kennzeichnet Label-Token bereits selbst, unter anderem als `"X++ Modern Label"`.
-Eine Erweiterung findet Label-IDs damit über die vorhandene Klassifizierung,
+Eine Erweiterung findet Label-IDs damit über die vorhandene Classification,
 statt X++ selbst zerlegen zu müssen. Das senkt den Aufwand für Z2 und Z3
 erheblich.
 
@@ -970,7 +983,7 @@ Erweiterungen nennt, welche auf Dienste des VSSDK angewiesen sind
 @ms-inproc-extensions. Der Prototyp hat gezeigt, dass sich der MEF-Anteil für
 QuickInfo und die Einblendung im Code darin unverändert mitverwenden lässt.
 Microsoft verwendet für die eigenen Developer Tools von Dynamics 365 dieselbe Mischform,
-was die Wahl zusätzlich stützt.
+was die Wahl zusätzlich stützt, siehe @befundprotokoll.
 
 Drei Folgen sind dabei in Kauf zu nehmen. Das Target Framework bleibt .NET Framework,
 und die Erweiterung trägt zwei Manifeste, weil sie ihre Identität aus dem
@@ -1067,7 +1080,7 @@ Phase vor dem Beginn der nächsten abgeschlossen wird.
 Zwei Gründe sprechen für dieses Vorgehen. Der Umfang steht mit der
 Themeneingabe fest. BE-terna bringt während der Umsetzung keine neuen Anforderungen
 ein und entscheidet erst nach Projektabschluss über die Einführung. Die Richtlinien verlangen eine durchgehende
-Dokumentation von der Initialisierung bis zur Abgabe, was ein phasenweises
+Dokumentation von der Initialisierung bis zur Abgabe @teko-richtlinien, was ein phasenweises
 Vorgehen ohnehin nahelegt.
 
 Innerhalb der Realisierung wird nach der Reihenfolge aus @projektziele umgesetzt.
@@ -1107,7 +1120,7 @@ regulär Donnerstag, Freitag und Samstag zur Verfügung.
 Daraus ergeben sich im Zeitraum vom 04.09.2026 bis zur Abgabe am 02.11.2026
 insgesamt 24 verfügbare Arbeitstage. Bei einem angenommenen Tagespensum von rund
 acht Stunden entspricht dies einem Gesamtaufwand von etwa 192 Stunden und liegt
-damit innerhalb der in den Richtlinien genannten Bandbreite von 150 bis 250 Stunden.
+damit innerhalb der in den Richtlinien genannten Bandbreite von 150 bis 250 Stunden @teko-richtlinien.
 Mit den vier Tagen für die Präsentation nach der Abgabe umfasst die Detailplanung
 28 Tage oder 224 Stunden.
 

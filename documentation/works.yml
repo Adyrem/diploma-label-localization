@@ -72,3 +72,57 @@ saxblog-xref:
     value: https://ievgensaxblog.wordpress.com/2018/12/09/msdyn365fo-code-to-build-cross-reference-data-without-a-full-compile/
     date: 2026-09-10
   date: 2018-12-09
+
+ms-assembly-loadfrom:
+  type: Web
+  title: Assembly.LoadFrom Method (System.Reflection)
+  author: Microsoft
+  publisher: Microsoft Learn
+  url:
+    value: https://learn.microsoft.com/en-us/dotnet/api/system.reflection.assembly.loadfrom
+    date: 2026-09-25
+
+ms-assembly-unload:
+  type: Web
+  title: "How to: Load and unload assemblies"
+  author: Microsoft
+  publisher: Microsoft Learn
+  url:
+    value: https://learn.microsoft.com/en-us/dotnet/standard/assembly/load-unload
+    date: 2026-09-25
+
+ms-models:
+  type: Web
+  title: Models and packages
+  author: Microsoft
+  publisher: Microsoft Learn
+  url:
+    value: https://learn.microsoft.com/en-us/dynamics365/fin-ops-core/dev-itpro/dev-tools/models
+    date: 2026-09-25
+  date: 2026-03-30
+
+ms-field-help:
+  type: Web
+  title: Customize field descriptions
+  author: Microsoft
+  publisher: Microsoft Learn
+  url:
+    value: https://learn.microsoft.com/en-us/dynamics365/fin-ops-core/dev-itpro/user-interface/customize-field-help
+    date: 2026-09-25
+  date: 2026-03-12
+
+ms-overlayering:
+  type: Web
+  title: Customize through extension and overlayering
+  author: Microsoft
+  publisher: Microsoft Learn
+  url:
+    value: https://learn.microsoft.com/en-us/dynamics365/fin-ops-core/dev-itpro/extensibility/customization-overlayering-extensions
+    date: 2026-09-25
+  date: 2026-03-27
+
+teko-richtlinien:
+  type: Report
+  title: Richtlinien Diplomarbeit Herbst 2026
+  author: TEKO Schweizerische Fachschule
+  date: 2026-02-11

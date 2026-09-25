@@ -1,0 +1,24 @@
+@startuml
+' Kontext der Extension: Benutzer, Host und Nachbarsysteme.
+' Rendern: plantuml -tpng -charset UTF-8 Kontextdiagramm.puml
+
+skinparam defaultFontSize 13
+skinparam shadowing false
+
+actor "Entwickler" as DEV
+rectangle "**Extension**" as EXT #E8E8E8
+rectangle "Visual Studio\n(Editor, Properties Window,\nOutput Window)" as VS
+rectangle "Developer Tools von Dynamics 365\n(X++-Editor, Designer)" as D365
+rectangle "Build und Best-Practice-Check\nder Developer Tools" as BUILD
+database "Package-Verzeichnis" as PKG
+cloud "Übersetzungsdienst" as SVC
+
+DEV --> EXT : sucht, legt an,\nbearbeitet, extrahiert
+EXT --> VS : fügt Text ein und ersetzt ihn,\nschreibt Meldungen
+D365 --> EXT : Classification der Label-Token,\ngewähltes Element
+EXT --> PKG : Label-Dateien, Descriptor,\nkompilierte Labels, XML der Elemente
+EXT --> SVC : Text und Zielsprachen
+SVC --> EXT : Übersetzungsvorschläge
+BUILD --> PKG : liest Label-Dateien
+BUILD --> DEV : meldet hardcodierte Texte
+@enduml
