@@ -9,6 +9,7 @@
 
 // Lange Tabellen dürfen über Seiten umbrechen, sonst entstehen grosse Lücken.
 #show figure: set block(breakable: true)
+#show figure.where(kind: image): set block(breakable: false)
 
 // X++ darf nicht zwischen den Pluszeichen umbrechen.
 #show "X++": it => box(it)
@@ -185,6 +186,7 @@ Unterschrift:
       [MEF], [Managed Extensibility Framework],
       [NFA], [Nicht-funktionale Anforderung],
       [OA], [Organisatorische Anforderung],
+      [Regex], [Regular Expression],
       [REST], [Representational State Transfer],
       [SDK], [Software Development Kit],
       [UC], [Use Case],
@@ -215,7 +217,7 @@ Unterschrift:
       [Komponente, die Visual Studio lädt und die an fest vorgegebenen Stellen der
        Oberfläche erscheint. Dynamics 365 stellt dafür ein eigenes Modell bereit.],
       [Classifier],
-      [Komponente des Editors, die Textbereichen eine Classification zuweist, etwa
+      [Komponente des Editors, die Spans eine Classification zuweist, etwa
        Schlüsselwort oder Label. Die Developer Tools bringen einen eigenen
        Classifier für X++ mit.],
       [CodeLens],
@@ -271,10 +273,16 @@ Unterschrift:
       [Selection Tracking],
       [Mechanismus von Visual Studio, über den eine Extension erfährt, welches
        Element gerade gewählt ist, etwa im Designer.],
+      [Span],
+      [Zusammenhängender Textbereich im Editor mit Anfang und Länge, etwa ein
+       einzelnes Token.],
       [Spike],
       [Zeitlich begrenzte Wegwerfarbeit, die eine offene technische Frage
        beantwortet. Das Ergebnis ist Wissen und nicht Software, der dabei
        entstandene Code wird nicht weiterverwendet.],
+      [String Literal],
+      [Text im Code zwischen Anführungszeichen, etwa `"Lieferadresse"`. In X++
+       steht auch eine Label-ID in einem String Literal.],
       [Tagger],
       [Bestandteil einer Editor-Erweiterung, der Textbereiche mit
        Zusatzinformationen verknüpft, auf die andere Funktionen aufbauen.],

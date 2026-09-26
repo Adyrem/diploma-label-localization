@@ -1,0 +1,105 @@
+@startuml
+' Klassenmodell der Kernlogik, Teil 2: Suche, Bearbeiten, Übersetzung, Querschnitt.
+' Klassen aus Teil 1 erscheinen ohne Members im weissen Paket.
+' Rendern: plantuml -tpng -charset UTF-8 Klassen_Bearbeiten.puml
+
+skinparam defaultFontSize 13
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam class {
+  BackgroundColor White
+  BorderColor Black
+}
+skinparam package {
+  BackgroundColor #F4F4F4
+}
+hide empty members
+
+package "Suche" {
+  class LabelSearch {
+    Search(query) : IReadOnlyList<SearchHit>
+  }
+  class SearchQuery {
+    Term : string
+    Mode : SearchMode
+    CaseSensitive : bool
+  }
+  enum SearchMode {
+    ExactMatch
+    Substring
+    AnythingLike
+    MatchWord
+    Id
+  }
+  class SearchHit {
+    Label : Label
+    Score : int
+  }
+}
+
+package "Bearbeiten" {
+  class LabelOperations {
+    Create(file, translations) : Label
+    Update(label)
+    Delete(label)
+    Copy(label, target, updateReferences) : Label
+    Move(label, target, updateReferences) : Label
+  }
+  class LabelIdGenerator {
+    NewId(file) : LabelId
+  }
+  class UsageSearch {
+    FindUsages(id) : IReadOnlyList<LabelUsage>
+    ReplaceReferences(from, to) : int
+  }
+  class LabelUsage {
+    Model : ModelInfo
+    FilePath : string
+    Line : int
+    Column : int
+  }
+}
+
+package "Übersetzung" {
+  interface ITranslationService {
+    TranslateAsync(text, source, targets, token)
+  }
+  class DeepLTranslationService
+}
+
+package "Querschnitt" {
+  class LabelSettings {
+    PackageDirectories : IList<string>
+    LoadLanguages : IList<string>
+    CreateLanguages : IList<string>
+    SourceLanguage : string
+  }
+  interface IMessageSink {
+    Report(severity, message)
+  }
+}
+
+package "Laden und Speichern" #FFFFFF {
+  class LabelStore
+  class LabelFileFormat
+  class LabelFileWatcher
+}
+
+LabelSearch --> LabelStore
+LabelSearch ..> SearchQuery
+LabelSearch ..> SearchHit
+SearchQuery --> SearchMode
+
+LabelOperations --> LabelIdGenerator
+LabelOperations --> UsageSearch
+LabelOperations --> LabelStore
+LabelOperations --> LabelFileFormat
+LabelOperations --> LabelFileWatcher
+UsageSearch ..> LabelUsage
+
+ITranslationService <|.. DeepLTranslationService
+
+SearchMode -[hidden]down- ITranslationService
+LabelUsage -[hidden]down- LabelSettings
+@enduml

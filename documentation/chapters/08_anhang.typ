@@ -58,7 +58,7 @@ Der Soll-Aufwand beträgt pro Arbeitstag acht Stunden.
       [1.7], [26.09.], [Review Initialisierung], [8], [4], [Zwei Reviews gegen Themeneingabe und Richtlinien eingearbeitet. Terminplan überarbeitet, FA12 bis FA17 und NFA06 ergänzt, Abweichungen von der Themeneingabe erfasst, Gliederung nach Richtlinien umgestellt. Auf den 24.09. vorgezogen], [Erledigt],
       table.cell(colspan: 7)[*AP2 Konzept*],
       [2.1], [01.10.], [Kontextdiagramm, Geschäftsprozessanalyse, Detailanforderungen], [8], [6], [Kontextdiagramm, zwei Sollabläufe, Detailanforderungen mit Akzeptanzkriterien, zehn Kann-Anforderungen. Dazu Systemarchitektur mit technischen Festlegungen und Realisierungsplan. Auf den 25.09. vorgezogen], [Erledigt],
-      [2.2], [02.10.], [Use Cases, Sequenzdiagramme, Klassenmodell, Systemarchitektur], [8], [], [], [],
+      [2.2], [02.10.], [Use Cases, Sequenzdiagramme, Klassenmodell, Systemarchitektur], [8], [6], [Use-Case-Diagramm mit vier ausführlichen Beschreibungen, Klassenmodell der Kernlogik mit Design Patterns, Sequenzdiagramme für Laden, Tooltip und Extraktion. Systemarchitektur bereits in AP2.1. Auf den 26.09. vorgezogen], [Erledigt],
       [2.3], [08.10.], [Testkonzept, GUI-Design, Review Konzept], [8], [], [], [],
       table.cell(colspan: 7)[*AP3 Realisierung*],
       [3.1], [09.10.], [Grundgerüst, Build- und Test-Toolchain, Ausgabe im Output Window], [8], [], [], [],

@@ -1,0 +1,89 @@
+@startuml
+' Klassenmodell der Kernlogik, Teil 1: Fachklassen, Laden und Speichern.
+' Rendern: plantuml -tpng -charset UTF-8 Klassen_Laden.puml
+
+skinparam defaultFontSize 13
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam class {
+  BackgroundColor White
+  BorderColor Black
+}
+skinparam package {
+  BackgroundColor #F4F4F4
+}
+hide empty members
+
+package "Laden und Speichern" {
+  class LabelStore {
+    IsLoaded : bool
+    Changed : event
+    LoadAsync(settings, token) : Task
+    Find(id) : Label
+  }
+  class ModelDiscovery {
+    FindModels(directories)
+    FindModelFor(filePath) : ModelInfo
+  }
+  interface ILabelSource {
+    Load(model, languages)
+  }
+  class LabelFileSource
+  class CompiledLabelSource
+  class LabelFileFormat {
+    {static} Read(stream)
+    {static} Write(path, entries)
+  }
+  class LabelFileWatcher {
+    ExternalChange : event
+    Start(files)
+    Suspend() : IDisposable
+  }
+}
+
+package "Fachklassen" {
+  class ModelInfo {
+    Name : string
+    Package : string
+    IsReadOnly : bool
+  }
+  class LabelFile {
+    Name : string
+    Languages : IReadOnlyList<string>
+    IsReadOnly : bool
+  }
+  class Label {
+    Id : LabelId
+    IsModified : bool
+    GetText(language) : string
+  }
+  class Translation {
+    Language : string
+    Text : string
+    Comment : string
+  }
+  class LabelId <<struct>> {
+    File : string
+    Key : string
+    IsLegacy : bool
+    {static} TryParse(text, out id) : bool
+    {static} Parse(text) : LabelId
+    {static} FindAll(text)
+  }
+}
+
+LabelStore --> ModelDiscovery
+LabelStore --> "1..*" ILabelSource
+LabelStore --> LabelFileWatcher
+ILabelSource <|.. LabelFileSource
+ILabelSource <|.. CompiledLabelSource
+LabelFileSource --> LabelFileFormat
+
+LabelStore o-- "0..*" LabelFile
+ModelDiscovery ..> ModelInfo
+ModelInfo "1" *-- "0..*" LabelFile
+LabelFile "1" *-- "0..*" Label
+Label "1" *-- "1..*" Translation
+Label --> "1" LabelId
+@enduml

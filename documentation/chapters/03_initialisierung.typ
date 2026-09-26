@@ -875,7 +875,7 @@ Eine eigene Erweiterung kann sich daran anhängen, was der Versuch auf der
 Testumgebung bestätigt hat. Damit sind Z2 und Z3 umsetzbar. Der Classifier von Dynamics 365
 kennzeichnet Label-Token bereits selbst, unter anderem als `"X++ Modern Label"`.
 Eine Erweiterung findet Label-IDs damit über die vorhandene Classification,
-statt X++ selbst zerlegen zu müssen. Das senkt den Aufwand für Z2 und Z3
+statt X++ selbst parsen zu müssen. Das senkt den Aufwand für Z2 und Z3
 erheblich.
 
 Die eigene QuickInfo-Quelle wird beim Überfahren von X++-Code gefragt und erkennt
@@ -899,8 +899,8 @@ den Dateien erfolgen können.
 
 Die Metadata-API lief auf einem privaten Gerät ohne Anwendungsserver, Datenbank
 und Developer Tools. Im warmen Zustand sind beide Zugriffsarten gleich
-schnell, weil das Zerlegen der Dateien den Aufwand bestimmt. Die API liefert den
-Dateiinhalt unverarbeitet, das Zerlegen bleibt in beiden Fällen eigene Arbeit.
+schnell, weil das Parsen der Dateien den Aufwand bestimmt. Die API liefert den
+Dateiinhalt unverarbeitet, das Parsen bleibt in beiden Fällen eigene Arbeit.
 
 Die Developer Tools enthalten einen fertigen Label-Resolver von Microsoft, der zu
 einer Label-ID den Text in einer gewählten Sprache liefert. Das entspricht fast
@@ -943,7 +943,7 @@ Stufe 2 zwei und Stufe 3 einen. Für Tests und Restarbeiten folgen drei weitere
 Tage.
 
 Entlastend wirkt ein Befund aus der zweiten Runde. Weil der Classifier von
-Dynamics 365 Label-Token bereits selbst kennzeichnet, entfällt das Zerlegen von
+Dynamics 365 Label-Token bereits selbst kennzeichnet, entfällt das Parsen von
 X++ für Z2 und Z3. Das war vorher der grösste Unsicherheitsposten der beiden
 Ziele.
 
@@ -1004,9 +1004,9 @@ Add-in würde ausserdem eine zweite Auslieferungsform nötig machen und die Arbe
 an die Version der Developer Tools binden.
 
 Bei V1 fällt die Wahl auf den direkten Dateizugriff mit eigenem Parser. Die
-Messung zeigt im warmen Zustand keinen Unterschied, und die Metadata-API zerlegt
+Messung zeigt im warmen Zustand keinen Unterschied, und die Metadata-API parst
 die Label-Dateien nicht, sondern liefert deren Inhalt unverarbeitet. Der Vorteil
-der API bleibt damit gering, weil das Zerlegen ohnehin selbst zu schreiben ist.
+der API bleibt damit gering, weil der Parser ohnehin selbst zu schreiben ist.
 
 Den Ausschlag gibt die Abhängigkeit. Ohne die API bleibt die Kernlogik frei von
 Assemblies der lokalen Installation. Das vereinfacht die Tests und macht die
@@ -1282,7 +1282,7 @@ bewertet. Der Risikowert ist ihr Produkt.
        umschliesst, sind nur Kompilieren und Paketieren belegt.],
       [2], [3], [6],
       [Das erste Arbeitspaket der Realisierung stellt ein lauffähiges Grundgerüst
-       her, bevor Funktionen entstehen. Scheitert es, bleibt der Rückfall auf das
+       her, bevor Funktionen entstehen. Scheitert es, bleibt der Fallback auf das
        klassische VSSDK, das im Spike nachweislich lädt und den MEF-Anteil
        unverändert übernimmt.],
 
@@ -1293,8 +1293,8 @@ bewertet. Der Risikowert ist ihr Produkt.
        die Nacharbeit Arbeitstage.],
       [2], [3], [6],
       [Die Fehlerbehandlung legt das Konzept fest, die Tests weisen sie nach. Die
-       Bezeichnungen der Classifier werden an einer Stelle gehalten, als Rückfall
-       bleibt ein eigener Mustervergleich auf der Textzeile.],
+       Bezeichnungen der Classifier werden an einer Stelle gehalten, als Fallback
+       bleibt eine eigene Regex auf der Textzeile.],
 
       [R08], [FA06 nicht wie vorgesehen umsetzbar],
       [Die Developer Tools von Dynamics 365 verwenden für X++ eine eigene Nachbildung von

@@ -1,0 +1,53 @@
+@startuml
+' Sequenz beim Überfahren einer Label-ID im X++-Editor.
+' Rendern: plantuml -tpng -charset UTF-8 Sequenz_Tooltip.puml
+
+skinparam defaultFontSize 13
+skinparam shadowing false
+skinparam sequence {
+  ParticipantBackgroundColor White
+  ParticipantBorderColor Black
+  ActorBackgroundColor White
+  ActorBorderColor Black
+  LifeLineBorderColor Gray
+  ArrowColor Black
+}
+hide footbox
+
+actor "Entwickler" as DEV
+participant "X++-Editor" as ED
+participant "QuickInfo-Quelle" as QI
+participant "Label-Erkennung" as REC
+participant "Classification der\nDeveloper Tools" as CL
+participant "LabelStore" as STORE
+
+DEV -> ED : überfährt eine Label-ID
+ED -> QI : GetQuickInfoItemAsync(session)
+activate QI
+QI -> REC : Label an der Mausposition
+activate REC
+REC -> CL : GetClassificationSpans(Zeile)
+CL --> REC : Spans mit Classification
+REC -> REC : Span mit "X++ Modern Label"\noder "X++ Legacy Label" wählen,\nAnführungszeichen entfernen,\nLabelId.TryParse
+REC --> QI : LabelId oder keine
+deactivate REC
+alt Label-ID erkannt und Labels geladen
+  QI -> STORE : Find(id)
+  alt Label bekannt
+    STORE --> QI : Label
+    QI --> ED : Eintrag mit allen konfigurierten\nSprachen, fehlende markiert
+  else Label unbekannt
+    STORE --> QI : null
+    QI --> ED : Eintrag "Label unbekannt"
+  end
+else sonst
+  QI --> ED : kein Eintrag
+end
+deactivate QI
+ED -> DEV : Tooltip mit den Einträgen der\nDeveloper Tools und der Extension
+
+note over REC, CL
+  Im Debug-Build ohne X++-Editor ersetzt
+  LabelId.FindAll die Classification.
+end note
+@enduml

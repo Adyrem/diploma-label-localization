@@ -126,3 +126,60 @@ teko-richtlinien:
   title: Richtlinien Diplomarbeit Herbst 2026
   author: TEKO Schweizerische Fachschule
   date: 2026-02-11
+
+deepl-translate:
+  type: Web
+  title: Translate text
+  author: DeepL SE
+  publisher: DeepL Developer Documentation
+  url:
+    value: https://developers.deepl.com/api-reference/translate
+    date: 2026-09-25
+
+deepl-languages:
+  type: Web
+  title: Languages supported
+  author: DeepL SE
+  publisher: DeepL Developer Documentation
+  url:
+    value: https://developers.deepl.com/docs/getting-started/supported-languages
+    date: 2026-09-25
+
+deepl-swiss-german:
+  type: Web
+  title: How we brought Swiss German to DeepL
+  author: Czerwinski, Maciej
+  publisher: DeepL Blog
+  date: 2026-07-31
+  url:
+    value: https://www.deepl.com/en/blog/how-we-brought-swiss-german-to-deepl
+    date: 2026-09-26
+
+ms-try-parse:
+  type: Web
+  title: Exceptions and Performance, Framework Design Guidelines
+  author: Microsoft
+  publisher: Microsoft Learn
+  url:
+    value: https://learn.microsoft.com/en-us/dotnet/standard/design-guidelines/exceptions-and-performance
+    date: 2026-09-26
+
+ms-tap:
+  type: Web
+  title: "Task-based Asynchronous Pattern (TAP): Introduction and overview"
+  author: Microsoft
+  publisher: Microsoft Learn
+  date: 2026-04-17
+  url:
+    value: https://learn.microsoft.com/en-us/dotnet/standard/asynchronous-programming-patterns/task-based-asynchronous-pattern-tap
+    date: 2026-09-26
+
+ms-using:
+  type: Web
+  title: using statement, ensure the correct use of disposable objects
+  author: Microsoft
+  publisher: Microsoft Learn
+  date: 2026-01-16
+  url:
+    value: https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/using
+    date: 2026-09-26

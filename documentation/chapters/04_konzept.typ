@@ -1,5 +1,8 @@
 #import "../helpers.typ": todo
 
+// Nummerierte alternative Abläufe in den Use-Case-Beschreibungen
+#let ablauf(..items) = grid(columns: (2em, 1fr), row-gutter: 0.6em, ..items)
+
 = Konzept <konzept>
 
 == Kontextdiagramm
@@ -117,7 +120,7 @@ entstehen nur in der neuen Form.
       [FA07\ Inline-Suche],
       [- Ein Command im Editor öffnet das Tool Window und sucht mit dem markierten
          Text.
-       - Ohne Markierung gilt der Inhalt des String-Literals unter dem
+       - Ohne Markierung gilt der Inhalt des String Literals unter dem
          Cursor.
        - Der Command ist über das Kontextmenü des Editors und einen Shortcut
          erreichbar.],
@@ -130,8 +133,8 @@ entstehen nur in der neuen Form.
       [FA03], [2],
 
       [FA09\ Extraktion hardcodierter Texte],
-      [- Im Editor wird der markierte Text eines String-Literals zu einem
-         neuen Label, das Literal enthält danach die Label-ID. Rückgängig machen
+      [- Im Editor wird ein markiertes String Literal als Ganzes zu einem neuen
+         Label und enthält danach die Label-ID. Rückgängig machen
          stellt den alten Text im Code wieder her.
        - Im Designer bietet der Command die Label-Eigenschaften des gewählten
          Elements an, die hardcodierten Text enthalten, etwa Label und Help Text.
@@ -182,7 +185,8 @@ entstehen nur in der neuen Form.
       [FA15\ Dateiüberwachung],
       [- Ändert sich eine beschreibbare Label-Datei von aussen, bietet die
          Extension das Neuladen an.
-       - Eigene Schreibvorgänge lösen keine Meldung aus.],
+       - Eigene Schreibvorgänge lösen keine Meldung aus.
+       - Nicht gespeicherte Labels bleiben beim Neuladen erhalten.],
       [--], [1],
 
       [FA16\ Shortcuts],
@@ -347,13 +351,13 @@ wenn nach AP4.1 Zeit bleibt, sonst fliessen sie in die Empfehlungen ein.
 
       [KA06\ Suche im Code nach Labeltext],
       [Eine Suche im geöffneten Dokument findet eine Label-ID auch über ihren Text
-       in einer der konfigurierten Sprachen. Die Suche nach «Lieferadresse» findet
+       in einer der konfigurierten Sprachen. Die Suche nach "Lieferadresse" findet
        so die Stelle mit der zugehörigen Label-ID.],
       [Ob sich die Suche von Visual Studio dafür erweitern lässt, ist nicht
-       untersucht. Rückfall ist ein eigener Command.],
+       untersucht. Fallback ist ein eigener Command.],
 
-      [KA07\ Vorschlag am String-Literal],
-      [Steht der Cursor auf einem hardcodierten String-Literal, bietet der Editor
+      [KA07\ Vorschlag am String Literal],
+      [Steht der Cursor auf einem hardcodierten String Literal, bietet der Editor
        die Extraktion aus FA09 als Vorschlag an.],
       [Suggested Actions des Editors über MEF, nicht untersucht.],
 
@@ -380,118 +384,243 @@ wenn nach AP4.1 Zeit bleibt, sonst fliessen sie in die Empfehlungen ein.
 
 == Use-Case-Diagramm
 
-// #figure(
-//   image("../diagrams/use_case_diagramm.png", width: 100%),
-//   caption: [Use-Case-Diagramm]
-// ) <use_case_diagramm>
+Menschlicher Akteur ist in allen Use Cases der Entwickler. Die Developer Tools und
+der Übersetzungsdienst nehmen als Systeme an einzelnen Use Cases teil. Die Use
+Cases fassen die Anforderungen aus @funktionale_anforderungen zu Aufgaben aus Sicht
+des Entwicklers zusammen. FA17 betrifft alle und hat keinen eigenen Use Case.
 
-== Use-Case-Beschreibungen
+#figure(
+  image("../diagrams/UseCases.png", width: 9.5cm),
+  caption: [Use-Case-Diagramm (eigene Darstellung)]
+) <use_case_diagramm>
 
 #[
   #show figure: set align(left)
+  #show figure: set block(breakable: false)
+  #set text(size: 10pt)
   #figure(
     table(
-      columns: (auto, 1fr),
-      [*Name*], [],
-      [*Nummer*], [UC-01],
-      [*Kurzbeschreibung*], [],
-      [*Stakeholder*], [],
-      [*Fachverantwortliche Person*], [],
-      [*Referenzen*], [],
-      [*Vorbedingungen*], [],
-      [*Nachbedingungen*], [],
-      [*Typischer Ablauf*], [],
-      [*Alternative Abläufe*], [],
-      [*Kritikalität*], [],
-      [*Verknüpfungen*], [],
-      [*Funktionale Anforderungen*], [],
-      [*Nicht-funktionale Anforderungen*], [],
+      align: left,
+      columns: (auto, 1fr, auto, auto),
+      table.header(
+        [*UC*], [*Use Case*], [*Anforderungen*], [*Stufe*],
+      ),
+      [UC01], [Label suchen], [FA01, FA07, FA12], [1, 2],
+      [UC02], [Label anlegen], [FA02, FA10, FA16], [1, 3],
+      [UC03], [Label bearbeiten], [FA03, FA08, FA16], [1, 2],
+      [UC04], [Verwendungen anzeigen], [FA04], [1, 2],
+      [UC05], [Label ersetzen], [FA13], [1],
+      [UC06], [Label-ID einfügen], [FA14, FA16], [1],
+      [UC07], [Übersetzungen im Code ansehen], [FA05, FA06], [2],
+      [UC08], [Hardcodierten Text extrahieren], [FA09], [3],
+      [UC09], [Einstellungen ändern], [FA11], [1],
+      [UC10], [Label-Dateien neu laden], [FA15], [1],
     ),
-    caption: [Use Case UC-01 (eigene Darstellung)]
+    caption: [Use Cases mit Anforderungen und Stufe (eigene Darstellung)]
+  ) <use_cases>
+]
+
+== Use-Case-Beschreibungen
+
+Ausführlich beschrieben sind die vier Use Cases, die mehrere Komponenten oder ein
+externes System einbeziehen. Für die übrigen legen die Akzeptanzkriterien in
+@funktionale_anforderungen das Verhalten fest.
+
+#[
+  #show figure: set align(left)
+  #set text(size: 9.5pt)
+  #figure(
+    table(
+      align: left,
+      columns: (auto, 1fr),
+      [*Nummer*], [UC01],
+      [*Kurzbeschreibung*],
+      [Der Entwickler sucht ein Label über Text, Kommentar oder ID, im Tool Window
+       oder direkt aus dem Editor.],
+      [*Akteure*], [Entwickler],
+      [*Auslöser*],
+      [Der Entwickler öffnet das Tool Window oder ruft die Suche im X++-Editor
+       über das Kontextmenü oder einen Shortcut auf.],
+      [*Vorbedingungen*], [Die Labels sind geladen, siehe @sequenz_laden.],
+      [*Typischer Ablauf*],
+      [+ Der Entwickler öffnet das Tool Window und gibt einen Suchbegriff ein.
+       + Die Trefferliste zeigt jedes passende Label einmal, nach Relevanz
+         sortiert.
+       + Der Entwickler wählt einen Treffer. Die Detailansicht zeigt Text und
+         Kommentar in allen geladenen Sprachen.],
+      [*Alternative Abläufe*],
+      [#ablauf(
+        [1a], [Der Entwickler markiert im X++-Editor einen Text und ruft die Suche
+               auf. Das Tool Window öffnet sich und sucht mit dem markierten
+               Text.],
+        [1b], [Wie 1a, aber ohne Markierung. Gesucht wird mit dem Inhalt des
+               String Literals unter dem Cursor.],
+        [2a], [Die Labels sind noch nicht geladen. Das Tool Window zeigt einen
+               Hinweis statt der Trefferliste.],
+        [2b], [Kein Treffer. Der Entwickler legt ein neues Label an, weiter mit
+               UC02.],
+      )],
+      [*Nachbedingungen*],
+      [Ein Label ist gewählt. Der Entwickler fügt seine ID ein (UC06) oder
+       bearbeitet es (UC03). Die Suche selbst ändert keine Datei.],
+      [*Verknüpfungen*], [--],
+      [*Anforderungen*], [FA01, FA07, FA12, NFA02],
+      [*Testfälle*], [#todo[Testfälle aus dem Testkonzept eintragen.]],
+      [*Stufe*], [1, aus dem Editor 2],
+    ),
+    caption: [Use Case UC01 Label suchen (eigene Darstellung)]
   ) <uc_01>
 ]
 
 #[
   #show figure: set align(left)
+  #set text(size: 9.5pt)
   #figure(
     table(
+      align: left,
       columns: (auto, 1fr),
-      [*Name*], [],
-      [*Nummer*], [UC-02],
-      [*Kurzbeschreibung*], [],
-      [*Stakeholder*], [],
-      [*Fachverantwortliche Person*], [],
-      [*Referenzen*], [],
-      [*Vorbedingungen*], [],
-      [*Nachbedingungen*], [],
-      [*Typischer Ablauf*], [],
-      [*Alternative Abläufe*], [],
-      [*Kritikalität*], [],
-      [*Verknüpfungen*], [],
-      [*Funktionale Anforderungen*], [],
-      [*Nicht-funktionale Anforderungen*], [],
+      [*Nummer*], [UC02],
+      [*Kurzbeschreibung*],
+      [Der Entwickler legt ein Label in einer beschreibbaren Label-Datei an. Der
+       Übersetzungsdienst schlägt die Übersetzungen vor.],
+      [*Akteure*], [Entwickler, Übersetzungsdienst],
+      [*Auslöser*],
+      [Knopf im Tool Window oder Shortcut für ein neues Label, auch aus UC01 ohne
+       Treffer und aus UC08.],
+      [*Vorbedingungen*],
+      [Die Labels sind geladen. Mindestens ein beschreibbares Model hat eine
+       Label-Datei.],
+      [*Typischer Ablauf*],
+      [+ Der Entwickler wählt im Tool Window eine Label-Datei und legt ein neues
+         Label an, per Knopf oder Shortcut.
+       + Alle anzulegenden Sprachen sind mit dem letzten Suchbegriff vorbelegt.
+       + Die Extension schickt den Text in der Quellsprache an den
+         Übersetzungsdienst und ersetzt die Vorbelegung der übrigen Sprachen durch
+         die Vorschläge.
+       + Der Entwickler prüft und ändert die Texte und bestätigt.
+       + Die Extension erzeugt die Label-ID und schreibt das Label in die Datei
+         jeder anzulegenden Sprache.],
+      [*Alternative Abläufe*],
+      [#ablauf(
+        [3a], [Kein API-Schlüssel hinterlegt oder der Dienst meldet einen Fehler.
+               Alle Sprachen behalten den Ausgangstext, das Output Window nennt
+               den Grund.],
+        [4a], [Der Entwickler bricht ab. Keine Datei wird geändert.],
+        [5a], [Eine Datei lässt sich nicht schreiben, etwa weil sie gesperrt ist.
+               Das Output Window nennt die Datei. Das Label bleibt als nicht
+               gespeichert im Label Store, und der Entwickler speichert es erneut,
+               sobald die Datei frei ist.],
+      )],
+      [*Nachbedingungen*],
+      [Das Label steht in allen anzulegenden Sprachen in der Label-Datei und im
+       Label Store. Dynamics 365 kompiliert die Datei ohne Fehler.],
+      [*Verknüpfungen*], [Wird von UC08 eingebunden.],
+      [*Anforderungen*], [FA02, FA10, FA16, NFA04, NFA06],
+      [*Testfälle*], [#todo[Testfälle aus dem Testkonzept eintragen.]],
+      [*Stufe*], [1, die Übersetzung 3],
     ),
-    caption: [Use Case UC-02 (eigene Darstellung)]
+    caption: [Use Case UC02 Label anlegen (eigene Darstellung)]
   ) <uc_02>
 ]
 
 #[
   #show figure: set align(left)
-  #figure(
-    table(
-      columns: (auto, 1fr),
-      [*Name*], [],
-      [*Nummer*], [UC-03],
-      [*Kurzbeschreibung*], [],
-      [*Stakeholder*], [],
-      [*Fachverantwortliche Person*], [],
-      [*Referenzen*], [],
-      [*Vorbedingungen*], [],
-      [*Nachbedingungen*], [],
-      [*Typischer Ablauf*], [],
-      [*Alternative Abläufe*], [],
-      [*Kritikalität*], [],
-      [*Verknüpfungen*], [],
-      [*Funktionale Anforderungen*], [],
-      [*Nicht-funktionale Anforderungen*], [],
-    ),
-    caption: [Use Case UC-03 (eigene Darstellung)]
-  ) <uc_03>
-]
-
-== Sequenzdiagramme
-
-// #figure(
-//   image("../diagrams/sequenz_01.png", width: 100%),
-//   caption: [Sequenzdiagramm]
-// ) <sequenz_01>
-
-== Modellierung der Klassen
-
-=== Klassendiagramm
-
-// #figure(
-//   image("../diagrams/class_diagram.png", width: 100%),
-//   caption: [Klassendiagramm]
-// ) <klassendiagramm>
-
-=== Beschreibung der Fachklassen
-
-#[
-  #show figure: set align(left)
+  #set text(size: 9.5pt)
   #figure(
     table(
       align: left,
-      columns: (1fr, 2fr, 1fr),
-      table.header(
-        [*Klasse*], [*Beschreibung*], [*Wichtige Attribute / Methoden*],
-      ),
-      [], [], [],
-      [], [], [],
-      [], [], [],
+      columns: (auto, 1fr),
+      [*Nummer*], [UC07],
+      [*Kurzbeschreibung*],
+      [Der Entwickler sieht zu einer Label-ID im X++-Editor die Übersetzungen
+       aller konfigurierten Sprachen, im Tooltip und oberhalb der Zeile.],
+      [*Akteure*], [Entwickler, Developer Tools],
+      [*Auslöser*],
+      [Eine X++-Datei wird im Editor angezeigt, für die Inline-Anzeige. Der
+       Entwickler überfährt eine Label-ID, für den Tooltip.],
+      [*Vorbedingungen*], [Eine X++-Datei ist im Editor geöffnet.],
+      [*Typischer Ablauf*],
+      [+ Oberhalb jeder Zeile mit einer Label-ID blendet die Extension die
+         Übersetzungen ein.
+       + Der Entwickler überfährt eine Label-ID mit der Maus.
+       + Die Extension erkennt das Label über die Classification der Developer
+         Tools und liest es aus dem Label Store.
+       + Der Tooltip zeigt zusätzlich zum Eintrag der Developer Tools alle
+         konfigurierten Sprachen.],
+      [*Alternative Abläufe*],
+      [#ablauf(
+        [1a], [Die Inline-Anzeige ist ausgeschaltet. Es erscheint nur der
+               Tooltip.],
+        [3a], [Die Labels sind noch nicht geladen. Die Extension zeigt nichts an
+               und ergänzt die Inline-Anzeige, sobald das Laden abgeschlossen
+               ist.],
+        [3b], [Die Label-ID ist unbekannt. Der Eintrag im Tooltip sagt das.],
+        [4a], [Einer Sprache fehlt die Übersetzung. Sie ist als fehlend
+               markiert.],
+      )],
+      [*Nachbedingungen*], [Keine Datei wird geändert.],
+      [*Verknüpfungen*], [--],
+      [*Anforderungen*], [FA05, FA06, NFA04],
+      [*Testfälle*], [#todo[Testfälle aus dem Testkonzept eintragen.]],
+      [*Stufe*], [2],
     ),
-    caption: [Fachklassen (eigene Darstellung)]
-  ) <fachklassen>
+    caption: [Use Case UC07 Übersetzungen im Code ansehen (eigene Darstellung)]
+  ) <uc_07>
+]
+
+#[
+  #show figure: set align(left)
+  #set text(size: 9.5pt)
+  #figure(
+    table(
+      align: left,
+      columns: (auto, 1fr),
+      [*Nummer*], [UC08],
+      [*Kurzbeschreibung*],
+      [Der Entwickler wandelt einen hardcodierten Text im Code oder in einer
+       Eigenschaft im Designer in ein neues Label um.],
+      [*Akteure*], [Entwickler, Developer Tools, über UC02 der Übersetzungsdienst],
+      [*Auslöser*],
+      [Der Entwickler ruft den Command für die Extraktion im X++-Editor oder im
+       Designer auf.],
+      [*Vorbedingungen*],
+      [Die Labels sind geladen. Die Datei oder das Element gehört zu einem
+       beschreibbaren Model.],
+      [*Typischer Ablauf*],
+      [+ Der Entwickler markiert im X++-Editor ein String Literal und ruft die
+         Extraktion auf.
+       + Die Extension bestimmt über die Classification `"X++ String"` das
+         String Literal an der Markierung.
+       + Das Tool Window öffnet ein neues Label mit dem Inhalt des String Literals
+         als Text und schlägt eine Label-Datei des Models vor, zu dem die Datei
+         gehört.
+       + Weiter wie UC02 ab Schritt 3.
+       + Die Extension ersetzt den Inhalt des String Literals durch die
+         Label-ID.],
+      [*Alternative Abläufe*],
+      [#ablauf(
+        [1a], [Der Entwickler wählt im Designer ein Element und ruft die
+               Extraktion auf. Die Extension bietet dessen Label-Eigenschaften mit
+               hardcodiertem Text an, etwa Label und Help Text. Nach der Wahl geht
+               es mit Schritt 3 weiter. In Schritt 5 schreibt die Extension die
+               Label-ID in die XML-Datei des Elements, siehe @festlegungen.],
+        [2a], [An der Markierung liegt kein String Literal. Ein Hinweis erscheint,
+               nichts wird geändert.],
+        [3a], [Das Model hat keine Label-Datei. Der Entwickler wählt die
+               Label-Datei selbst.],
+        [4a], [Der Entwickler bricht ab. Code und Dateien bleiben unverändert.],
+        [5a], [Der Entwickler macht die Änderung rückgängig. Der alte Text steht
+               wieder im Code, das Label bleibt in der Label-Datei.],
+      )],
+      [*Nachbedingungen*],
+      [Das Label existiert, und die Fundstelle enthält seine ID.],
+      [*Verknüpfungen*], [Bindet UC02 ein.],
+      [*Anforderungen*], [FA09, FA02, FA10],
+      [*Testfälle*], [#todo[Testfälle aus dem Testkonzept eintragen.]],
+      [*Stufe*], [3],
+    ),
+    caption: [Use Case UC08 Hardcodierten Text extrahieren (eigene Darstellung)]
+  ) <uc_08>
 ]
 
 == Systemarchitektur <architektur>
@@ -641,7 +770,7 @@ der Extension und der Kernlogik.
 
       [Label-Erkennung],
       [Über die Classifications `"X++ Modern Label"` und `"X++ Legacy Label"`.
-       Die Spanne beginnt mit dem Anführungszeichen. Beide Formen der Label-ID
+       Der Span beginnt mit dem Anführungszeichen. Beide Formen der Label-ID
        werden verarbeitet, mit und ohne Doppelpunkt. Die Namen der
        Classifications stehen an einer Stelle, siehe R07.],
       [Neue Form belegt, alte Form nur im Properties Window beobachtet.],
@@ -649,12 +778,12 @@ der Extension und der Kernlogik.
       [Entwicklung ohne X++-Editor],
       [Auf dem privaten Gerät gibt es keinen X++-Editor. Im Debug-Build hängen sich
        Tooltip und Inline-Anzeige zusätzlich an Textdateien mit der Endung `.xpp`
-       an und erkennen Labels über einen Mustervergleich. Derselbe Mustervergleich
-       ist der Rückfall aus R07.],
+       an und erkennen Labels über eine Regex. Dieselbe Regex ist der Fallback
+       aus R07.],
       [Senkt die Zahl der Durchgänge auf der Testumgebung, siehe R04.],
 
       [Tool Window],
-      [Remote UI des neuen Modells. Fehlt dort ein benötigtes Steuerelement, folgt
+      [Remote UI des neuen Modells. Fehlt dort ein benötigtes Control, folgt
        ein klassisches Tool Window mit WPF, das im selben Prozess ebenfalls möglich
        ist.],
       [Im Spike nicht geprüft. Zu prüfen in 3.1.],
@@ -670,7 +799,7 @@ der Extension und der Kernlogik.
       [Nicht erprobt, siehe R08. Z2 ist über FA05 auch ohne sie erreicht.],
 
       [Extraktion im Editor],
-      [Ersetzt den markierten Text im Textpuffer des Editors. Rückgängig machen
+      [Ersetzt das markierte String Literal im Text Buffer des Editors. Rückgängig machen
        und Speichern bleiben bei Visual Studio und den Developer Tools.],
       [Standardschnittstelle des Editors, nicht eigens erprobt.],
 
@@ -685,7 +814,7 @@ der Extension und der Kernlogik.
       [Die Verwendungssuche findet die Label-ID in der XML-Datei des Elements.
        Der X++-Editor arbeitet dagegen auf einer `.xpp`-Datei im Ordner
        XppSource, siehe @befundprotokoll. Angestrebt ist der Sprung in den
-       X++-Editor an die entsprechende Stelle. Rückfall ist das Öffnen der
+       X++-Editor an die entsprechende Stelle. Fallback ist das Öffnen der
        XML-Datei an der Zeile.],
       [Zu prüfen, siehe unten.],
 
@@ -695,7 +824,7 @@ der Extension und der Kernlogik.
       [NFA06],
 
       [Error Boundary],
-      [Jeder Einstiegspunkt, also Command, MEF-Teil und Hintergrundaufgabe, fängt
+      [Jeder Einstiegspunkt, also Command, MEF-Teil und Background Task, fängt
        Fehler ab und meldet sie im Output Window.],
       [NFA04, Nachweis im Testkonzept.],
     ),
@@ -718,6 +847,245 @@ erkennen kann. Davon hängt die Vorbelegung der Einstellung ab.]
 XML-Datei auf eine Zeile im X++-Editor übertragen lässt. Davon hängt ab, wohin
 ein Klick in der Verwendungssuche führt.]
 
+== Modellierung der Klassen
+
+=== Klassendiagramm
+
+Das Klassenmodell zeigt die Kernlogik. Die Extension setzt die Komponenten aus
+@komponenten mit Klassen um, die Visual Studio anbinden und die Kernlogik
+aufrufen. Eigene Fachlogik enthalten sie nicht, damit sich alles, was geprüft
+werden muss, ohne Visual Studio testen lässt. Die Namen sind die späteren Namen im
+Code und deshalb englisch.
+
+@klassen_laden folgt für die Fachklassen dem Zusammenhang aus @labelstruktur.
+
+#figure(
+  image("../diagrams/Klassen_Laden.png", width: 100%),
+  caption: [Klassen der Kernlogik, Fachklassen, Laden und Speichern (eigene
+            Darstellung)]
+) <klassen_laden>
+
+Suche, Bearbeiten und Übersetzung in @klassen_bearbeiten greifen auf den Label
+Store zu. Die Klassen aus @klassen_laden erscheinen dort ohne Attribute und
+Methoden.
+
+#figure(
+  image("../diagrams/Klassen_Bearbeiten.png", width: 100%),
+  caption: [Klassen der Kernlogik, Suche, Bearbeiten und Übersetzung (eigene
+            Darstellung)]
+) <klassen_bearbeiten>
+
+=== Beschreibung der Klassen
+
+#[
+  #show figure: set align(left)
+  #set text(size: 9.5pt)
+  #figure(
+    table(
+      align: left,
+      columns: (auto, 1fr, auto),
+      table.header(
+        [*Klasse*], [*Beschreibung*], [*Wichtige Methoden*],
+      ),
+      [`LabelId`],
+      [Label-ID in einer der beiden Formen aus @festlegungen. Trennt eine ID in
+       Label-Datei und Label. `FindAll` findet Label-IDs in einer Textzeile, für
+       den Ersatz des X++-Editors im Debug-Build und als Fallback aus R07.],
+      [`TryParse`\ `Parse`\ `FindAll`],
+
+      [`Label`\ `Translation`],
+      [Ein Label mit Text und Kommentar je Sprache. `IsModified` zeigt an, dass
+       eine Änderung noch nicht in der Label-Datei steht.],
+      [`GetText`],
+
+      [`LabelFile`],
+      [Steht für eine Label-Datei wie `BDM1` und kennt die Sprachen, in denen es
+       sie gibt. Ändern lässt sie sich nur, wenn ihr Model beschreibbar ist und
+       sie nicht nur kompiliert vorliegt.],
+      [--],
+
+      [`ModelInfo`\ `ModelDiscovery`],
+      [Findet die Models über die Descriptor-Dateien der Package-Verzeichnisse
+       und erkennt schreibgeschützte Models. Ordnet einer Datei ihr Model zu, für
+       den Vorschlag der Label-Datei bei der Extraktion.],
+      [`FindModels`\ `FindModelFor`],
+
+      [`ILabelSource`],
+      [Liefert die Label-Dateien eines Models. `LabelFileSource` liest die
+       Label-Dateien, `CompiledLabelSource` die kompilierten Ressourcen, ohne die
+       Assembly zu laden. Eine Quelle über die Metadata-API aus
+       @variantenentscheid liesse sich ergänzen, ohne den Label Store zu
+       ändern.],
+      [`Load`],
+
+      [`LabelFileFormat`],
+      [Liest und schreibt das Format der Label-Dateien nach @festlegungen. Keine
+       andere Klasse kennt das Format.],
+      [`Read`\ `Write`],
+
+      [`LabelStore`],
+      [Hält alle geladenen Labels, nach Label-ID indiziert. `Find` liefert `null`
+       für eine unbekannte ID. Das Laden baut einen neuen Index auf und ersetzt
+       den alten erst am Ende. Suchen während des Ladens sehen so den bisherigen
+       Stand, auch beim Neuladen nach FA15. Neue und geänderte Labels stehen
+       sofort im Label Store und bleiben als geändert markiert, bis das Speichern
+       gelingt. Ein Neuladen übernimmt sie in den neuen Index.],
+      [`LoadAsync`\ `Find`],
+
+      [`LabelFileWatcher`],
+      [Meldet Änderungen an beschreibbaren Label-Dateien von aussen. Während
+       eigener Schreibvorgänge ist er angehalten.],
+      [`Suspend`],
+
+      [`LabelSearch`],
+      [Suche mit Ranking. `SearchMode` und `CaseSensitive` ergeben zusammen die
+       acht Suchmodi aus @ist_funktionen.],
+      [`Search`],
+
+      [`LabelOperations`],
+      [Anlegen, Ändern, Löschen, Kopieren und Verschieben. Trägt die Änderung in
+       den Label Store ein, hält die Dateiüberwachung an und schreibt alle
+       Sprachen der Label-Datei. Beim Kopieren und Verschieben stellt es auf
+       Wunsch die Referenzen um.],
+      [`Create`\ `Update`\ `Delete`\ `Copy`\ `Move`],
+
+      [`LabelIdGenerator`],
+      [Erzeugt neue Label-IDs nach @festlegungen.],
+      [`NewId`],
+
+      [`UsageSearch`\ `LabelUsage`],
+      [Textsuche nach der vollständigen Label-ID in den XML-Dateien der Elemente.
+       Eine Fundstelle zählt nur, wenn kein weiteres Zeichen der ID folgt, damit
+       die Suche nach `@SYS1234` nicht `@SYS12345` meldet. Referenzen ersetzt sie
+       nur in beschreibbaren Models.],
+      [`FindUsages`\ `ReplaceReferences`],
+
+      [`ITranslationService`\ `DeepLTranslationService`],
+      [Übersetzt einen Text in mehrere Zielsprachen. Die Umsetzung für DeepL
+       schickt je Zielsprache eine Anfrage, weil DeepL pro Anfrage nur eine
+       Zielsprache annimmt @deepl-translate. Sie bildet die Sprachcodes von
+       Dynamics 365 auf die von DeepL ab. `de` wird zu `DE`, `de-CH` zu `DE-CH`
+       @deepl-languages. Die Unterscheidung zählt, weil die Schweizer Variante
+       kein scharfes S kennt und "Strasse" statt "Straße" schreibt
+       @deepl-swiss-german. Weitere Dienste wie in KA10 kommen als eigene
+       Umsetzung dazu.],
+      [`TranslateAsync`],
+
+      [`LabelSettings`],
+      [Package-Verzeichnisse, zu ladende und anzulegende Sprachen, Quellsprache.
+       Gespeichert werden sie von der Extension, die auch den API-Schlüssel
+       verwaltet.],
+      [--],
+
+      [`IMessageSink`],
+      [Meldungen der Kernlogik mit ihrer Art. Die Extension leitet sie ins Output
+       Window.],
+      [`Report`],
+    ),
+    caption: [Klassen der Kernlogik (eigene Darstellung)]
+  ) <klassen>
+]
+
+=== Design Patterns
+
+#[
+  #show figure: set align(left)
+  #set text(size: 9.5pt)
+  #figure(
+    table(
+      align: left,
+      columns: (auto, auto, 1fr),
+      table.header(
+        [*Pattern*], [*Verwendung*], [*Begründung*],
+      ),
+      [Try-Parse Pattern],
+      [`LabelId`\ `.TryParse`],
+      [Ob ein Suchbegriff oder ein Eigenschaftswert im Designer eine Label-ID ist,
+       zeigt sich erst beim Parsen. Ein Fehlschlag ist dort der Normalfall und
+       kein Fehler. `TryParse` meldet ihn mit `false` statt mit einer Exception,
+       die um Grössenordnungen langsamer sein kann, und liefert die ID im
+       `out`-Parameter. Microsoft empfiehlt das Pattern für solche Fälle, zusammen
+       mit einer Methode, die eine Exception wirft @ms-try-parse. Das ist `Parse`,
+       etwa für die IDs beim Lesen einer Label-Datei. Der Label Store braucht das
+       Pattern nicht, weil ein fehlendes Label als `null` eindeutig ist.],
+
+      [Strategy],
+      [`ILabelSource`\ `ITranslationService`],
+      [Eine neue Quelle oder ein neuer Übersetzungsdienst kommt als eigene Klasse
+       dazu, ohne dass sich Label Store oder Tool Window ändern (NFA03). Unit Tests
+       setzen eine Umsetzung mit festen Daten ein und kommen ohne Dateisystem und
+       ohne Internet aus.],
+
+      [Dependency Inversion],
+      [`IMessageSink`],
+      [Die Kernlogik legt das Interface für Meldungen fest, die Extension setzt es
+       mit dem Output Window um. So braucht die Kernlogik keine Referenz auf
+       Visual Studio (Z8).],
+
+      [Task-based Asynchronous Pattern],
+      [`LoadAsync`\ `TranslateAsync`],
+      [Laden und Übersetzen dauern und dürfen Visual Studio nicht blockieren
+       (NFA02). Microsoft empfiehlt das Pattern für neue Entwicklung @ms-tap. Der
+       `CancellationToken` bricht das Laden ab, wenn Visual Studio schliesst oder
+       ein neues Laden beginnt.],
+
+      [Observer über Events],
+      [`Changed`\ `ExternalChange`],
+      [Tool Window und Inline-Anzeige erfahren von neuen Labels, ohne dass die
+       Kernlogik sie kennt.],
+
+      [`using`-Block mit `IDisposable`],
+      [`LabelFileWatcher`\ `.Suspend`],
+      [Innerhalb des Blocks ruht die Dateiüberwachung. Am Ende läuft sie wieder,
+       auch wenn das Schreiben mit einer Exception abbricht @ms-using. Eigene
+       Schreibvorgänge lösen so keine Meldung aus (FA15), und ein Fehler legt die
+       Überwachung nicht dauerhaft still.],
+    ),
+    caption: [Design Patterns der Kernlogik (eigene Darstellung)]
+  ) <design_patterns>
+]
+
+== Sequenzdiagramme
+
+Die drei Sequenzen zeigen die Abläufe, in denen die Extension mit Visual Studio,
+den Developer Tools oder einem externen Dienst zusammenspielt. Die übrigen
+Abläufe bleiben im Tool Window und in der Kernlogik.
+
+=== Laden
+
+Das Laden beginnt, sobald das Tool Window oder die erste X++-Datei geöffnet wird,
+siehe @festlegungen. Visual Studio wartet nicht darauf. Eine beschädigte oder
+gesperrte Datei erzeugt eine Warnung, geladen werden die übrigen.
+
+#figure(
+  image("../diagrams/Sequenz_Laden.png", width: 90%),
+  caption: [Sequenz beim Laden der Labels (eigene Darstellung)]
+) <sequenz_laden>
+
+=== Tooltip
+
+Die Label-Erkennung wählt den Span mit der Classification eines Labels. Dieser
+Span beginnt mit dem Anführungszeichen, siehe @befundprotokoll. Die
+Label-Erkennung entfernt es vor dem Parsen. Die Inline-Anzeige verwendet dieselbe Erkennung und denselben
+Zugriff auf den Label Store.
+
+#figure(
+  image("../diagrams/Sequenz_Tooltip.png", width: 95%),
+  caption: [Sequenz beim Überfahren einer Label-ID (eigene Darstellung)]
+) <sequenz_tooltip>
+
+=== Extraktion
+
+Gezeigt ist die Extraktion im X++-Editor. Die Classification `"X++ String"` für
+String Literals hat die Machbarkeitsstudie beobachtet, siehe @befundprotokoll. Im
+Designer tritt das Selection Tracking an die Stelle der Label-Erkennung, und
+geschrieben wird in die XML-Datei des Elements statt in den Text Buffer.
+
+#figure(
+  image("../diagrams/Sequenz_Extraktion.png", width: 100%),
+  caption: [Sequenz beim Extrahieren eines hardcodierten Textes im X++-Editor
+            (eigene Darstellung)]
+) <sequenz_extraktion>
 
 == Testkonzept
 
@@ -905,5 +1273,5 @@ dem Grundgerüst, damit sich die grössten Unsicherheiten früh zeigen.
 
 Reicht die Zeit an einem Tag nicht, wandert der Rest in AP4.1. Scheitert das
 Schreiben aus dem Properties Window in D1, bleibt bis zum 21.10. Zeit, den
-Rückfall über die Eigenschaft des gewählten Elements vorzubereiten. Die
+Fallback über die Eigenschaft des gewählten Elements vorzubereiten. Die
 Property Descriptors melden sie als beschreibbar, erprobt ist das nicht.

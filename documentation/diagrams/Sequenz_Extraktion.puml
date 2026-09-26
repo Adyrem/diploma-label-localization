@@ -1,0 +1,59 @@
+@startuml
+' Sequenz beim Extrahieren eines hardcodierten Textes im X++-Editor.
+' Rendern: plantuml -tpng -charset UTF-8 Sequenz_Extraktion.puml
+
+skinparam defaultFontSize 13
+skinparam shadowing false
+skinparam sequence {
+  ParticipantBackgroundColor White
+  ParticipantBorderColor Black
+  ActorBackgroundColor White
+  ActorBorderColor Black
+  LifeLineBorderColor Gray
+  ArrowColor Black
+}
+hide footbox
+
+actor "Entwickler" as DEV
+participant "X++-Editor" as ED
+participant "Command\nExtraktion" as CMD
+participant "Label-Erkennung" as REC
+participant "ModelDiscovery" as MD
+participant "Tool Window" as TW
+participant "ITranslationService" as TR
+participant "LabelOperations" as OPS
+
+DEV -> CMD : ruft die Extraktion auf\neinem markierten String Literal auf
+activate CMD
+CMD -> REC : String Literal an der Markierung
+REC --> CMD : Span mit "X++ String" oder keiner
+alt kein String Literal
+  CMD -> DEV : Hinweis, nichts geändert
+else String Literal gefunden
+  CMD -> MD : FindModelFor(Pfad der Datei)
+  MD --> CMD : Model mit Label-Dateien
+  CMD -> TW : neues Label mit Inhalt des String Literals\nund vorgeschlagener Label-Datei
+  activate TW
+  TW -> TR : TranslateAsync(Text, SourceLanguage,\nCreateLanguages)
+  loop je Zielsprache
+    TR -> TR : Anfrage an den Dienst
+  end
+  alt Vorschläge erhalten
+    TR --> TW : Übersetzungen
+  else kein API-Schlüssel oder Fehler
+    TR --> TW : Fehler
+    TW -> TW : Ausgangstext in allen Sprachen,\nMeldung mit Grund
+  end
+  DEV -> TW : prüft, ändert und bestätigt
+  TW -> OPS : Create(Label-Datei, Übersetzungen)
+  activate OPS
+  OPS -> OPS : NewId, Label im LabelStore eintragen,\nDateiüberwachung anhalten,\nalle Sprachen schreiben
+  OPS --> TW : Label
+  deactivate OPS
+  TW --> CMD : Label-ID
+  deactivate TW
+  CMD -> ED : Inhalt des String Literals\ndurch die Label-ID ersetzen
+  note right of ED : ein Edit im Text Buffer,\nrückgängig machbar
+end
+deactivate CMD
+@enduml

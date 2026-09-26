@@ -1,0 +1,43 @@
+@startuml
+' Sequenz beim Laden der Labels im Hintergrund.
+' Rendern: plantuml -tpng -charset UTF-8 Sequenz_Laden.puml
+
+skinparam defaultFontSize 13
+skinparam shadowing false
+skinparam sequence {
+  ParticipantBackgroundColor White
+  ParticipantBorderColor Black
+  DatabaseBackgroundColor White
+  DatabaseBorderColor Black
+  LifeLineBorderColor Gray
+  ArrowColor Black
+}
+hide footbox
+
+participant "Tool Window\noder X++-Editor" as UI
+participant "LabelStore" as STORE
+participant "ModelDiscovery" as MD
+participant "ILabelSource" as SRC
+participant "LabelFileWatcher" as W
+participant "Meldungen\n(Output Window)" as OUT
+database "Package-\nVerzeichnis" as PKG
+
+UI ->> STORE : LoadAsync(settings, token)
+activate STORE
+STORE -> MD : FindModels(PackageDirectories)
+MD -> PKG : Descriptor-Dateien lesen
+MD --> STORE : Models
+loop je Model und Quelle
+  STORE -> SRC : Load(model, LoadLanguages)
+  SRC -> PKG : Label-Dateien je Sprache\noder kompilierte Ressourcen lesen
+  opt Datei beschädigt oder gesperrt
+    SRC -> OUT : Warnung mit Dateiname
+  end
+  SRC --> STORE : lesbare Label-Dateien
+end
+STORE -> STORE : neuen Index nach Label-ID\naufbauen, nicht gespeicherte\nLabels übernehmen, alten ersetzen
+STORE -> W : Start(beschreibbare Label-Dateien)
+STORE -> OUT : Anzahl Labels und Ladezeit
+STORE -->> UI : Changed
+deactivate STORE
+@enduml

@@ -1,0 +1,50 @@
+@startuml
+' Use Cases der Extension mit Akteuren.
+' Rendern: plantuml -tpng -charset UTF-8 UseCases.puml
+
+skinparam defaultFontSize 13
+skinparam shadowing false
+skinparam usecase {
+  BackgroundColor White
+  BorderColor Black
+}
+skinparam rectangle {
+  BackgroundColor #F4F4F4
+}
+left to right direction
+
+actor "Entwickler" as DEV
+actor "Developer Tools" as D365 <<System>>
+actor "Übersetzungsdienst" as SVC <<System>>
+
+rectangle "Extension in Visual Studio" {
+  usecase "UC01\nLabel suchen" as UC01
+  usecase "UC06\nLabel-ID einfügen" as UC06
+  usecase "UC03\nLabel bearbeiten" as UC03
+  usecase "UC05\nLabel ersetzen" as UC05
+  usecase "UC04\nVerwendungen anzeigen" as UC04
+  usecase "UC07\nÜbersetzungen im Code ansehen" as UC07
+  usecase "UC08\nHardcodierten Text extrahieren" as UC08
+  usecase "UC02\nLabel anlegen" as UC02
+  usecase "UC09\nEinstellungen ändern" as UC09
+  usecase "UC10\nLabel-Dateien neu laden" as UC10
+}
+
+DEV --> UC01
+DEV --> UC06
+DEV --> UC03
+DEV --> UC05
+DEV --> UC04
+DEV --> UC07
+DEV --> UC08
+DEV --> UC02
+DEV --> UC09
+DEV --> UC10
+
+UC05 .right.> UC04 : <<include>>
+UC08 .right.> UC02 : <<include>>
+
+UC07 -- D365
+UC08 -- D365
+UC02 -- SVC
+@enduml
