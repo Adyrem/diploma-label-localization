@@ -74,7 +74,7 @@
 
 == Deployment / Inbetriebnahme
 
-== Testprotokoll
+== Testprotokoll <testprotokoll>
 
 === Teststrategie
 
@@ -104,7 +104,7 @@
   #figure(
     table(
       columns: (auto, 1fr),
-      [*ID*], [TC-01],
+      [*ID*], [TC01],
       [*Beschreibung*], [],
       [*Vorgehen*], [],
       [*Erwartetes Ergebnis*], [],
@@ -112,7 +112,7 @@
       [*Status*], [],
       [*Referenz*], [],
     ),
-    caption: [Testergebnis TC-01]
+    caption: [Testergebnis TC01]
   ) <tc_01>
 ]
 
@@ -121,7 +121,7 @@
   #figure(
     table(
       columns: (auto, 1fr),
-      [*ID*], [TC-02],
+      [*ID*], [TC02],
       [*Beschreibung*], [],
       [*Vorgehen*], [],
       [*Erwartetes Ergebnis*], [],
@@ -129,7 +129,7 @@
       [*Status*], [],
       [*Referenz*], [],
     ),
-    caption: [Testergebnis TC-02]
+    caption: [Testergebnis TC02]
   ) <tc_02>
 ]
 

@@ -173,7 +173,6 @@ Unterschrift:
       ),
       [AP], [Arbeitspaket],
       [API], [Application Programming Interface],
-      [BOM], [Byte Order Mark],
       [CI/CD], [Continuous Integration / Continuous Deployment],
       [D365], [Microsoft Dynamics 365],
       [EDT], [Extended Data Type],
@@ -189,6 +188,8 @@ Unterschrift:
       [Regex], [Regular Expression],
       [REST], [Representational State Transfer],
       [SDK], [Software Development Kit],
+      [TC], [Test Case, Testfall],
+      [TO], [Testobjekt],
       [UC], [Use Case],
       [UI], [User Interface],
       [UTF-8], [Unicode Transformation Format, 8 Bit],
@@ -256,6 +257,10 @@ Unterschrift:
       [Metadata-API],
       [Von Microsoft ausgelieferte Assemblies, über die sich die Elemente eines
        Models lesen und schreiben lassen, ohne die Dateien selbst zu kennen.],
+      [Metadaten-Konfiguration],
+      [Einstellung der Developer Tools in der Unified Developer Experience, die
+       festlegt, in welchen Ordnern die eigenen Models und die Referenz-Metadaten
+       liegen. Es kann mehrere geben, aktiv ist immer eine.],
       [Model],
       [Gruppe von Elementen wie Code, Metadaten und Label-Dateien, die eine
        auslieferbare Lösung bildet. Gehört immer zu einem Package.],
@@ -292,6 +297,13 @@ Unterschrift:
       [VSSDK],
       [Ursprüngliches Erweiterungspaket von Visual Studio mit Zugriff auf alle
        internen Dienste.],
+      [X++-Editor],
+      [Code-Fenster von Visual Studio, in dem die Developer Tools den Code eines
+       Elements anzeigen, etwa nach View code auf einer Klasse, Table oder Form.
+       Es arbeitet auf einer `.xpp`-Datei im Ordner XppSource und bringt die
+       Einfärbung und den Tooltip der Developer Tools mit. Nicht dazu gehören der
+       Designer mit den Knoten eines Elements und die `.xpp`-Textdateien, die auf
+       dem privaten Gerät den X++-Editor im Debug-Build ersetzen.],
     ),
     caption: [Glossar (eigene Darstellung)]
   ) <glossar>

@@ -155,8 +155,8 @@ entstehen nur in der neuen Form.
 
       [FA11\ Einstellungen],
       [- Einstellbar sind zu ladende Sprachen, anzulegende Sprachen,
-         Quellsprache, Package-Verzeichnisse, Übersetzungsdienst mit API-Schlüssel
-         und die Inline-Anzeige.
+         Quellsprache, Metadaten-Konfiguration, weitere Package-Verzeichnisse,
+         Übersetzungsdienst mit API-Schlüssel und die Inline-Anzeige.
        - Geänderte Sprachen wirken nach dem nächsten Laden, ohne Neustart von
          Visual Studio.
        - Die Einstellungen bleiben über einen Neustart erhalten.],
@@ -223,40 +223,40 @@ entstehen nur in der neuen Form.
        - Alle Testfälle bestehen unter Visual Studio 2026.
        - Unter Visual Studio 2022 hält das Testprotokoll das Ergebnis jedes
          Testfalls fest.],
-      [Testfälle in D4],
+      [TC32 in D4],
 
       [NFA02\ Performance],
       [- Eine Suche über alle geladenen Labels dauert höchstens 500 ms, gemessen
          auf der Testumgebung mit den dort vorhandenen Label-Dateien.
        - Das Laden läuft im Hintergrund. Visual Studio meldet währenddessen keine
          blockierte Oberfläche.],
-      [Messung in D4],
+      [TC31 in D4],
 
       [NFA03\ Erweiterbarkeit],
       [- Die Kernlogik hat keine Abhängigkeit zu Visual Studio, siehe
          @architektur.
        - Ein weiterer Übersetzungsdienst lässt sich ergänzen, ohne bestehende
          Komponenten zu ändern.],
-      [Review],
+      [TC33],
 
       [NFA04\ Stabilität],
       [- Jeder Einstiegspunkt fängt Fehler ab und meldet sie im Output Window.
        - Eine beschädigte Label-Datei, ein fehlendes Package-Verzeichnis, ein
          nicht erreichbarer Übersetzungsdienst und eine gesperrte Datei führen zu
          einer Meldung. Visual Studio läuft weiter.],
-      [Testfälle],
+      [TC10, TC19,\ TC21, TC26],
 
       [NFA05\ Wartbarkeit],
       [- Öffentliche Klassen und Methoden sind dokumentiert.
        - Der Build läuft ohne Warnungen.],
-      [Review, Build],
+      [TC34],
 
       [NFA06\ Sicherheit],
       [- Der API-Schlüssel liegt verschlüsselt über die Data Protection API im
          Benutzerprofil.
        - Er erscheint weder im Klartext auf der Festplatte noch im Output Window
          noch im Repository.],
-      [Review, Testfall],
+      [TC20],
     ),
     caption: [Nicht-funktionale Anforderungen mit Akzeptanzkriterien (eigene
               Darstellung)]
@@ -278,18 +278,18 @@ entstehen nur in der neuen Form.
       [OA01\ Bereitstellung],
       [- Ein einziges VSIX-Paket, das sich per Doppelklick ohne weitere Schritte
          installieren lässt.],
-      [Testfall in D4],
+      [TC12, in D4\ wiederholt],
 
       [OA02\ Dokumentation],
       [- Das Repository beschreibt Aufbau, Build und Erweiterungspunkte so, dass
          eine andere Person die Weiterentwicklung übernehmen kann.],
-      [Review],
+      [TC35],
 
       [OA03\ Quellcodeablage],
       [- Das Repository enthält weder Code der Standardanwendung noch Code des
          bestehenden Tools.
        - Testdaten sind synthetisch.],
-      [Prüfung vor jedem Commit],
+      [TC35, Prüfung\ vor jedem Commit],
 
       [OA04\ Ablösung des bestehenden Tools],
       [- Alle Anforderungen zu Z1 sind erfüllt, bevor BE-terna über den Umstieg
@@ -465,7 +465,7 @@ externes System einbeziehen. Für die übrigen legen die Akzeptanzkriterien in
        bearbeitet es (UC03). Die Suche selbst ändert keine Datei.],
       [*Verknüpfungen*], [--],
       [*Anforderungen*], [FA01, FA07, FA12, NFA02],
-      [*Testfälle*], [#todo[Testfälle aus dem Testkonzept eintragen.]],
+      [*Testfälle*], [TC04, TC13, TC24],
       [*Stufe*], [1, aus dem Editor 2],
     ),
     caption: [Use Case UC01 Label suchen (eigene Darstellung)]
@@ -516,7 +516,7 @@ externes System einbeziehen. Für die übrigen legen die Akzeptanzkriterien in
        Label Store. Dynamics 365 kompiliert die Datei ohne Fehler.],
       [*Verknüpfungen*], [Wird von UC08 eingebunden.],
       [*Anforderungen*], [FA02, FA10, FA16, NFA04, NFA06],
-      [*Testfälle*], [#todo[Testfälle aus dem Testkonzept eintragen.]],
+      [*Testfälle*], [TC03, TC11, TC15, TC29, TC30],
       [*Stufe*], [1, die Übersetzung 3],
     ),
     caption: [Use Case UC02 Label anlegen (eigene Darstellung)]
@@ -561,7 +561,7 @@ externes System einbeziehen. Für die übrigen legen die Akzeptanzkriterien in
       [*Nachbedingungen*], [Keine Datei wird geändert.],
       [*Verknüpfungen*], [--],
       [*Anforderungen*], [FA05, FA06, NFA04],
-      [*Testfälle*], [#todo[Testfälle aus dem Testkonzept eintragen.]],
+      [*Testfälle*], [TC02, TC22, TC23],
       [*Stufe*], [2],
     ),
     caption: [Use Case UC07 Übersetzungen im Code ansehen (eigene Darstellung)]
@@ -603,7 +603,10 @@ externes System einbeziehen. Für die übrigen legen die Akzeptanzkriterien in
                Extraktion auf. Die Extension bietet dessen Label-Eigenschaften mit
                hardcodiertem Text an, etwa Label und Help Text. Nach der Wahl geht
                es mit Schritt 3 weiter. In Schritt 5 schreibt die Extension die
-               Label-ID in die XML-Datei des Elements, siehe @festlegungen.],
+               Label-ID in die XML-Datei des Elements, siehe @festlegungen. Der
+               Designer meldet die Änderung, und der Entwickler lädt das Element
+               neu. Hat das Element ungespeicherte Änderungen, bietet die
+               Extension vorher an, es zu speichern.],
         [2a], [An der Markierung liegt kein String Literal. Ein Hinweis erscheint,
                nichts wird geändert.],
         [3a], [Das Model hat keine Label-Datei. Der Entwickler wählt die
@@ -616,7 +619,7 @@ externes System einbeziehen. Für die übrigen legen die Akzeptanzkriterien in
       [Das Label existiert, und die Fundstelle enthält seine ID.],
       [*Verknüpfungen*], [Bindet UC02 ein.],
       [*Anforderungen*], [FA09, FA02, FA10],
-      [*Testfälle*], [#todo[Testfälle aus dem Testkonzept eintragen.]],
+      [*Testfälle*], [TC27, TC28],
       [*Stufe*], [3],
     ),
     caption: [Use Case UC08 Hardcodierten Text extrahieren (eigene Darstellung)]
@@ -625,7 +628,7 @@ externes System einbeziehen. Für die übrigen legen die Akzeptanzkriterien in
 
 == Systemarchitektur <architektur>
 
-Die Lösung besteht aus drei Projekten. Die Kernlogik enthält alles, was ohne
+Die Extension heisst BE-LabelExtension. Die Lösung besteht aus drei Projekten. Die Kernlogik enthält alles, was ohne
 Visual Studio auskommt, und zielt auf .NET Standard 2.0. Die Extension zielt auf
 .NET Framework 4.8, weil sie im Prozess von Visual Studio läuft, und bindet die
 Kernlogik als Assembly ein. Mit .NET Framework 4.8 lief auch die Laufzeitprobe auf
@@ -704,7 +707,8 @@ der Extension und der Kernlogik.
        Label-Eigenschaften.],
       [FA09],
       [Einstellungen],
-      [Sprachen, Package-Verzeichnisse, Übersetzungsdienst und API-Schlüssel.],
+      [Sprachen, Metadaten-Konfiguration, weitere Package-Verzeichnisse,
+       Übersetzungsdienst und API-Schlüssel.],
       [FA11, NFA06],
       [Meldungen],
       [Ausgabe im Output Window.],
@@ -727,11 +731,24 @@ der Extension und der Kernlogik.
         [*Thema*], [*Festlegung*], [*Stand*],
       ),
       [Package-Verzeichnis],
-      [Konfigurierbar, mehrere Verzeichnisse möglich. Vorbelegt mit dem
-       Verzeichnis der Unified Developer Experience im Benutzerprofil, bei
-       mehreren Versionen mit der neuesten. Das bestehende Tool kennt nur die
-       fest eingestellten Pfade der klassischen Entwicklungs-VM.],
-      [Auf der Testumgebung liegen drei Versionen. Zu prüfen, siehe unten.],
+      [Konfigurierbar, mehrere Verzeichnisse möglich. In der Unified Developer
+       Experience gilt genau eine aktive Metadaten-Konfiguration der Developer
+       Tools. Sie nennt einen Ordner für die eigenen Models und Ordner für
+       Referenz-Metadaten, darunter das entpackte `PackagesLocalDirectory` mit den
+       Models von Microsoft @ms-ude-tools. Die Konfigurationen liegen als je eine
+       JSON-Datei im Ordner `XPPConfig` unter
+       `%LOCALAPPDATA%\Microsoft\Dynamics365` @bucher-ude. Der Ordner für eigene
+       Models steht dort unter `ModelStoreFolder`, die Referenz-Metadaten unter
+       `FrameworkDirectory` und `ReferencePackagesPaths`. Welche Konfiguration
+       aktiv ist, lässt sich an diesen Dateien nicht ablesen. Der Entwickler wählt
+       sie deshalb in den Einstellungen, bei nur einer ist sie vorgewählt. Die
+       Extension liest die Datei bei jedem Laden neu, weil sich Namen und Pfade
+       mit Updates ändern. Weitere Verzeichnisse lassen sich von Hand ergänzen,
+       etwa die fest eingestellten Pfade der klassischen Entwicklungs-VM, die das
+       bestehende Tool als einzige kennt.],
+      [Einträge und Ablage auf der Testumgebung geprüft. Beim Wechsel der aktiven
+       Konfiguration änderte sich keine Datei. Die aktive Konfiguration
+       automatisch zu erkennen bleibt vorgemerkt.],
 
       [Kompilierte Labels],
       [Labels ohne Label-Datei liest das bestehende Tool aus kompilierten
@@ -739,7 +756,8 @@ der Extension und der Kernlogik.
        die Datei bis zum Schliessen geladen @ms-assembly-unload, und ein erneutes
        Laden lieferte die alte Fassung @ms-assembly-loadfrom. Die Kernlogik liest
        die Ressourcen deshalb direkt aus der Datei, ohne die Assembly zu laden.],
-      [Zu prüfen in 3.2.],
+      [Es gibt Models, die nur kompilierte Ressourcen haben. Zu prüfen in
+       AP3.2.],
 
       [Laden],
       [Im Hintergrund, sobald das Tool Window oder die erste X++-Datei geöffnet
@@ -748,7 +766,7 @@ der Extension und der Kernlogik.
       [NFA02],
 
       [Schreiben],
-      [Im selben Format wie das bestehende Tool, also UTF-8 mit BOM und leere
+      [Im selben Format wie das bestehende Tool, also UTF-8 und leere
        Texte als ein Leerzeichen. Geschrieben wird in eine temporäre Datei, die
        danach die alte ersetzt.],
       [Format aus dem bestehenden Tool übernommen.],
@@ -786,7 +804,7 @@ der Extension und der Kernlogik.
       [Remote UI des neuen Modells. Fehlt dort ein benötigtes Control, folgt
        ein klassisches Tool Window mit WPF, das im selben Prozess ebenfalls möglich
        ist.],
-      [Im Spike nicht geprüft. Zu prüfen in 3.1.],
+      [Im Spike nicht geprüft. Zu prüfen in AP3.1.],
 
       [Tooltip],
       [Eigene QuickInfo-Quelle über MEF. Ihr Eintrag erscheint im selben Tooltip
@@ -805,18 +823,49 @@ der Extension und der Kernlogik.
 
       [Extraktion im Properties Window],
       [Lesen über das Selection Tracking. Geschrieben wird direkt in die
-       XML-Datei des Elements, wie in @machbarkeitsbeurteilung festgelegt. Offen ist,
-       wie sich ein geöffneter Designer verhält, wenn sich die Datei darunter
-       ändert.],
-      [Lesen belegt. Schreiben zu prüfen, siehe unten.],
+       XML-Datei des Elements, wie in @machbarkeitsbeurteilung festgelegt. Ein
+       geöffneter Designer meldet die Änderung danach und bietet an, das Element
+       neu zu laden. Das Element muss vorher gespeichert sein, siehe die nächste
+       Zeile.],
+      [Lesen belegt. Verhalten des Designers auf der Testumgebung
+       beobachtet.],
+
+      [Schreiben in Elemente],
+      [Die Extraktion im Designer, das Umstellen der Referenzen beim Kopieren und
+       Verschieben und das Ersetzen schreiben in die XML-Dateien von Elementen.
+       Hat ein betroffenes Element in Visual Studio ungespeicherte Änderungen,
+       schreibt die Extension nicht in dieses Element, nennt es im Output Window
+       und bietet an, zuerst zu speichern. Fallback ist, vor jedem Schreiben
+       anzubieten, alle Dokumente über den Command `File.SaveAll` zu speichern
+       @ms-vs-shortcuts. In `.xpp`-Dateien schreibt die Extension nie, siehe die
+       nächste Zeile.],
+      [Auf der Testumgebung beobachtet, dass ein Element vor dem Ändern der
+       XML-Datei gespeichert sein muss. Ob die Extension ungespeicherte
+       Änderungen erkennt und wie ein geöffneter X++-Editor auf eine geänderte
+       XML-Datei reagiert, prüft D2.],
 
       [Sprung an die Fundstelle],
       [Die Verwendungssuche findet die Label-ID in der XML-Datei des Elements.
-       Der X++-Editor arbeitet dagegen auf einer `.xpp`-Datei im Ordner
-       XppSource, siehe @befundprotokoll. Angestrebt ist der Sprung in den
-       X++-Editor an die entsprechende Stelle. Fallback ist das Öffnen der
-       XML-Datei an der Zeile.],
-      [Zu prüfen, siehe unten.],
+       Der X++-Editor zeigt dagegen eine `.xpp`-Datei im Ordner XppSource, siehe
+       @befundprotokoll. Die Developer Tools erzeugen sie erst beim Öffnen des
+       Elements, eine Datei je Element, für Klassen wie für Tables. Ihre Zeilen
+       entsprechen dem Editor, die Methoden folgen, soweit geprüft, der
+       Reihenfolge im XML. XML und `.xpp` ändern sich erst beim Speichern. Eine
+       Änderung direkt an der `.xpp`-Datei zeigt der Editor zwar an, beim
+       nächsten Öffnen des Elements ist sie aber verworfen. Die Verwendungssuche
+       sieht deshalb nur gespeicherte Stände.
+
+       Ein Klick auf das Symbol einer Fundstelle öffnet das Element dort, wo die
+       Label-ID steht. Steht sie im Code, öffnet die Extension das Element im
+       X++-Editor und setzt den Cursor auf dasselbe Vorkommen der Label-ID, also
+       auf das dritte, wenn die Fundstelle das dritte Vorkommen im Code des XML
+       ist. Steht sie in einer Eigenschaft, öffnet die Extension das Element im
+       Designer, wählt den Knoten mit der Eigenschaft, etwa ein Feld einer Table,
+       und markiert die Eigenschaft im Properties Window. Gelingt das nicht, ist
+       das Element trotzdem geöffnet, nur ohne Sprung an die Fundstelle.],
+      [Ablage und Speichern auf der Testumgebung geprüft. Wie die Extension ein
+       Element öffnet und darin einen Knoten und eine Eigenschaft wählt, ist
+       nicht untersucht und wird in D2 geprüft.],
 
       [API-Schlüssel],
       [Verschlüsselt über die Data Protection API von Windows im Benutzerprofil,
@@ -831,21 +880,6 @@ der Extension und der Kernlogik.
     caption: [Technische Festlegungen (eigene Darstellung)]
   ) <festlegungen>
 ]
-
-#todo[Auf der Testumgebung prüfen, wie sich ein geöffneter Designer verhält,
-wenn sich die XML-Datei des Elements darunter ändert. Dazu ein EDT im Designer
-öffnen, sein Label in der XML-Datei mit einem Texteditor ändern und festhalten, was
-Visual Studio macht. Das Ergebnis entscheidet, ob die Extraktion aus dem Properties
-Window direkt in die Datei schreiben kann.]
-
-#todo[Auf der Testumgebung prüfen, welche der drei Versionen des
-Package-Verzeichnisses die Developer Tools verwenden und woran die Extension das
-erkennen kann. Davon hängt die Vorbelegung der Einstellung ab.]
-
-#todo[Auf der Testumgebung prüfen, ob unter XppSource für jedes Element eine
-`.xpp`-Datei liegt oder nur für geöffnete, und ob sich eine Fundstelle in der
-XML-Datei auf eine Zeile im X++-Editor übertragen lässt. Davon hängt ab, wohin
-ein Klick in der Verwendungssuche führt.]
 
 == Modellierung der Klassen
 
@@ -905,10 +939,12 @@ Methoden.
       [--],
 
       [`ModelInfo`\ `ModelDiscovery`],
-      [Findet die Models über die Descriptor-Dateien der Package-Verzeichnisse
-       und erkennt schreibgeschützte Models. Ordnet einer Datei ihr Model zu, für
-       den Vorschlag der Label-Datei bei der Extraktion.],
-      [`FindModels`\ `FindModelFor`],
+      [Liest die Ordner der gewählten Metadaten-Konfiguration aus `XPPConfig`.
+       Findet die Models über die Descriptor-Dateien dieser und der weiteren
+       Package-Verzeichnisse und erkennt schreibgeschützte Models. Ordnet einer
+       Datei ihr Model zu, für den Vorschlag der Label-Datei bei der
+       Extraktion.],
+      [`ReadConfiguration`\ `FindModels`\ `FindModelFor`],
 
       [`ILabelSource`],
       [Liefert die Label-Dateien eines Models. `LabelFileSource` liest die
@@ -1087,14 +1123,124 @@ geschrieben wird in die XML-Datei des Elements statt in den Text Buffer.
             (eigene Darstellung)]
 ) <sequenz_extraktion>
 
-== Testkonzept
+== GUI-Design <gui_design>
+
+Die Oberfläche übernimmt Aufbau und Begriffe des bestehenden Tools, damit sich
+Entwickler, die es kennen, ohne Einarbeitung zurechtfinden. Beschriftet ist sie wie
+das bestehende Tool auf Englisch.
+
+=== Tool Window
+
+Das Tool Window soll auch schmal am Rand angedockt benutzbar sein. Suche,
+Trefferliste, Detailansicht und Verwendungen stehen deshalb untereinander und nicht
+nebeneinander wie in @ist_screenshot. Die Trefferliste hat eine Spalte je geladene Sprache.
+
+#figure(
+  image("../diagrams/GUI_ToolWindow.png", width: 12cm),
+  caption: [Wireframe des Tool Window mit Demo-Daten (eigene Darstellung)]
+) <gui_toolwindow>
+
+#[
+  #show figure: set align(left)
+  #set text(size: 10pt)
+  #figure(
+    table(
+      align: left,
+      columns: (1fr, 1.4fr),
+      table.header(
+        [*Bestehendes Tool*], [*Extension*],
+      ),
+      [Apply, Save und Save and apply im Ribbon],
+      [Insert, Save und Save and insert in der Toolbar. Insert fügt die Label-ID
+       an der Cursorposition ein, statt sie in die Zwischenablage zu kopieren
+       (FA14).],
+      [Ein Knopf je beschreibbares Model, siehe @ist_erstellen],
+      [Auswahl der Label-Datei und ein Knopf New. Eine Reihe von Knöpfen passt nicht
+       in ein schmales Tool Window.],
+      [Verwendungssuche in einer eigenen Ansicht, siehe @ist_verwendungssuche],
+      [Bereich References unter der Detailansicht. Ein Klick auf das Symbol einer
+       Fundstelle öffnet das Element an dieser Stelle (FA04).],
+      [Console],
+      [Eigener Bereich BE-LabelExtension im Output Window (FA17).],
+      [Settings],
+      [Seite in den Optionen von Visual Studio, siehe @gui_einstellungen. Der Knopf
+       Settings öffnet sie.],
+      [Tracing (Preview)],
+      [Entfällt, siehe @abgrenzung.],
+    ),
+    caption: [Bedienelemente des bestehenden Tools in der Extension (eigene
+              Darstellung)]
+  ) <gui_zuordnung>
+]
+
+Ein neues Label erscheint in der Detailansicht ohne ID, bis der Entwickler
+bestätigt. Vorschläge des Übersetzungsdienstes sind markiert, bis er sie ändert oder
+bestätigt (FA10). Nicht gespeicherte Labels sind in der Trefferliste markiert.
+
+=== Editor und Designer
+
+Im X++-Editor erscheinen die Übersetzungen im Tooltip und oberhalb der Zeile wie in
+@demo_quickinfo und @demo_inline. Eine fehlende Übersetzung ist als `missing`
+markiert. Das Kontextmenü des Editors erhält drei Commands, Search label (FA07),
+Open in label window (FA08) und Extract to label (FA09). Im Designer wirkt der Knopf
+Extract im Tool Window auf das gewählte Element. Ob sich der Command auch ins
+Kontextmenü des Designers einhängen lässt, ist nicht untersucht.
+
+=== Einstellungen
+
+In den Optionen von Visual Studio erhält die Extension eine eigene Seite
+BE-LabelExtension mit den Einstellungen aus FA11. Der API-Schlüssel erscheint dort
+verdeckt und wird nach NFA06 verschlüsselt abgelegt.
+
+#figure(
+  image("../diagrams/GUI_Einstellungen.png", width: 12cm),
+  caption: [Wireframe der Einstellungen (eigene Darstellung)]
+) <gui_einstellungen>
+
+=== Shortcuts
+
+Die Shortcuts des bestehenden Tools lassen sich nicht übernehmen, weil Visual Studio
+alle vier bereits belegt. Strg+S und Strg+Shift+S speichern Dateien, Strg+Shift+A
+fügt einem Projekt ein Element hinzu, und Strg+N legt eine neue Datei an
+@ms-vs-shortcuts. Die Extension erhält deshalb neue Shortcuts, die in AP3.5 gewählt
+werden. Jeder Entwickler kann sie in den Optionen von Visual Studio umbelegen, die
+dort auch anzeigen, ob ein Shortcut schon vergeben ist @ms-vs-customize-shortcuts.
+
+== Testkonzept <testkonzept>
 
 === Vorgehen
+
+Getestet wird auf drei Stufen.
+
+- Unit Tests prüfen die Kernlogik ohne Visual Studio und ohne Dynamics 365. Sie
+  laufen bei jedem Build unter .NET 8 und unter .NET Framework 4.8.
+- Systemtests prüfen die Extension in Visual Studio. Sie laufen zuerst auf dem
+  privaten Gerät mit dem Debug-Build, die Testfälle zum X++-Editor dort über den
+  Ersatz aus @festlegungen. Auf der Testumgebung laufen sie in den Durchgängen aus
+  @durchgaenge, in D4 vollständig.
+- Reviews prüfen, was sich nicht ausführen lässt, etwa die Abhängigkeiten der
+  Kernlogik.
+
+Die Unit Tests arbeiten mit synthetischen Testdaten, die in AP3.2 entstehen und
+keine Daten des Arbeitgebers enthalten (OA03). Sie decken beide Label-Formen,
+schreibgeschützte Models, kompilierte Ressourcen und beschädigte Label-Dateien ab.
+Für FA12 werden die Treffer des bestehenden Tools auf denselben Testdaten einmal
+erfasst und als erwartete Ergebnisse abgelegt.
+
+Testfälle, die auf der Testumgebung schreiben, verwenden dort ein bestehendes
+Model.
+
+Ein Testfall ist bestanden, wenn alle erwarteten Ergebnisse eintreten. Fehler, die
+eine Anforderung verletzen, werden bis AP4.1 behoben. Unter Visual Studio 2022 hält
+das Testprotokoll die Ergebnisse nur fest, Fehler dort haben nach NFA01 tiefe
+Priorität. Die Ergebnisse stehen im Testprotokoll, siehe @testprotokoll.
 
 === Testobjekte
 
 #[
   #show figure: set align(left)
+  #show figure: set block(breakable: false)
+  #set text(size: 10pt)
   #figure(
     table(
       align: left,
@@ -1102,9 +1248,13 @@ geschrieben wird in die XML-Datei des Elements statt in den Text Buffer.
       table.header(
         [*ID*], [*Testobjekt*], [*Teststufe*],
       ),
-      [], [], [],
-      [], [], [],
-      [], [], [],
+      [TO1], [Kernlogik], [Unit Tests bei jedem Build],
+      [TO2], [Extension im Debug-Build auf dem privaten Gerät], [Systemtest],
+      [TO3], [VSIX-Paket unter Visual Studio 2026 auf der Testumgebung],
+      [Systemtest in D1 bis D4],
+      [TO4], [VSIX-Paket unter Visual Studio 2022 auf der Testumgebung],
+      [Systemtest in D4],
+      [TO5], [Quellcode und Repository], [Review],
     ),
     caption: [Testobjekte (eigene Darstellung)]
   ) <testobjekte>
@@ -1112,23 +1262,264 @@ geschrieben wird in die XML-Datei des Elements statt in den Text Buffer.
 
 === Testfälle
 
+Die Systemtests auf dem privaten Gerät laufen in D4 auf der Testumgebung ein
+zweites Mal. OA04 folgt erst nach Projektabschluss und hat keinen Testfall.
+
 #[
   #show figure: set align(left)
+  #set text(size: 9pt)
   #figure(
     table(
       align: left,
-      columns: (auto, 1fr, 1fr, auto),
+      columns: (auto, 1fr, 1.2fr, auto),
       table.header(
-        [*ID*],
-        [*Beschreibung*],
-        [*Erwartetes Ergebnis*],
-        [*Referenz*],
+        [*ID*], [*Testfall*], [*Erwartetes Ergebnis*], [*Referenz*],
       ),
-      [], [], [], [],
-      [], [], [], [],
-      [], [], [], [],
-      [], [], [], [],
-      [], [], [], [],
+      table.cell(colspan: 4)[*Unit Tests der Kernlogik, TO1*],
+      [TC01],
+      [Label-Datei mit Kommentaren, leeren Texten und beiden Label-Formen lesen und
+       wieder schreiben.],
+      [Die geschriebene Datei ist Byte für Byte gleich wie die gelesene, in
+       UTF-8.],
+      [FA03],
+
+      [TC02],
+      [Label-IDs beider Formen parsen und in einer Textzeile finden, dazu
+       ungültige Eingaben.],
+      [`@BDM1:L3F2A9C15B8047DE1` und `@SYS12345` werden erkannt und getrennt.
+       Ungültige Eingaben liefern `false` ohne Exception. `FindAll` findet alle IDs
+       einer Zeile mit Position.],
+      [FA01\ FA05],
+
+      [TC03],
+      [10'000 neue Label-IDs erzeugen.],
+      [Jede ID besteht aus `L` und 16 hexadezimalen Ziffern in Grossbuchstaben,
+       keine kommt doppelt vor.],
+      [FA02],
+
+      [TC04],
+      [Jeden der acht Suchmodi mit festen Suchbegriffen auf die Testdaten
+       anwenden.],
+      [Treffer und Reihenfolge entsprechen den erfassten Ergebnissen des
+       bestehenden Tools. Jedes Label erscheint einmal.],
+      [FA01\ FA12],
+
+      [TC05],
+      [Verwendungen einer Label-ID suchen und durch eine andere ersetzen.],
+      [Alle Fundstellen mit Model, Datei, Zeile und Spalte. Die Suche nach
+       `@SYS1234` meldet `@SYS12345` nicht. Ersetzt wird nur in beschreibbaren
+       Models, die Zahl geänderter Dateien stimmt.],
+      [FA04\ FA13],
+
+      [TC06],
+      [Label in eine andere Label-Datei kopieren und verschieben, mit Umstellen der
+       Referenzen.],
+      [Das neue Label hat eine ID in der neuen Form und alle Sprachen der
+       Ziel-Datei. Referenzen in beschreibbaren Models zeigen auf die neue ID.
+       Verschieben löscht das Original.],
+      [FA03],
+
+      [TC07],
+      [Labels aus einem schreibgeschützten Model und aus kompilierten Ressourcen
+       ändern, löschen und kopieren.],
+      [Ändern und Löschen werden abgelehnt, Kopieren gelingt. Schreibgeschützte
+       Label-Dateien stehen beim Anlegen nicht zur Wahl.],
+      [FA02\ FA03],
+
+      [TC08],
+      [Labels aus einer Ressourcen-Assembly der Testdaten lesen.],
+      [Alle Labels sind gelesen. Die Assembly ist danach nicht geladen und die
+       Datei lässt sich ersetzen.],
+      [@festlegungen],
+
+      [TC09],
+      [Ein Label ungespeichert ändern, die Label-Datei von aussen ändern und neu
+       laden, danach selbst speichern.],
+      [Die Änderung von aussen löst eine Meldung aus, das eigene Speichern nicht.
+       Das ungespeicherte Label ist nach dem Neuladen noch da.],
+      [FA15],
+
+      [TC10],
+      [Laden mit einer beschädigten Label-Datei, einem fehlenden
+       Package-Verzeichnis und einer gesperrten Datei.],
+      [Je eine Meldung mit Datei oder Pfad, die übrigen Labels sind geladen. Keine
+       Exception verlässt die Kernlogik.],
+      [NFA04],
+
+      [TC11],
+      [Mit einem simulierten Übersetzungsdienst übersetzen, dazu eine
+       Fehlerantwort.],
+      [Eine Anfrage je Zielsprache, `de-CH` geht als `DE-CH` hinaus. Die
+       Fehlerantwort ergibt einen Fehler mit Grund statt Vorschlägen.],
+      [FA10],
+
+      table.cell(colspan: 4)[*Systemtests auf dem privaten Gerät, TO2*],
+      [TC12],
+      [VSIX-Paket per Doppelklick installieren, Visual Studio starten und das Tool
+       Window öffnen.],
+      [Die Installation braucht keine weiteren Schritte. Das Tool Window öffnet
+       sich, das Laden läuft im Hintergrund.],
+      [OA01\ NFA02],
+
+      [TC13],
+      [Im Tool Window in jedem Suchmodus suchen und einen Treffer wählen.],
+      [Jedes Label erscheint einmal. Die Detailansicht zeigt alle geladenen
+       Sprachen.],
+      [FA01\ FA12],
+
+      [TC14],
+      [Text und Kommentar in zwei Sprachen ändern und speichern, danach ein Label
+       löschen.],
+      [Die Label-Dateien enthalten die Änderungen. Das gelöschte Label fehlt in
+       allen Sprachen.],
+      [FA03],
+
+      [TC15],
+      [Nach einer Suche ohne Treffer mit dem Shortcut ein neues Label anlegen.],
+      [Alle anzulegenden Sprachen sind mit dem Suchbegriff vorbelegt. Nach dem
+       Bestätigen steht das Label mit einer ID nach @festlegungen in allen
+       Dateien.],
+      [FA02\ FA16],
+
+      [TC16],
+      [Label-ID einfügen mit und ohne aktiven Editor, danach Save and insert.],
+      [Die ID steht an der Cursorposition. Ohne Editor erscheint ein Hinweis. Save
+       and insert speichert vorher.],
+      [FA14],
+
+      [TC17],
+      [Alle Shortcuts auslösen und einen davon in den Optionen umbelegen.],
+      [Jede Funktion reagiert. Die Optionen zeigen keine Doppelbelegung, der neue
+       Shortcut wirkt.],
+      [FA16],
+
+      [TC18],
+      [Sprachen und Metadaten-Konfiguration ändern, neu laden, dann Visual Studio
+       neu starten.],
+      [Die neuen Sprachen wirken nach dem Laden ohne Neustart. Nach dem Neustart
+       sind alle Einstellungen erhalten.],
+      [FA11],
+
+      [TC19],
+      [Einen Fehler auslösen, etwa mit einem ungültigen Package-Verzeichnis.],
+      [Die Meldung steht mit Art und Zeitpunkt im eigenen Bereich des Output
+       Window. Visual Studio läuft weiter.],
+      [FA17\ NFA04],
+
+      [TC20],
+      [API-Schlüssel hinterlegen, dann Einstellungsdateien, Output Window und
+       Repository nach ihm durchsuchen.],
+      [Der Schlüssel erscheint nirgends im Klartext.],
+      [NFA06],
+
+      table.cell(colspan: 4)[*Systemtests auf der Testumgebung, TO3 und TO4*],
+      [TC21],
+      [Extension neben den Developer Tools laden und eine X++-Klasse öffnen, in D1.],
+      [Beide laufen ohne Fehlermeldung. Die Developer Tools arbeiten wie ohne
+       Extension.],
+      [NFA04\ R06],
+
+      [TC22],
+      [Label-IDs beider Formen im X++-Editor überfahren, darunter eine unbekannte
+       und eine mit fehlender Übersetzung, in D2.],
+      [Der Tooltip zeigt alle konfigurierten Sprachen neben dem Eintrag der
+       Developer Tools. Die fehlende Übersetzung ist markiert, die unbekannte ID
+       gemeldet.],
+      [FA05],
+
+      [TC23],
+      [Datei mit mehreren Label-IDs öffnen, die Inline-Anzeige aus- und
+       einschalten, Visual Studio neu starten, in D2.],
+      [Oberhalb jeder Zeile mit einer Label-ID stehen die Übersetzungen. Die
+       Einstellung bleibt nach dem Neustart erhalten.],
+      [FA06],
+
+      [TC24],
+      [Suche aus dem Editor, dann auf einer Label-ID das
+       Label im Tool Window öffnen, in D2.],
+      [Gesucht wird mit dem markierten Text oder dem Inhalt des String Literals.
+       Das Label öffnet sich in der Detailansicht und lässt sich bearbeiten.],
+      [FA07\ FA08],
+
+      [TC25],
+      [Verwendungen eines Labels suchen und eine Fundstelle anklicken, in D2.],
+      [Alle Fundstellen mit Model, Datei, Zeile und Spalte. Ein Klick auf das
+       Symbol einer Fundstelle im Code öffnet das Element im X++-Editor mit dem
+       Cursor auf der Label-ID. Bei einer Fundstelle in einer Eigenschaft öffnet
+       sich das Element im Designer mit gewähltem Knoten und markierter
+       Eigenschaft, mindestens aber das Element.],
+      [FA04],
+
+      [TC26],
+      [Label mit Umstellen der Referenzen verschieben, während ein betroffenes
+       Element mit ungespeicherten Änderungen im Designer offen ist. Danach
+       dasselbe mit einem gespeicherten Element, das im X++-Editor offen ist, in
+       D2.],
+      [Die Extension schreibt nicht in das ungespeicherte Element, nennt es im
+       Output Window und bietet an, zuerst zu speichern. Nach dem Speichern
+       gelingt das Umstellen, und der Designer bietet das Neuladen an. Die
+       umgestellte Referenz geht auch beim nächsten Speichern im X++-Editor
+       nicht verloren.],
+      [FA03\ NFA04],
+
+      [TC27],
+      [String Literal im X++-Editor extrahieren, danach rückgängig machen, in D3.],
+      [Das Literal enthält die neue Label-ID, das Label steht in der Label-Datei.
+       Rückgängig stellt den Text wieder her.],
+      [FA09],
+
+      [TC28],
+      [Im Designer ein Element mit hardcodiertem Label und Help Text wählen und
+       extrahieren, in D3.],
+      [Beide Eigenschaften stehen zur Wahl. Die gewählte enthält danach die
+       Label-ID. Der Designer meldet die Änderung und lädt das Element nach
+       Bestätigung neu.],
+      [FA09],
+
+      [TC29],
+      [Label mit Übersetzungsdienst anlegen, mit gültigem und ohne API-Schlüssel,
+       in D3.],
+      [Vorschläge für alle anzulegenden Sprachen, vor dem Speichern änderbar. Ohne
+       Schlüssel der Ausgangstext in allen Sprachen und eine Meldung.],
+      [FA10],
+
+      [TC30],
+      [Nach Anlegen, Ändern und Verschieben von Labels das verwendete Model
+       kompilieren, in D3.],
+      [Der Build läuft ohne Fehler.],
+      [FA02\ FA03],
+
+      [TC31],
+      [Zehn Suchen über alle Label-Dateien der Testumgebung messen und das Laden
+       beobachten, in D4.],
+      [Jede Suche dauert höchstens 500 ms. Visual Studio meldet während des Ladens
+       keine blockierte Oberfläche.],
+      [NFA02],
+
+      [TC32],
+      [Alle Systemtests unter Visual Studio 2022 wiederholen, in D4.],
+      [Das Testprotokoll hält das Ergebnis jedes Testfalls fest.],
+      [NFA01],
+
+      table.cell(colspan: 4)[*Reviews, TO5*],
+      [TC33],
+      [Referenzen der Kernlogik prüfen und probeweise einen zweiten
+       Übersetzungsdienst ergänzen.],
+      [Keine Referenz auf Visual Studio. Der zweite Dienst braucht keine Änderung
+       an bestehenden Klassen.],
+      [NFA03\ Z8],
+
+      [TC34],
+      [Build der Solution und Dokumentation der öffentlichen Klassen prüfen.],
+      [Keine Warnungen. Alle öffentlichen Klassen und Methoden sind dokumentiert.],
+      [NFA05],
+
+      [TC35],
+      [Repository prüfen.],
+      [Aufbau, Build und Erweiterungspunkte sind beschrieben. Kein Code der
+       Standardanwendung oder des bestehenden Tools, die Testdaten sind
+       synthetisch.],
+      [OA02\ OA03],
     ),
     caption: [Testfälle (eigene Darstellung)]
   ) <testfaelle>
@@ -1136,18 +1527,41 @@ geschrieben wird in die XML-Datei des Elements statt in den Text Buffer.
 
 == Einführung und Betrieb
 
-// Einführungs-, Migrations- und Betriebskonzept bewusst in einem kurzen
-// Abschnitt. Eine Datenmigration entfällt, weil die Label-Dateien unverändert
-// bleiben. Die produktive Einführung entscheidet BE-terna nach Projektabschluss.
+Eine Datenmigration entfällt. Die Extension liest und schreibt dieselben
+Label-Dateien im selben Format wie das bestehende Tool, siehe @festlegungen. Die
+Einstellungen des bestehenden Tools werden nicht übernommen, weil es nur zwei Listen
+von Sprachen sind.
 
-== GUI-Design
+Eingeführt wird in drei Schritten.
+
++ Das VSIX-Paket wird per Doppelklick installiert (OA01).
++ Beim ersten Start trägt der Entwickler seine Sprachen ein und prüft das
+  vorbelegte Package-Verzeichnis. Für Übersetzungsvorschläge hinterlegt er einen
+  API-Schlüssel.
++ Wo beide Tools dieselben Package-Verzeichnisse verwenden, lassen sie sich
+  nebeneinander betreiben. Ändert eines eine Label-Datei, bietet das andere das
+  Neuladen an, siehe FA15 und @ist_funktionen.
+
+Ob und wann das bestehende Tool abgelöst wird, entscheidet BE-terna nach
+Projektabschluss (OA04). Ich empfehle eine Pilotphase mit einzelnen Entwicklern,
+deren Rückmeldungen vor der Ablösung einfliessen. Das wirkt zugleich R09 entgegen.
+
+Im Betrieb braucht die Extension weder Server noch Datenbank. Eine neue Version
+kommt als neues VSIX-Paket, das die alte ersetzt. Wie das Paket verteilt wird und
+woher die API-Schlüssel im Betrieb stammen, legt BE-terna fest. Für Entwicklung und
+Tests während des Projekts stelle ich einen eigenen Schlüssel. Die
+Weiterentwicklung liegt beim Maintainer, siehe @stakeholderanalyse. Nach einem Uninstall bleiben die Label-Dateien unverändert.
+
+#todo[Mit BE-terna klären, unter welcher Lizenz der Code im öffentlichen Repository
+steht und dass BE-terna die Extension einsetzen und weiterentwickeln darf. Danach
+eine Lizenzdatei ins Repository legen und die Lizenz hier nennen.]
 
 == Realisierungsplan <realisierungsplan>
 
 Die Realisierung folgt den Stufen aus @projektziele. Die Kernlogik kommt vor der
 Oberfläche, weil Tool Window, Tooltip und Extraktion auf denselben Label Store
 zugreifen. Jeder Tag endet mit einem Ergebnis, das sich prüfen lässt. Gegenüber
-@terminplan_soll wandert die Suche aus dem Editor von 3.6 zu 3.7, damit 3.6 ganz
+@terminplan_soll wandert die Suche aus dem Editor von AP3.6 zu AP3.7, damit AP3.6 ganz
 der Anzeige im Editor gehört.
 
 #[
@@ -1158,7 +1572,7 @@ der Anzeige im Editor gehört.
       align: left,
       columns: (auto, 1.5fr, auto, 1.5fr),
       table.header(
-        [*Tag*], [*Inhalt*], [*Anforde-\ rungen*], [*Ergebnis*],
+        [*AP*], [*Inhalt*], [*Anforde-\ rungen*], [*Ergebnis*],
       ),
       table.cell(colspan: 4)[*Grundgerüst*],
       [3.1\ 09.10.],
@@ -1172,15 +1586,16 @@ der Anzeige im Editor gehört.
       table.cell(colspan: 4)[*Stufe 1, Feature Parity*],
       [3.2\ 10.10.],
       [Model-Suche, Label-Dateien lesen und schreiben, kompilierte Labels,
-       Label Store, Dateiüberwachung, eigener Testdatensatz.],
+       Label Store, Dateiüberwachung, synthetische Testdaten.],
       [FA15, NFA02],
       [Unit Tests lesen und schreiben Label-Dateien ohne Verlust von Kommentaren
        und Kodierung. Das Laden läuft im Hintergrund.],
       [3.3\ 15.10.],
-      [Alle Suchmodi mit Ranking.],
+      [Alle Suchmodi mit Ranking. Treffer des bestehenden Tools auf dem
+       Testdaten als erwartete Ergebnisse erfassen.],
       [FA01, FA12, NFA02],
-      [Unit Tests je Suchmodus. Eine Suche über den Testdatensatz dauert wenige
-       hundert Millisekunden.],
+      [TC04 besteht für alle acht Suchmodi. Eine Suche über die Testdaten
+       dauert wenige hundert Millisekunden.],
       [3.4\ 16.10.],
       [Tool Window mit Suchfeld, Trefferliste und Detailansicht, Bearbeiten und
        Speichern.],
@@ -1206,7 +1621,7 @@ der Anzeige im Editor gehört.
        Fundstelle.],
       [FA04, FA07, FA08],
       [Von einer Label-ID im Code führt ein Command ins Tool Window. Ein Klick auf
-       eine Fundstelle öffnet die Datei an der richtigen Zeile.],
+       das Symbol einer Fundstelle öffnet das Element an der Fundstelle.],
 
       table.cell(colspan: 4)[*Stufe 3, erweiterte Features*],
       [3.8\ 21.10.],
@@ -1254,24 +1669,25 @@ dem Grundgerüst, damit sich die grössten Unsicherheiten früh zeigen.
       table.header(
         [*Durchgang*], [*Nach*], [*Prüft*],
       ),
-      [D1], [3.1],
-      [Laden neben den Developer Tools, siehe R06. Verhalten eines geöffneten
-       Designers, wenn sich die XML-Datei des Elements darunter ändert. Ablage
-       des X++-Codes unter XppSource. Beides lässt sich auch ohne Extension von
-       Hand prüfen.],
-      [D2], [3.7],
+      [D1], [AP3.1],
+      [Laden neben den Developer Tools (TC21).],
+      [D2], [AP3.7],
       [Label-Erkennung, Tooltip, Inline-Anzeige, Suche aus dem Editor, Öffnen im
-       Panel, Verwendungssuche.],
-      [D3], [3.8],
-      [Extraktion im Editor und im Properties Window, Übersetzungsdienst.],
-      [D4], [4.2],
-      [Alle Testfälle, zusätzlich unter Visual Studio 2022.],
+       Panel, Verwendungssuche mit Öffnen im X++-Editor, Schreiben in geöffnete
+       Elemente (TC22 bis TC26).],
+      [D3], [AP3.8],
+      [Extraktion im Editor und im Properties Window, Übersetzungsdienst,
+       Kompilieren nach Änderungen (TC27 bis TC30).],
+      [D4], [AP4.2],
+      [Alle Systemtests aus @testfaelle, zusätzlich unter Visual Studio 2022
+       (TC32).],
     ),
     caption: [Durchgänge auf der Testumgebung (eigene Darstellung)]
   ) <durchgaenge>
 ]
 
-Reicht die Zeit an einem Tag nicht, wandert der Rest in AP4.1. Scheitert das
-Schreiben aus dem Properties Window in D1, bleibt bis zum 21.10. Zeit, den
-Fallback über die Eigenschaft des gewählten Elements vorzubereiten. Die
-Property Descriptors melden sie als beschreibbar, erprobt ist das nicht.
+Reicht die Zeit an einem Tag nicht, wandert der Rest in AP4.1. Das Schreiben aus
+dem Properties Window setzt nach der Prüfung auf der Testumgebung nur voraus, dass
+das Element gespeichert ist. Der Fallback über die Eigenschaft des gewählten
+Elements bleibt vorgemerkt. Die Property Descriptors melden sie als beschreibbar,
+erprobt ist das nicht.

@@ -20,11 +20,13 @@ participant "ModelDiscovery" as MD
 participant "ILabelSource" as SRC
 participant "LabelFileWatcher" as W
 participant "Meldungen\n(Output Window)" as OUT
-database "Package-\nVerzeichnis" as PKG
+database "Dateisystem\n(XPPConfig und\nPackage-Verzeichnisse)" as PKG
 
 UI ->> STORE : LoadAsync(settings, token)
 activate STORE
-STORE -> MD : FindModels(PackageDirectories)
+STORE -> MD : ReadConfiguration(MetadataConfiguration)
+MD -> PKG : JSON-Datei in XPPConfig lesen
+STORE -> MD : FindModels(Ordner der Konfiguration\nund PackageDirectories)
 MD -> PKG : Descriptor-Dateien lesen
 MD --> STORE : Models
 loop je Model und Quelle

@@ -1,0 +1,19 @@
+@startsalt
+' Wireframe der Einstellungsseite in den Optionen von Visual Studio.
+' Rendern: plantuml -tpng -charset UTF-8 GUI_Einstellungen.puml
+scale 2
+{+
+  { **BE-LabelExtension** }
+  ==
+  {
+    Metadata configuration | ^<name of the configuration>^
+    Additional package directories | { "                              " | [Add] | [Remove] }
+    Languages to load | "de, en-us                     "
+    Languages to create | "de, en-us                     "
+    Source language | ^de^
+    Translation service | ^DeepL^
+    API key | "••••••••••••                  "
+    Inline display | [X] enabled
+  }
+}
+@endsalt

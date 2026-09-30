@@ -23,6 +23,7 @@ package "Laden und Speichern" {
     Find(id) : Label
   }
   class ModelDiscovery {
+    ReadConfiguration(name)
     FindModels(directories)
     FindModelFor(filePath) : ModelInfo
   }

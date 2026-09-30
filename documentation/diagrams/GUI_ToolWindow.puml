@@ -1,0 +1,36 @@
+@startsalt
+' Wireframe des Tool Window, angedockt und deshalb untereinander aufgebaut.
+' Beschriftung englisch wie im bestehenden Tool und in Visual Studio.
+' Daten aus dem synthetischen Demo-Datensatz, @DMO1001 ist ein erfundenes
+' Beispiel der alten Form in einem schreibgeschützten Model.
+' Rendern: plantuml -tpng -charset UTF-8 GUI_ToolWindow.puml
+scale 2
+{+
+  { [Save] | [Save and insert] | [Insert] | . | ^BDM1^ | [New] | [Extract] | [Settings] }
+  ==
+  { ^Exact match, ignore case^ | "Lieferadresse                 " }
+  {#
+    . | **Label ID** | **Text de** | **Text en-us**
+    . | @BDM1:BDM110000003 | Lieferadresse | Delivery address
+    <&lock-locked> | @DMO1001 | Lieferadresse | Delivery address
+    . | @BDM2:L3F2A9C15B8047DE1 | Lieferadresse Kunde | <i>missing
+  }
+  ==
+  { **@BDM1:BDM110000003** | . | Label file BDM1, model BEDemo1 }
+  { [Find references] | [Delete] | [Copy to] | [Move to] | [Replace] }
+  {#
+    **Language** | **Text** | **Comment**
+    de | "Lieferadresse          " | "                    "
+    en-us | "Delivery address       " | "                    "
+  }
+  ==
+  { **References** | . | 2 found }
+  {#
+    **Go to** | **Model** | **File** | **Line** | **Column**
+    <&share-boxed> | BEDemo1 | AxTable\BDMDelivery.xml | 12 | 18
+    <&share-boxed> | BEDemo1 | AxForm\BDMDeliveryForm.xml | 40 | 25
+  }
+  --
+  { 3 labels found in 42 ms }
+}
+@endsalt

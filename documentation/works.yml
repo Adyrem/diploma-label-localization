@@ -183,3 +183,43 @@ ms-using:
   url:
     value: https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/using
     date: 2026-09-26
+
+ms-vs-shortcuts:
+  type: Web
+  title: Keyboard shortcuts, Visual Studio (Windows)
+  author: Microsoft
+  publisher: Microsoft Learn
+  date: 2026-06-26
+  url:
+    value: https://learn.microsoft.com/en-us/visualstudio/ide/default-keyboard-shortcuts-in-visual-studio
+    date: 2026-09-26
+
+ms-vs-customize-shortcuts:
+  type: Web
+  title: Identify and customize keyboard shortcuts, Visual Studio (Windows)
+  author: Microsoft
+  publisher: Microsoft Learn
+  date: 2026-05-07
+  url:
+    value: https://learn.microsoft.com/en-us/visualstudio/ide/identifying-and-customizing-keyboard-shortcuts-in-visual-studio
+    date: 2026-09-26
+
+ms-ude-tools:
+  type: Web
+  title: Install and configure development tools
+  author: Microsoft
+  publisher: Microsoft Learn
+  date: 2026-02-02
+  url:
+    value: https://learn.microsoft.com/en-us/power-platform/developer/unified-experience/finance-operations-install-config-tools
+    date: 2026-09-28
+
+bucher-ude:
+  type: Web
+  title: Shortcomings of the Unified Development Environment in Dynamics 365
+  author: Bucher, Raphael
+  publisher: X++ Blog
+  date: 2024-09-11
+  url:
+    value: https://raphaelbucher.ch/power%20platform/dynamics%20365/x++/2024/09/11/unified-developer-environment-shortcomings.html
+    date: 2026-09-28

@@ -70,6 +70,7 @@ package "Übersetzung" {
 
 package "Querschnitt" {
   class LabelSettings {
+    MetadataConfiguration : string
     PackageDirectories : IList<string>
     LoadLanguages : IList<string>
     CreateLanguages : IList<string>
