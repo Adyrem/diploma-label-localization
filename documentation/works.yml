@@ -233,3 +233,21 @@ ms-vc-navigation:
   url:
     value: https://learn.microsoft.com/en-us/dynamics365/fin-ops-core/dev-itpro/dev-tools/version-control-metadata-navigation
     date: 2026-09-30
+
+deepl-auth:
+  type: Web
+  title: Access and authentication
+  author: DeepL SE
+  publisher: DeepL Developer Documentation
+  url:
+    value: https://developers.deepl.com/docs/getting-started/auth
+    date: 2026-10-01
+
+osi-mit:
+  type: Web
+  title: The MIT License
+  author: Open Source Initiative
+  publisher: Open Source Initiative
+  url:
+    value: https://opensource.org/license/mit
+    date: 2026-10-01

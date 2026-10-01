@@ -59,7 +59,7 @@ Der Soll-Aufwand beträgt pro Arbeitstag acht Stunden.
       table.cell(colspan: 7)[*AP2 Konzept*],
       [2.1], [01.10.], [Kontextdiagramm, Geschäftsprozessanalyse, Detailanforderungen], [8], [6], [Kontextdiagramm, zwei Sollabläufe, Detailanforderungen mit Akzeptanzkriterien, zehn Kann-Anforderungen. Dazu Systemarchitektur mit technischen Festlegungen und Realisierungsplan. Auf den 25.09. vorgezogen], [Erledigt],
       [2.2], [02.10.], [Use Cases, Sequenzdiagramme, Klassenmodell, Systemarchitektur], [8], [6], [Use-Case-Diagramm mit vier ausführlichen Beschreibungen, Klassenmodell der Kernlogik mit Design Patterns, Sequenzdiagramme für Laden, Tooltip und Extraktion. Systemarchitektur bereits in AP2.1. Auf den 26.09. vorgezogen], [Erledigt],
-      [2.3], [08.10.], [Testkonzept, GUI-Design, Review Konzept], [8], [], [], [],
+      [2.3], [08.10.], [Testkonzept, GUI-Design, Review Konzept], [8], [8], [GUI-Design mit zwei Wireframes, Testkonzept mit 40 Testfällen, Einführung und Betrieb, fachliche Regeln aus dem bestehenden Tool. Prüfungen auf der Testumgebung und ein Review eingearbeitet, klassische Entwicklungs-VM ergänzt. Zwischen dem 26.09. und dem 01.10. vorgezogen], [Erledigt],
       table.cell(colspan: 7)[*AP3 Realisierung*],
       [3.1], [09.10.], [Grundgerüst, Build- und Test-Toolchain, Ausgabe im Output Window], [8], [], [], [],
       [3.2], [10.10.], [Parser, Laden der Label-Dateien, Dateiüberwachung (Stufe 1)], [8], [], [], [],

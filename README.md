@@ -2,11 +2,11 @@
 
 Diplomarbeit von Adrian Aeschlimann an der TEKO Schweizerische Fachschule, Studiengang Software Engineering HF, Durchführung Herbst 2026.
 
-Der definitive Titel steht noch nicht fest.
+Der Titel der Arbeit ist *IDE-Erweiterung zentraler Entwicklungsprozesse*.
 
 ## Thema
 
-TODO
+Gebaut wird BE-LabelExtension, eine Extension für Visual Studio, mit der sich Labels für Dynamics 365 direkt in der IDE suchen, anlegen, bearbeiten und übersetzen lassen. Sie löst das eigenständige Tool BE-LabelEditor der BE-terna AG ab, für das bei jedem Lokalisierungsvorgang die IDE verlassen werden muss.
 
 ## Termine
 
@@ -45,4 +45,4 @@ Dieses Repository ist öffentlich. Es enthält die eigene Arbeit und keine Besta
 
 ## Lizenz
 
-TODO
+MIT, siehe [LICENSE](LICENSE).

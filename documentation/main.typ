@@ -146,8 +146,10 @@ Unterschrift:
       [@machbarkeitsbeurteilung, @befundprotokoll],
       [Claude (Anthropic)],
       [Review der Projektinitialisierung gegen Themeneingabe und
-       Richtlinien. Die Befunde wurden geprüft und anschliessend eingearbeitet.],
-      [@initialisierung, Lebenslauf, Verzeichnisse, Anhang],
+       Richtlinien sowie Review des Konzepts gegen die Projektinitialisierung,
+       das Befundprotokoll und die getroffenen Entscheide. Die Befunde wurden
+       geprüft und anschliessend eingearbeitet.],
+      [@initialisierung, @konzept, Lebenslauf, Verzeichnisse, Anhang],
       [Typst],
       [Formatierung und Erzeugung des Dokuments.],
       [Gesamtes Dokument],
@@ -180,8 +182,11 @@ Unterschrift:
       [FA], [Funktionale Anforderung],
       [GUI], [Graphical User Interface],
       [HF], [Höhere Fachschule],
+      [ID], [Identifier, Bezeichner],
       [IDE], [Integrated Development Environment],
+      [JSON], [JavaScript Object Notation],
       [KA], [Kann-Anforderung],
+      [KI], [Künstliche Intelligenz],
       [MEF], [Managed Extensibility Framework],
       [NFA], [Nicht-funktionale Anforderung],
       [OA], [Organisatorische Anforderung],
@@ -230,6 +235,10 @@ Unterschrift:
       [Cross-Reference-Datenbank],
       [Datenbank von Dynamics 365, die beim Build gefüllt wird und festhält, wo ein
        Element verwendet wird. Visual Studio nutzt sie für die Referenzsuche.],
+      [Designer],
+      [Fenster der Developer Tools, das ein Element als Baum seiner Knoten zeigt,
+       etwa die Felder einer Table. Die Eigenschaften des gewählten Knotens stehen
+       im Properties Window.],
       [Developer Tools],
       [Erweiterung von Microsoft, die Visual Studio für die Entwicklung mit
        Dynamics 365 ausstattet, unter anderem mit dem X++-Editor, den Designern
@@ -295,6 +304,9 @@ Unterschrift:
       [Tagger],
       [Bestandteil einer Editor-Erweiterung, der Textbereiche mit
        Zusatzinformationen verknüpft, auf die andere Funktionen aufbauen.],
+      [Tool Window],
+      [Fenster einer Extension, das sich in Visual Studio wie das Properties
+       Window andocken lässt.],
       [Unified Developer Experience],
       [Entwicklung für Dynamics 365 mit Visual Studio auf dem eigenen Rechner,
        verbunden mit einer Umgebung in der Power Platform. Die Metadaten von

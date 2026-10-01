@@ -89,8 +89,9 @@ entstehen nur in der neuen Form.
       [FA03\ Label-Bearbeitung],
       [- Text und Kommentar lassen sich je Sprache ändern und speichern.
        - Löschen entfernt das Label in allen Sprachen der Label-Datei.
-       - Kopieren legt in einer anderen Label-Datei ein neues Label mit allen
-         Sprachen an, die es dort gibt. Verschieben löscht danach das Original.
+       - Kopieren legt in einer anderen Label-Datei ein neues Label in allen
+         Sprachen an, die Original und Ziel gemeinsam haben, mit Text und
+         Kommentar des Originals. Verschieben löscht danach das Original.
        - Auf Wunsch werden die Referenzen in beschreibbaren Models auf die neue
          ID umgestellt.
        - Labels aus schreibgeschützten Models oder kompilierten Ressourcen lassen
@@ -641,14 +642,18 @@ externes System einbeziehen. Für die übrigen legen die Akzeptanzkriterien in
 
 == Systemarchitektur <architektur>
 
-Die Extension heisst BE-LabelExtension. Die Lösung besteht aus drei Projekten. Die Kernlogik enthält alles, was ohne
+Die Extension heisst BE-LabelExtension. Die Lösung liegt im Repository unter
+`source` und besteht aus drei Projekten, `BE.LabelExtension`,
+`BE.LabelExtension.Core` und `BE.LabelExtension.Tests`. Die Kernlogik enthält alles, was ohne
 Visual Studio auskommt, und zielt auf .NET Standard 2.0. Die Extension zielt auf
 .NET Framework 4.8, weil sie im Prozess von Visual Studio läuft, und bindet die
 Kernlogik als Assembly ein. Mit .NET Framework 4.8 lief auch die Laufzeitprobe auf
 der Testumgebung. Ein Testprojekt prüft die Kernlogik ohne Visual Studio und ohne
 Dynamics 365. Es zielt auf .NET 8 und auf .NET Framework 4.8. Unter .NET 8 laufen
 die Tests auch ausserhalb von Windows, unter .NET Framework 4.8 auf derselben
-Laufzeit wie im Betrieb.
+Laufzeit wie im Betrieb. Die Tests verwenden vorerst xUnit. Macht es Probleme,
+lässt es sich durch ein anderes Framework ersetzen, ohne die Kernlogik zu
+ändern.
 
 Weil .NET Standard weder WPF noch das Visual Studio SDK kennt, kann die Kernlogik
 nicht versehentlich von Visual Studio abhängig werden. Damit ist Z8 in der Struktur
@@ -702,7 +707,7 @@ der Extension und der Kernlogik.
       [Suche, Trefferliste, Detailansicht, Bearbeiten, Verwendungen.],
       [FA01 -- FA04, FA11 -- FA13],
       [Commands],
-      [Suche aus dem Editor, Öffnen im Panel, Label-ID einfügen, Extraktion,
+      [Suche aus dem Editor, Öffnen im Tool Window, Label-ID einfügen, Extraktion,
        Shortcuts.],
       [FA07 -- FA09, FA14, FA16],
       [Label-Erkennung],
@@ -788,21 +793,22 @@ der Extension und der Kernlogik.
       [NFA02],
 
       [Schreiben],
-      [Im selben Format wie das bestehende Tool, also UTF-8 und leere
-       Texte als ein Leerzeichen. Geschrieben wird in eine temporäre Datei, die
-       danach die alte ersetzt.],
+      [Im Format aus @fachliche_regeln, in UTF-8 und leere Texte als ein
+       Leerzeichen. Geschrieben wird in eine temporäre Datei, die danach die alte
+       ersetzt.],
       [Format aus dem bestehenden Tool übernommen.],
 
       [Neue Label-IDs],
       [Der Buchstabe `L` und acht kryptografisch zufällige Bytes als 16
        hexadezimale Ziffern in Grossbuchstaben, etwa `L3F2A9C15B8047DE1`. Die
-       Label-Datei steht wie bisher davor, die User-ID entfällt.],
+       Label-Datei steht wie bisher davor, die User-ID entfällt. Gibt es die
+       erzeugte ID in der Label-Datei schon, erzeugt die Extension eine neue.],
       [Aus der Logik übernommen, die im Betrieb bereits verwendet wird.],
 
       [Label-Formen],
       [Die alte Form ohne Doppelpunkt, etwa `@SYS12345`, kommt im Code und in
        Eigenschaften noch an vielen Stellen vor. In der Label-Datei steht sie mit
-       vollständiger ID samt `@`. Suche, Tooltip, Inline-Anzeige, Öffnen im Panel,
+       vollständiger ID samt `@`. Suche, Tooltip, Inline-Anzeige, Öffnen im Tool Window,
        Auswahl im Designer, Bearbeiten, Verwendungssuche, Ersetzen, Kopieren und
        Verschieben verarbeiten beide Formen. Neue Labels entstehen nur in der
        neuen Form, auch beim Kopieren und Verschieben.],
@@ -828,6 +834,12 @@ der Extension und der Kernlogik.
        ist.],
       [Im Spike nicht geprüft. Zu prüfen in AP3.1.],
 
+      [Commands],
+      [Die Commands stehen im Kontextmenü des X++-Editors und im Tool Window.
+       Lässt sich das Kontextmenü des X++-Editors nicht erweitern, stehen sie im
+       Menü Extensions. Die Shortcuts gelten in beiden Fällen.],
+      [Nicht untersucht, zeigt AP3.7.],
+
       [Tooltip],
       [Eigene QuickInfo-Quelle über MEF. Ihr Eintrag erscheint im selben Tooltip
        wie der Eintrag der Developer Tools.],
@@ -848,9 +860,13 @@ der Extension und der Kernlogik.
        XML-Datei des Elements, wie in @machbarkeitsbeurteilung festgelegt. Ein
        geöffneter Designer meldet die Änderung danach und bietet an, das Element
        neu zu laden. Das Element muss vorher gespeichert sein, siehe die nächste
-       Zeile.],
-      [Lesen belegt. Verhalten des Designers auf der Testumgebung
-       beobachtet.],
+       Zeile. Die XML-Datei findet die Extension über Elementtyp und Elementname
+       aus dem Selection Tracking, die Stelle darin über den Namen des gewählten
+       Knotens. Ersetzt wird nur, wenn die Eigenschaft dort genau den angezeigten
+       Text enthält. Ist die Stelle nicht eindeutig, bricht die Extension mit
+       einer Meldung ab.],
+      [Lesen belegt. Verhalten des Designers auf der Testumgebung beobachtet.
+       Die Zuordnung zur Stelle im XML zeigt eine Probe in D1.],
 
       [Schreiben in Elemente],
       [Die Extraktion im Designer, das Umstellen der Referenzen beim Kopieren und
@@ -892,6 +908,13 @@ der Extension und der Kernlogik.
        wählt, ist nicht untersucht. Eine Probe zeigt es in D1, abschliessend
        prüft es D2.],
 
+      [Übersetzungsdienst],
+      [DeepL über die REST-Schnittstelle, der Schlüssel im Header
+       `Authorization` als `DeepL-Auth-Key`. Schlüssel für DeepL API Free enden
+       auf `:fx` und gehen an `api-free.deepl.com`, alle anderen an
+       `api.deepl.com` @deepl-auth.],
+      [Laut Dokumentation, nicht erprobt.],
+
       [API-Schlüssel],
       [Verschlüsselt über die Data Protection API von Windows im Benutzerprofil,
        nie im Repository.],
@@ -904,6 +927,74 @@ der Extension und der Kernlogik.
     ),
     caption: [Technische Festlegungen (eigene Darstellung)]
   ) <festlegungen>
+]
+
+=== Fachliche Regeln
+
+Wo die Extension das bestehende Tool ablöst, übernimmt sie dessen Verhalten,
+soweit dieses Kapitel nichts anderes festlegt, siehe @fachliche_regeln.
+
+#[
+  #show figure: set align(left)
+  #set text(size: 9.5pt)
+  #figure(
+    table(
+      align: left,
+      columns: (auto, 1fr),
+      table.header(
+        [*Thema*], [*Regel*],
+      ),
+      [Label-Dateien],
+      [Je Label-Datei und Sprache gibt es eine Datei
+       `<Label-Datei>.<Sprache>.label.txt`. Eine Zeile `ID=Text` beginnt ein Label,
+       die ID reicht bis zum ersten Gleichheitszeichen. Beginnt die folgende Zeile
+       nach Leerzeichen mit `;` oder `#`, ist sie der Kommentar dieses Labels.
+       Leere Zeilen zählen nicht. Kommt eine ID doppelt vor, gilt die erste, das
+       Output Window meldet die zweite, und sie entfällt beim nächsten Speichern.
+       Geschrieben wird jedes Label als `ID=Text`, der Kommentar als
+       Folgezeile ` ;Kommentar`, in der bisherigen Reihenfolge, neue Labels am
+       Ende, mit Windows-Zeilenenden. Namen von Label-Dateien und Labels können
+       Unterstriche enthalten, etwa `FieldDescriptions_AccountsPayable`
+       @ms-field-help.],
+
+      [Kompilierte Ressourcen],
+      [Die Datei `<Label-Datei>.Resources.dll` liegt in einem Ordner, der nach
+       der Sprache heisst. Ihre erste Manifest-Ressource enthält die Labels als
+       Paare aus ID und Text, ohne Kommentare. Gibt es zur selben Label-Datei und
+       Sprache eine `.label.txt`, gilt diese.],
+
+      [Suchmodi],
+      [Exact match findet Labels, bei denen ID, Text oder Kommentar gleich dem
+       Suchbegriff sind. Die ID zählt dabei mit und ohne Label-Datei. Substring
+       findet Labels, bei denen eines dieser Felder den Suchbegriff enthält.
+       Anything like that zerlegt den Suchbegriff in Wörter. Getrennt wird an
+       Leerzeichen, Komma, Punkt und Bindestrich. Die Wörter werden in ID und Text
+       gesucht. MatchWord findet den Suchbegriff als ganzes Wort in Text oder
+       Kommentar oder als vollständige ID. Gross- und Kleinschreibung spielen
+       dabei keine Rolle. Label id findet genau das Label mit dieser
+       vollständigen ID.],
+
+      [Verwendungssuche],
+      [Gesucht wird in den XML-Dateien aller Models. Ist das auf der
+       Testumgebung zu langsam, beschränkt die Extension die Suche wie das
+       bestehende Tool auf Models, deren Layer gleich hoch oder höher ist als der
+       des Models mit dem Label. Referenzen umgestellt werden nur in
+       beschreibbaren Models.],
+
+      [Löschen],
+      [Entfernt das Label in allen beschreibbaren Label-Dateien, ohne Rückfrage
+       und ohne Prüfung der Verwendungen, wie im bestehenden Tool.],
+
+      [Speichern],
+      [Anlegen, Extraktion, Ersetzen und Kopieren oder Verschieben mit Umstellen
+       der Referenzen speichern die betroffenen Label-Dateien sofort, weil danach
+       Code oder Eigenschaften auf das Label zeigen können. Ändern und Löschen
+       bleiben im Label Store, bis der Entwickler speichert. Beim Schliessen von
+       Visual Studio fragt die Extension wie das bestehende Tool, ob
+       ungespeicherte Änderungen gespeichert werden sollen.],
+    ),
+    caption: [Fachliche Regeln aus dem bestehenden Tool (eigene Darstellung)]
+  ) <fachliche_regeln>
 ]
 
 == Modellierung der Klassen
@@ -984,8 +1075,8 @@ Methoden.
       [`Load`],
 
       [`LabelFileFormat`],
-      [Liest und schreibt das Format der Label-Dateien nach @festlegungen. Keine
-       andere Klasse kennt das Format.],
+      [Liest und schreibt das Format der Label-Dateien nach
+       @fachliche_regeln. Keine andere Klasse kennt das Format.],
       [`Read`\ `Write`],
 
       [`LabelStore`],
@@ -1375,7 +1466,8 @@ Entwicklungs-VM. OA04 folgt erst nach Projektabschluss und hat keinen Testfall.
       [TC08],
       [Labels aus einer Ressourcen-Assembly der Testdaten lesen.],
       [Alle Labels sind gelesen. Die Assembly ist danach nicht geladen und die
-       Datei lässt sich ersetzen.],
+       Datei lässt sich ersetzen. Gibt es zur selben Label-Datei und Sprache eine
+       `.label.txt`, wird die Ressource übersprungen.],
       [@festlegungen],
 
       [TC09],
@@ -1643,9 +1735,9 @@ woher die API-Schlüssel im Betrieb stammen, legt BE-terna fest. Für Entwicklun
 Tests während des Projekts stelle ich einen eigenen Schlüssel. Die
 Weiterentwicklung liegt beim Maintainer, siehe @stakeholderanalyse. Nach einem Uninstall bleiben die Label-Dateien unverändert.
 
-#todo[Mit BE-terna klären, unter welcher Lizenz der Code im öffentlichen Repository
-steht und dass BE-terna die Extension einsetzen und weiterentwickeln darf. Danach
-eine Lizenzdatei ins Repository legen und die Lizenz hier nennen.]
+Der Code steht im öffentlichen Repository unter der MIT-Lizenz. Sie erlaubt
+BE-terna, die Extension einzusetzen, zu ändern und weiterzugeben, solange der
+Lizenzhinweis erhalten bleibt @osi-mit.
 
 == Realisierungsplan <realisierungsplan>
 
@@ -1668,22 +1760,26 @@ der Anzeige im Editor gehört.
       table.cell(colspan: 4)[*Grundgerüst*],
       [3.1\ 09.10.],
       [Solution mit drei Projekten. Build und Paketierung mit den Erkenntnissen aus
-       dem Spike. Output Window, Error Boundary, leeres Tool Window. Zwei
+       dem Spike. Output Window, Error Boundary, leeres Tool Window. Drei
        Probe-Commands im Debug-Build für D1.],
       [FA17, NFA04],
       [Die Extension lädt in Visual Studio 2026 und öffnet ihr Tool Window. Ein
        absichtlich ausgelöster Fehler erscheint im Output Window, Visual Studio
        läuft weiter. Die Probe-Commands versuchen, ein Element an einer Stelle zu
-       öffnen und ungespeicherte Dokumente aufzulisten, und melden das Ergebnis
-       im Output Window.],
+       öffnen, ungespeicherte Dokumente aufzulisten und zum gewählten Knoten im
+       Designer die Stelle im XML zu finden. Sie melden das Ergebnis im Output
+       Window.],
 
       table.cell(colspan: 4)[*Stufe 1, Feature Parity*],
       [3.2\ 10.10.],
-      [Model-Suche, Label-Dateien lesen und schreiben, kompilierte Labels,
-       Label Store, Dateiüberwachung, synthetische Testdaten.],
+      [Model-Suche über die Metadaten-Konfiguration, Label-Dateien lesen und
+       schreiben, kompilierte Labels, Label Store, Dateiüberwachung, synthetische
+       Testdaten. Bis zur Einstellungsseite in AP3.5 wird die
+       Metadaten-Konfiguration über eine einfache Vorgabe gewählt.],
       [FA15, NFA02],
       [Unit Tests lesen und schreiben Label-Dateien ohne Verlust von Kommentaren
-       und Kodierung. Das Laden läuft im Hintergrund.],
+       und Kodierung. Die Extension lädt die Labels der gewählten
+       Metadaten-Konfiguration im Hintergrund.],
       [3.3\ 15.10.],
       [Alle Suchmodi mit Ranking. Treffer des bestehenden Tools auf den
        Testdaten als erwartete Ergebnisse erfassen.],
@@ -1711,7 +1807,7 @@ der Anzeige im Editor gehört.
       [Der Tooltip zeigt alle konfigurierten Sprachen, auf dem privaten Gerät über
        den Ersatz, auf der Testumgebung im X++-Editor.],
       [3.7\ 20.10.],
-      [Suche aus dem Editor, Öffnen im Panel, Verwendungssuche mit Sprung an die
+      [Suche aus dem Editor, Öffnen im Tool Window, Verwendungssuche mit Sprung an die
        Fundstelle.],
       [FA04, FA07, FA08],
       [Von einer Label-ID im Code führt ein Command ins Tool Window. Ein Klick auf
@@ -1768,13 +1864,15 @@ Unsicherheiten früh zeigen.
       [Laden neben den Developer Tools und Laden der echten Label-Dateien über
        die Metadaten-Konfiguration, einschliesslich eines Models mit nur
        kompilierten Ressourcen (TC25). Mit den Probe-Commands aus AP3.1 ein
-       Element im X++-Editor und im Designer an einer Stelle öffnen und
-       ungespeicherte Elemente erkennen. Von Hand prüfen, wie ein geöffneter
+       Element im X++-Editor und im Designer an einer Stelle öffnen,
+       ungespeicherte Elemente erkennen und zum gewählten Knoten die Stelle im
+       XML finden. Von Hand messen, wie lange eine Textsuche über die
+       XML-Dateien aller Models dauert, und prüfen, wie ein geöffneter
        X++-Editor auf eine geänderte XML-Datei reagiert und welche Datei der
        X++-Editor auf der klassischen Entwicklungs-VM öffnet.],
       [D2], [AP3.7],
       [Label-Erkennung, Tooltip, Inline-Anzeige, Suche aus dem Editor, Öffnen im
-       Panel, Verwendungssuche mit Öffnen im X++-Editor, Schreiben in geöffnete
+       Tool Window, Verwendungssuche mit Öffnen im X++-Editor, Schreiben in geöffnete
        Elemente (TC26 bis TC30).],
       [D3], [AP3.8],
       [Extraktion im Editor und im Properties Window, Übersetzungsdienst,

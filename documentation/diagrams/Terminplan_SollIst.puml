@@ -39,6 +39,7 @@ sunday are closed
 
 -- AP2 Konzept --
 [Soll AP2] as [S2] starts 2026-10-01 and requires 3 days
+[Ist AP2] as [I2] starts 2026-09-25 and ends 2026-10-01
 
 -- AP3 Realisierung --
 [Soll AP3] as [S3] starts 2026-10-09 and requires 8 days
@@ -63,4 +64,5 @@ sunday are closed
 [S5] is colored in LightGray
 [S6] is colored in LightGray
 [I1] is colored in LightBlue
+[I2] is colored in LightBlue
 @endgantt
