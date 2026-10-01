@@ -242,6 +242,10 @@ Unterschrift:
       [Feature Parity],
       [Gleicher Funktionsumfang wie ein bestehendes System. In dieser Arbeit der
        Funktionsumfang des BE-LabelEditors.],
+      [Klassische Entwicklungs-VM],
+      [Virtuelle Maschine mit Dynamics 365, Visual Studio und den Developer Tools.
+       Eigene Models und die von Microsoft liegen dort in einem gemeinsamen
+       `PackagesLocalDirectory`, meist unter `K:\AOSService`.],
       [Label],
       [Platzhalter mit einer eindeutigen ID, den die Anwendung zur Laufzeit durch die
        Übersetzung in der Sprache des Benutzers ersetzt.],
@@ -291,6 +295,11 @@ Unterschrift:
       [Tagger],
       [Bestandteil einer Editor-Erweiterung, der Textbereiche mit
        Zusatzinformationen verknüpft, auf die andere Funktionen aufbauen.],
+      [Unified Developer Experience],
+      [Entwicklung für Dynamics 365 mit Visual Studio auf dem eigenen Rechner,
+       verbunden mit einer Umgebung in der Power Platform. Die Metadaten von
+       Microsoft liegen im Benutzerprofil, die eigenen Models in einem Ordner nach
+       Wahl.],
       [VSIX],
       [Paketformat, in dem eine Erweiterung für Visual Studio ausgeliefert und
        installiert wird.],

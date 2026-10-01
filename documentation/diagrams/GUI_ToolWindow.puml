@@ -8,7 +8,7 @@ scale 2
 {+
   { [Save] | [Save and insert] | [Insert] | . | ^BDM1^ | [New] | [Extract] | [Settings] }
   ==
-  { ^Exact match, ignore case^ | "Lieferadresse                 " }
+  { ^Substring, ignore case^ | "Lieferadresse                 " }
   {#
     . | **Label ID** | **Text de** | **Text en-us**
     . | @BDM1:BDM110000003 | Lieferadresse | Delivery address

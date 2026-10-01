@@ -11,12 +11,15 @@ rectangle "Visual Studio\n(Editor, Properties Window,\nOutput Window)" as VS
 rectangle "Developer Tools von Dynamics 365\n(X++-Editor, Designer)" as D365
 rectangle "Build und Best-Practice-Check\nder Developer Tools" as BUILD
 database "Package-Verzeichnis" as PKG
+database "Metadaten-Konfiguration\n(XPPConfig)" as CFG
 cloud "Übersetzungsdienst" as SVC
 
 DEV --> EXT : sucht, legt an,\nbearbeitet, extrahiert
 EXT --> VS : fügt Text ein und ersetzt ihn,\nschreibt Meldungen
 D365 --> EXT : Classification der Label-Token,\ngewähltes Element
 EXT --> PKG : Label-Dateien, Descriptor,\nkompilierte Labels, XML der Elemente
+EXT --> CFG : liest Ordner der\nPackage-Verzeichnisse
+D365 --> CFG : pflegt
 EXT --> SVC : Text und Zielsprachen
 SVC --> EXT : Übersetzungsvorschläge
 BUILD --> PKG : liest Label-Dateien

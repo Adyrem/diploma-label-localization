@@ -42,8 +42,11 @@ DEV --> UC09
 DEV --> UC10
 
 UC05 .right.> UC04 : <<include>>
+UC03 .right.> UC04 : <<include>>
 UC08 .right.> UC02 : <<include>>
 
+UC01 -- D365
+UC04 -- D365
 UC07 -- D365
 UC08 -- D365
 UC02 -- SVC

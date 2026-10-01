@@ -223,3 +223,13 @@ bucher-ude:
   url:
     value: https://raphaelbucher.ch/power%20platform/dynamics%20365/x++/2024/09/11/unified-developer-environment-shortcomings.html
     date: 2026-09-28
+
+ms-vc-navigation:
+  type: Web
+  title: Version control, metadata search, and navigation
+  author: Microsoft
+  publisher: Microsoft Learn
+  date: 2026-03-30
+  url:
+    value: https://learn.microsoft.com/en-us/dynamics365/fin-ops-core/dev-itpro/dev-tools/version-control-metadata-navigation
+    date: 2026-09-30
