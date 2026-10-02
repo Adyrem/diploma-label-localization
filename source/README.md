@@ -63,3 +63,12 @@ $env:BELABELEXTENSION_PACKAGES_DIRECTORY = "$env:TEMP\pld-demo"
 ```
 
 Die Label-Dateien des Datensatzes sind UTF-8 mit BOM und Windows-Zeilenenden. `.gitattributes` schützt sie vor einer Umwandlung durch Git, weil TC01 sie Byte für Byte vergleicht.
+
+## Werkzeuge
+
+| Skript | Zweck |
+| --- | --- |
+| `tools\Get-LabelEnvironmentStructure.ps1` | Liest auf der Testumgebung den Aufbau von Metadaten-Konfiguration, Descriptor, Label-Dateien und kompilierten Ressourcen. Gibt nur Feldnamen, Typen, Anzahlen und Pfade mit Platzhaltern aus. |
+| `tools\Capture-ExistingToolResults.ps1` | Erfasst die Trefferlisten des bestehenden BE-LabelEditor für die Begriffe in `tools\ExistingToolSearchTerms.txt` in allen acht Suchmodi. Das Ergebnis `BE.LabelExtension.Tests\TestData\ExpectedSearchResults.json` ist die Vorgabe für TC04. Die Vorbereitung steht im Kopf des Skripts. |
+
+Beide laufen unter Windows PowerShell 5.1.

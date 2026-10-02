@@ -1,0 +1,38 @@
+kunde
+Kunde
+KUNDE
+Lieferadresse
+lieferadresse
+adresse
+Adresse
+liefer adresse
+Liefer-Adresse
+Kunde.
+kunde %1
+%1
+delivered
+Delivery
+delivery address
+customer
+Customer name
+DMO100
+DMO1001
+@DMO1001
+@dmo1001
+@DMO10010
+BDM110000003
+@BDM1:BDM110000003
+bdm110000003
+@BDM2:L3F2A9C15B8047DE1
+L3F2A9C15B8047DE1
+BDMCustomer
+BDMCustomer_Name
+e
+Rechnung
+rechnung %1 gebucht
+Quantität
+Menge
+Strasse
+ort
+Text folgt
+zzzz
