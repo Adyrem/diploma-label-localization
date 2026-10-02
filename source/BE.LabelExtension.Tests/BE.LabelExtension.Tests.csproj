@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Unit tests of the core logic, without Visual Studio and without Dynamics 365.
+    .NET 8 runs them outside Windows too, .NET Framework 4.8 on the runtime the
+    extension uses inside Visual Studio.
+  -->
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net48</TargetFrameworks>
+    <RootNamespace>BE.LabelExtension.Tests</RootNamespace>
+    <AssemblyName>BE.LabelExtension.Tests</AssemblyName>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+
+    <!-- Test classes are public for xUnit; documenting every test adds nothing. -->
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.10.1" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BE.LabelExtension.Core\BE.LabelExtension.Core.csproj" />
+  </ItemGroup>
+</Project>

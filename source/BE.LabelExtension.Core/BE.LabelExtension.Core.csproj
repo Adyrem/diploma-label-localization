@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Core logic without any dependency on Visual Studio (Z8, NFA03). .NET Standard 2.0
+    knows neither WPF nor the Visual Studio SDK, so the core cannot depend on them by
+    accident.
+  -->
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>BE.LabelExtension.Core</RootNamespace>
+    <AssemblyName>BE.LabelExtension.Core</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="BE.LabelExtension.Tests" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
+  <Metadata>
+    <Identity Id="BE.LabelExtension.7c41e2d9" Version="0.1.0" Language="en-US" Publisher="Adrian Aeschlimann" />
+    <DisplayName>BE-LabelExtension</DisplayName>
+    <Description xml:space="preserve">Search, create, edit and translate the labels of Dynamics 365 Finance and Operations directly in Visual Studio.</Description>
+  </Metadata>
+  <!--
+    The extension type makes Visual Studio read .vsextension/extension.json of the new
+    model next to the classic parts. Without it the menus, commands and the tool window of
+    the new model are not registered, although the extension is installed and enabled.
+  -->
+  <Installation ExtensionType="VSSDK+VisualStudio.Extensibility">
+    <!-- Visual Studio 2022 from 17.14 and Visual Studio 2026 (NFA01). Community covers all editions. -->
+    <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[17.14, 19.0)">
+      <ProductArchitecture>amd64</ProductArchitecture>
+    </InstallationTarget>
+  </Installation>
+  <Dependencies>
+    <Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="[4.8,)" />
+  </Dependencies>
+  <Prerequisites>
+    <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[17.14, 19.0)" DisplayName="Visual Studio core editor" />
+  </Prerequisites>
+  <Assets>
+    <Asset Type="Microsoft.VisualStudio.MefComponent" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%|" />
+  </Assets>
+</PackageManifest>

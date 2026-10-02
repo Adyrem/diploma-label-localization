@@ -1,0 +1,18 @@
+<Project>
+  <!-- Settings shared by all projects of the solution. -->
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Deterministic>true</Deterministic>
+
+    <!-- NFA05: the build runs without warnings, and public members are documented. -->
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+    <Product>BE-LabelExtension</Product>
+    <Authors>Adrian Aeschlimann</Authors>
+    <Copyright>Copyright 2026 Adrian Aeschlimann</Copyright>
+    <Version>0.1.0</Version>
+  </PropertyGroup>
+</Project>

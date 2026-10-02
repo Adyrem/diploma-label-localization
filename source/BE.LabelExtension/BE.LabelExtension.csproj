@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    The extension: VisualStudio.Extensibility running in the Visual Studio process
+    together with MEF, in a single VSIX (variant decision V4).
+
+    Build with the MSBuild of Visual Studio and with restore and build as two separate
+    calls. A combined call evaluates the project before the SDK targets are restored and
+    fails with VSEXT0008 (findings log, section 11).
+  -->
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <RootNamespace>BE.LabelExtension</RootNamespace>
+    <AssemblyName>BE.LabelExtension</AssemblyName>
+    <UseWPF>true</UseWPF>
+
+    <!-- Runs the new model in-process. Requires RequiresInProcessHosting in LabelExtension. -->
+    <VssdkCompatibleExtension>true</VssdkCompatibleExtension>
+
+    <!-- No VSPackage, so there is no pkgdef to merge after installing (OA01). -->
+    <GeneratePkgDefFile>false</GeneratePkgDefFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Not referenced automatically in SDK-style .NET Framework projects, needed for MEF. -->
+    <Reference Include="System.ComponentModel.Composition" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.VisualStudio.Extensibility.Sdk" Version="17.14.40608" />
+    <PackageReference Include="Microsoft.VisualStudio.Extensibility.Build" Version="17.14.40608" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.VisualStudio.SDK" Version="17.14.40265" ExcludeAssets="runtime" />
+    <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="18.9.820" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BE.LabelExtension.Core\BE.LabelExtension.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Remote UI: the XAML is sent to Visual Studio as text, not compiled as a WPF page. -->
+    <Page Remove="ToolWindow\LabelToolWindowContent.xaml" />
+    <EmbeddedResource Include="ToolWindow\LabelToolWindowContent.xaml" LogicalName="BE.LabelExtension.ToolWindow.LabelToolWindowContent.xaml" />
+  </ItemGroup>
+</Project>
