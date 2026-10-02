@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<AxModelInfo xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Customization>Allow</Customization>
+	<DisplayName>BE demo 2</DisplayName>
+	<Id>895010002</Id>
+	<Layer>12</Layer>
+	<ModelModule>BEDemo2</ModelModule>
+	<Name>BEDemo2</Name>
+	<Publisher>Demo</Publisher>
+	<VersionMajor>1</VersionMajor>
+	<VersionMinor>0</VersionMinor>
+</AxModelInfo>

@@ -1,0 +1,9 @@
+﻿@DMO1001=Lieferadresse
+@DMO1002=Kunde
+@DMO1003=Artikel
+@DMO1004=Lager
+@DMO1005=Buchen
+@DMO1006=Abbrechen
+@DMO1007=Datum
+@DMO1008=Fehler beim Buchen
+@DMO10010=Lieferadressen

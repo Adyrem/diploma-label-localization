@@ -1,0 +1,12 @@
+﻿BDM210000001=Delivery
+BDM210000002=Packing slip
+BDM210000003=Confirm delivery
+BDM210000004=Partial delivery
+BDM210000005=Customer group
+BDM210000006=Address
+BDM210000007=Invoice
+BDM210000008=Invoice %1 posted
+ ;%1 = invoice number
+BDM210000009=Customer
+BDM210000010=Credit limit
+LC0FFEE0000000001=Change delivery address

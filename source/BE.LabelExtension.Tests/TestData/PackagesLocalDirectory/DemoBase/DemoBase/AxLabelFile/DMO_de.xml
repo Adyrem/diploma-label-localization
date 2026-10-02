@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<AxLabelFile xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>DMO_de</Name>
+	<LabelContentFileName>DMO.de.label.txt</LabelContentFileName>
+	<LabelFileId>DMO</LabelFileId>
+	<Language>de</Language>
+	<RelativeUriInModelStore>DemoBase\DemoBase\AxLabelFile\LabelResources\de\DMO.de.label.txt</RelativeUriInModelStore>
+</AxLabelFile>

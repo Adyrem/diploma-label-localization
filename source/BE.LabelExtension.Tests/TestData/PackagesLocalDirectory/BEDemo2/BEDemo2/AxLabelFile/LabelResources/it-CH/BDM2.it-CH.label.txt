@@ -1,0 +1,11 @@
+﻿L3F2A9C15B8047DE1=Indirizzo di consegna cliente
+BDM210000001=Consegna
+BDM210000002=Documento di trasporto
+BDM210000003=Conferma consegna
+BDM210000005=Gruppo clienti
+BDM210000006=Indirizzo
+BDM210000007=Fattura
+BDM210000008=Fattura %1 registrata
+BDM210000009=Cliente
+BDM210000010=Limite di credito
+LC0FFEE0000000001=Modifica indirizzo di consegna

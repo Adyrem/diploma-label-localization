@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<AxLabelFile xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>BDM1_Extension_it-CH</Name>
+	<LabelContentFileName>BDM1_Extension.it-CH.label.txt</LabelContentFileName>
+	<LabelFileId>BDM1_Extension</LabelFileId>
+	<Language>it-CH</Language>
+	<RelativeUriInModelStore>BEDemo2\BEDemo2\AxLabelFile\LabelResources\it-CH\BDM1_Extension.it-CH.label.txt</RelativeUriInModelStore>
+</AxLabelFile>

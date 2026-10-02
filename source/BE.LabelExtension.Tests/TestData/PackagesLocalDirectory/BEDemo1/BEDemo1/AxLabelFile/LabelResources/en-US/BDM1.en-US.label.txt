@@ -1,0 +1,32 @@
+﻿BDM110000001=Customer
+BDM110000002=Customer name
+BDM110000003=Delivery address
+ ;Address the goods are delivered to
+BDM110000004=Invoice address
+BDM110000005=Invoice date
+BDM110000006=Delivery date
+BDM110000007=Vendor
+BDM110000008=Sales order
+BDM110000009=Purchase order
+BDM110000010=Quantity
+BDM110000011=Price
+BDM110000012=Amount
+BDM110000013=Currency
+BDM110000014=Customer %1 was not found.
+ ;%1 = customer account
+BDM110000015=No customer was specified.
+BDM110000016=Delivery address of the customer
+BDM110000017=Street
+BDM110000018=ZIP/postal code
+BDM110000019=City
+BDM110000020=Country/region
+BDM110000021=Reserved
+L0A1B2C3D4E5F6071=Terms of payment
+ ;Used on sales and purchase orders
+L1122334455667788=Delivery terms
+L9F8E7D6C5B4A3921=Warehouse
+LABCDEF0123456789=Item number
+L00000000000000AA=Description
+L7E57C0DE00000001=Status
+L5A5A5A5A5A5A5A5A=Telephone
+L1234ABCD5678EF90=Email address

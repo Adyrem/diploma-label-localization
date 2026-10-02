@@ -49,3 +49,17 @@ $ide = "C:\Program Files\Microsoft Visual Studio\18\Community\Common7\IDE"
 Ohne `/updateconfiguration` registriert Visual Studio die Menüs, Commands und das Tool Window der Extension nicht, auch nach einer Installation per Doppelklick. Danach erscheint das Menü *Extensions > BE-LabelExtension*.
 
 Der Debug-Build enthält dort zusätzlich Probe-Commands für den ersten Durchgang auf der Testumgebung. Sie lesen nur und schreiben ihr Ergebnis in den Bereich *BE-LabelExtension* des Output Window.
+
+## Ohne Dynamics 365 entwickeln
+
+Unter `BE.LabelExtension.Tests\TestData\PackagesLocalDirectory` liegt ein synthetischer Datensatz: vier Models mit beschreibbaren, gesperrten und schreibgeschützten Layern, beide Formen der Label-ID, Kommentare, leere Texte, fehlende Übersetzungen und eine `_Extension`-Datei. Die Unit Tests arbeiten auf einer Kopie davon.
+
+Der Debug-Build lädt statt der Metadaten-Konfiguration ein beliebiges Package-Verzeichnis, wenn die Umgebungsvariable `BELABELEXTENSION_PACKAGES_DIRECTORY` gesetzt ist. Am besten zeigt sie auf eine Kopie des Datensatzes, weil die Extension in die Label-Dateien schreibt:
+
+```powershell
+Copy-Item BE.LabelExtension.Tests\TestData\PackagesLocalDirectory $env:TEMP\pld-demo -Recurse
+$env:BELABELEXTENSION_PACKAGES_DIRECTORY = "$env:TEMP\pld-demo"
+& "$ide\devenv.exe" /rootsuffix Exp
+```
+
+Die Label-Dateien des Datensatzes sind UTF-8 mit BOM und Windows-Zeilenenden. `.gitattributes` schützt sie vor einer Umwandlung durch Git, weil TC01 sie Byte für Byte vergleicht.

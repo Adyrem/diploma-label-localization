@@ -19,9 +19,17 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.10.1" />
     <PackageReference Include="xunit" Version="2.9.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5" PrivateAssets="all" />
+
+    <!-- Builds synthetic resource assemblies for the compiled labels (TC08). -->
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\BE.LabelExtension.Core\BE.LabelExtension.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Synthetic package directory, also the data set for the expected results of TC04. -->
+    <None Update="TestData\**\*" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

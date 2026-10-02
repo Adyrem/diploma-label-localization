@@ -37,6 +37,19 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!--
+      Visual Studio ships these and redirects every older version to its own copy
+      (devenv.exe.config), so copies in the package would never be loaded.
+    -->
+    <SuppressFromVsix Include="System.Reflection.Metadata.dll" />
+    <SuppressFromVsix Include="System.Collections.Immutable.dll" />
+    <SuppressFromVsix Include="System.Memory.dll" />
+    <SuppressFromVsix Include="System.Buffers.dll" />
+    <SuppressFromVsix Include="System.Numerics.Vectors.dll" />
+    <SuppressFromVsix Include="System.Runtime.CompilerServices.Unsafe.dll" />
+  </ItemGroup>
+
+  <ItemGroup>
     <!-- Remote UI: the XAML is sent to Visual Studio as text, not compiled as a WPF page. -->
     <Page Remove="ToolWindow\LabelToolWindowContent.xaml" />
     <EmbeddedResource Include="ToolWindow\LabelToolWindowContent.xaml" LogicalName="BE.LabelExtension.ToolWindow.LabelToolWindowContent.xaml" />

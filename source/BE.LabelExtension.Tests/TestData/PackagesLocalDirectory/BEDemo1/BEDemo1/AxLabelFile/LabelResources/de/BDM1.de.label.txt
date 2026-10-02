@@ -1,0 +1,31 @@
+﻿BDM110000001=Kunde
+BDM110000002=Kundenname
+BDM110000003=Lieferadresse
+ ;Adresse, an die geliefert wird
+BDM110000004=Rechnungsadresse
+BDM110000005=Rechnungsdatum
+BDM110000006=Lieferdatum
+BDM110000007=Lieferant
+BDM110000008=Auftrag
+BDM110000009=Bestellung
+BDM110000010=Menge
+BDM110000011=Preis
+BDM110000012=Betrag
+BDM110000013=Währung
+BDM110000014=Kunde %1 wurde nicht gefunden.
+BDM110000015=Es wurde kein Kunde angegeben.
+BDM110000016=Lieferadresse des Kunden
+BDM110000017=Strasse
+BDM110000018=Postleitzahl
+BDM110000019=Ort
+BDM110000020=Land/Region
+BDM110000021= 
+ ;Text folgt
+L0A1B2C3D4E5F6071=Zahlungsbedingungen
+L1122334455667788=Lieferbedingungen
+L9F8E7D6C5B4A3921=Lagerort
+LABCDEF0123456789=Artikelnummer
+L00000000000000AA=Beschreibung
+L7E57C0DE00000001=Status
+L5A5A5A5A5A5A5A5A=Telefon
+L1234ABCD5678EF90=E-Mail-Adresse

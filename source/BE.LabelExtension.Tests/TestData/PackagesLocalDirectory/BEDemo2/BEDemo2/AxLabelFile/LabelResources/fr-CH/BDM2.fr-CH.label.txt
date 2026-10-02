@@ -1,0 +1,12 @@
+﻿L3F2A9C15B8047DE1=Adresse de livraison client
+BDM210000001=Livraison
+BDM210000002=Bulletin de livraison
+BDM210000003=Confirmer la livraison
+BDM210000004=Livraison partielle
+BDM210000005=Groupe de clients
+BDM210000006=Adresse
+BDM210000007=Facture
+BDM210000008=Facture %1 comptabilisée
+BDM210000009=Client
+BDM210000010=Limite de crédit
+LC0FFEE0000000001=Modifier l'adresse de livraison

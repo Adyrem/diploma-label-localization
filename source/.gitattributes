@@ -1,0 +1,3 @@
+# Label files are compared byte for byte (TC01). Keep their Windows line endings and the
+# byte order mark exactly as they are, on every platform.
+*.label.txt -text

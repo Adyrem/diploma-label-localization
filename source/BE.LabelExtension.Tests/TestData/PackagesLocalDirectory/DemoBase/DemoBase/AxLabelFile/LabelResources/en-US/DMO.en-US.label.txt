@@ -1,0 +1,10 @@
+﻿@DMO1001=Delivery address
+@DMO1002=Customer
+@DMO1003=Item
+@DMO1004=Inventory
+@DMO1005=Post
+@DMO1006=Cancel
+@DMO1007=Date
+@DMO1008=Error while posting
+ ;Shown when posting fails
+@DMO10010=Delivery addresses

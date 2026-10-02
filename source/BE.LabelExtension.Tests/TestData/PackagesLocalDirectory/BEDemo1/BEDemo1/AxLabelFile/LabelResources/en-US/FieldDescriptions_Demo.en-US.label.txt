@@ -1,0 +1,5 @@
+﻿BDMCustomer_AccountNum=Customer account
+BDMCustomer_Name=Name of the customer
+BDMVendor_AccountNum=Vendor account
+BDMOrderLine_Quantity=Ordered quantity
+ ;Quantity of the order line

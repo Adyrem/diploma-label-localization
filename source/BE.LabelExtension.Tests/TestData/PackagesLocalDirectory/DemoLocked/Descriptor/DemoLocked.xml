@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<AxModelInfo xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Customization>Allow</Customization>
+	<DisplayName>Demo locked</DisplayName>
+	<Id>895010004</Id>
+	<Layer>10</Layer>
+	<Locked>true</Locked>
+	<ModelModule>DemoLocked</ModelModule>
+	<Name>DemoLocked</Name>
+	<Publisher>Demo</Publisher>
+	<VersionMajor>1</VersionMajor>
+	<VersionMinor>0</VersionMinor>
+</AxModelInfo>

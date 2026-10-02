@@ -1,0 +1,12 @@
+﻿L3F2A9C15B8047DE1=Lieferadresse Kunde
+BDM210000001=Lieferung
+BDM210000002=Lieferschein
+BDM210000003=Lieferung bestätigen
+BDM210000004=Teillieferung
+BDM210000005=Kundengruppe
+BDM210000006=Adresse
+BDM210000007=Rechnung
+BDM210000008=Rechnung %1 gebucht
+BDM210000009=Kunde
+BDM210000010=Kreditlimite
+LC0FFEE0000000001=Lieferadresse ändern

@@ -1,0 +1,3 @@
+﻿DML10000001=Gesperrtes Label
+DML10000002=Lieferadresse (gesperrt)
+DML10000003=Nur lesen

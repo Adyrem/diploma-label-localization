@@ -1,0 +1,5 @@
+﻿BDM110000001=Cliente
+BDM110000002=Nome cliente
+BDM110000003=Indirizzo di consegna
+BDM110000004=Indirizzo di fatturazione
+BDM110000010=Quantità

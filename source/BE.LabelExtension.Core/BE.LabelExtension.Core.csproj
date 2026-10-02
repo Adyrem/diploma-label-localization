@@ -13,4 +13,12 @@
   <ItemGroup>
     <InternalsVisibleTo Include="BE.LabelExtension.Tests" />
   </ItemGroup>
+
+  <ItemGroup>
+    <!--
+      Reads compiled label resources without loading the assembly. Version 8 on purpose:
+      Visual Studio 2022 and 2026 redirect it to the version they ship, which is newer.
+    -->
+    <PackageReference Include="System.Reflection.Metadata" Version="8.0.1" />
+  </ItemGroup>
 </Project>

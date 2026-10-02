@@ -1,0 +1,3 @@
+﻿DML10000001=Locked label
+DML10000002=Delivery address (locked)
+DML10000003=Read only

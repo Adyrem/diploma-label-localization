@@ -1,6 +1,10 @@
 using BE.LabelExtension.Commands;
 using BE.LabelExtension.Core.Diagnostics;
+using BE.LabelExtension.Core.Models;
+using BE.LabelExtension.Core.Sources;
+using BE.LabelExtension.Core.Store;
 using BE.LabelExtension.Diagnostics;
+using BE.LabelExtension.Labels;
 using BE.LabelExtension.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.Extensibility;
@@ -63,6 +67,15 @@ namespace BE.LabelExtension
             serviceCollection.AddSingleton<ExtensionTasks>();
             serviceCollection.AddSingleton<IMessageSink, OutputWindowSink>();
             serviceCollection.AddSingleton<ErrorBoundary>();
+
+            serviceCollection.AddSingleton(_ => new ModelDiscovery(MetadataConfiguration.DefaultFolder));
+            serviceCollection.AddSingleton<LabelFileWatcher>();
+            serviceCollection.AddSingleton(provider => new LabelStore(
+                provider.GetRequiredService<ModelDiscovery>(),
+                new ILabelSource[] { new LabelFileSource(), new CompiledLabelSource() },
+                provider.GetRequiredService<LabelFileWatcher>(),
+                provider.GetRequiredService<IMessageSink>()));
+            serviceCollection.AddSingleton<LabelLoader>();
         }
     }
 }

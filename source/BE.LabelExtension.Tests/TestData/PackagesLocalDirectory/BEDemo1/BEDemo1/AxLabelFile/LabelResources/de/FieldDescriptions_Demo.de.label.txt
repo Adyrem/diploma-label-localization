@@ -1,0 +1,4 @@
+﻿BDMCustomer_AccountNum=Kundenkonto
+BDMCustomer_Name=Name des Kunden
+BDMVendor_AccountNum=Lieferantenkonto
+BDMOrderLine_Quantity=Bestellte Menge
