@@ -1,11 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <!--
     Unit tests of the core logic, without Visual Studio and without Dynamics 365.
-    .NET 8 runs them outside Windows too, .NET Framework 4.8 on the runtime the
-    extension uses inside Visual Studio.
+    They run on .NET Framework 4.8, the runtime of the extension inside Visual Studio.
   -->
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net48</TargetFrameworks>
+    <TargetFramework>net48</TargetFramework>
     <RootNamespace>BE.LabelExtension.Tests</RootNamespace>
     <AssemblyName>BE.LabelExtension.Tests</AssemblyName>
     <IsPackable>false</IsPackable>

@@ -8,14 +8,14 @@ Visual-Studio-Extension, die die Labels von Dynamics 365 Finance and Operations 
 | --- | --- | --- |
 | `BE.LabelExtension.Core` | .NET Standard 2.0 | Kernlogik ohne Abhängigkeit zu Visual Studio |
 | `BE.LabelExtension` | .NET Framework 4.8 | Extension, VisualStudio.Extensibility im Prozess von Visual Studio zusammen mit MEF, ein VSIX-Paket |
-| `BE.LabelExtension.Tests` | .NET 8 und .NET Framework 4.8 | Unit Tests der Kernlogik mit xUnit |
+| `BE.LabelExtension.Tests` | .NET Framework 4.8 | Unit Tests der Kernlogik mit xUnit, auf der Runtime, auf der Visual Studio die Extension ausführt |
 
 Gemeinsame Einstellungen stehen in `Directory.Build.props`. Der Build bricht bei jeder Warnung ab, und öffentliche Member brauchen eine XML-Dokumentation.
 
 ## Voraussetzungen
 
-- Visual Studio 2026 mit der Workload *Visual Studio extension development*
-- .NET SDK 8 oder neuer, für die Tests unter .NET 8
+- Windows mit Visual Studio 2026 und der Workload *Visual Studio extension development*
+- .NET SDK, für `dotnet test`
 
 ## Bauen
 
@@ -35,7 +35,7 @@ Das Paket liegt danach unter `BE.LabelExtension\bin\Release\net48\BE.LabelExtens
 dotnet test BE.LabelExtension.Tests\BE.LabelExtension.Tests.csproj
 ```
 
-Die Tests laufen unter .NET 8 und unter .NET Framework 4.8.
+Die Tests laufen unter .NET Framework 4.8.
 
 ## In der experimentellen Instanz ausprobieren
 

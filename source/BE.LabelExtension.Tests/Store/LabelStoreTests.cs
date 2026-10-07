@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using BE.LabelExtension.Core.Diagnostics;
@@ -155,12 +154,7 @@ namespace BE.LabelExtension.Tests.Store
 
             Assert.Contains(this.messages.Messages, m => m.Severity == MessageSeverity.Warning && m.Message.Contains("damaged") && m.Message.Contains("BDM2.de.label.txt"));
             Assert.Contains(this.messages.Messages, m => m.Severity == MessageSeverity.Warning && m.Message.Contains("missing"));
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                // Only Windows enforces FileShare.None for other readers.
-                Assert.Contains(this.messages.Messages, m => m.Severity == MessageSeverity.Warning && m.Message.Contains("FieldDescriptions_Demo.de.label.txt"));
-            }
-
+            Assert.Contains(this.messages.Messages, m => m.Severity == MessageSeverity.Warning && m.Message.Contains("FieldDescriptions_Demo.de.label.txt"));
             Assert.Null(this.store.Find("@BDM2:BDM210000001")?.GetText("de"));
             Assert.Equal("Delivery", this.store.Find("@BDM2:BDM210000001")?.GetText("en-US"));
             Assert.Equal("Kunde", this.store.Find("@BDM1:BDM110000001")?.GetText("de"));
