@@ -51,7 +51,48 @@ namespace BE.LabelExtension.Tests.Labels
 
             byte[] written = RoundTrip(original);
 
-            Assert.Equal(Utf8WithBom("A=First\r\n ; comment with hash\r\nB= \r\nC=Last\r\n"), written);
+            Assert.Equal(Encoding.UTF8.GetBytes("A=First\r\n ; comment with hash\r\nB= \r\nC=Last\r\n"), written);
+        }
+
+        /// <summary>
+        /// F12: a file without byte order mark keeps it that way. The existing tool writes one
+        /// into every file.
+        /// </summary>
+        [Fact]
+        public void ReadAndWrite_FileWithoutByteOrderMark_IsUnchangedByteForByte()
+        {
+            byte[] original = Encoding.UTF8.GetBytes(
+                "BDM110000001=Kunde\r\n" +
+                "BDM110000003=Lieferadresse\r\n" +
+                " ;Adresse, an die geliefert wird\r\n" +
+                "L3F2A9C15B8047DE1=Währung: %1 (für Kunden)\r\n" +
+                "@DMO1002= \r\n");
+
+            byte[] written = RoundTrip(original);
+
+            Assert.Equal(original, written);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void Read_ByteOrderMark_IsRecordedAndTheTextIsTheSame(bool withByteOrderMark)
+        {
+            byte[] text = Encoding.UTF8.GetBytes("A=Währung\r\n");
+            using var stream = new MemoryStream(withByteOrderMark ? Bom.Concat(text).ToArray() : text);
+
+            LabelFileContent content = LabelFileFormat.Read(stream);
+
+            Assert.Equal(withByteOrderMark, content.HasByteOrderMark);
+            Assert.Equal("Währung", content.Entries.Single().Text);
+        }
+
+        [Fact]
+        public void Read_ShortFile_HasNoByteOrderMark()
+        {
+            using var stream = new MemoryStream(new byte[] { 0xEF, 0xBB });
+
+            Assert.False(LabelFileFormat.Read(stream).HasByteOrderMark);
         }
 
         [Fact]
@@ -149,7 +190,7 @@ namespace BE.LabelExtension.Tests.Labels
             }
 
             using var output = new MemoryStream();
-            LabelFileFormat.Write(output, content.Entries);
+            LabelFileFormat.Write(output, content.Entries, content.HasByteOrderMark);
             return output.ToArray();
         }
 

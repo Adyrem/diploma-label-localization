@@ -38,6 +38,37 @@ namespace BE.LabelExtension.Tests.Models
             Assert.Equal(new[] { false, true, true }, directories.Select(d => d.IsReference));
         }
 
+        /// <summary>
+        /// The Developer Tools do not write the fields in a fixed order, and many fields hold
+        /// null, numbers or booleans. Seen on the test environment.
+        /// </summary>
+        [Fact]
+        public void ReadConfiguration_OtherFieldOrderAndFurtherFields_IsRead()
+        {
+            string store = Path.Combine(this.packages.Root, "Metadata").Replace("\\", "\\\\");
+            string framework = Path.Combine(this.packages.Root, "10.0.2527.197", "PackagesLocalDirectory").Replace("\\", "\\\\");
+            string json = "{\r\n"
+                + "  \"CrossReferencesDatabaseName\": \"XRef\",\r\n"
+                + $"  \"ModelStoreFolder\": \"{store}\",\r\n"
+                + "  \"ModuleExclusionList\": null,\r\n"
+                + $"  \"DebugSourceFolder\": \"{store}\",\r\n"
+                + $"  \"FrameworkDirectory\": \"{framework}\",\r\n"
+                + "  \"AzureCR_Key\": null,\r\n"
+                + "  \"EnableOfflineAuthentication\": true,\r\n"
+                + "  \"RuntimeHostType\": 4,\r\n"
+                + $"  \"ReferencePackagesPaths\": [ \"{framework}\" ],\r\n"
+                + "  \"Description\": \"Demo\"\r\n"
+                + "}\r\n";
+            Directory.CreateDirectory(this.packages.ConfigurationFolder);
+            File.WriteAllText(Path.Combine(this.packages.ConfigurationFolder, "Demo.json"), json, new System.Text.UTF8Encoding(true));
+
+            MetadataConfiguration configuration = new ModelDiscovery(this.packages.ConfigurationFolder).ReadConfiguration("Demo");
+
+            Assert.Equal(Path.Combine(this.packages.Root, "Metadata"), configuration.ModelStoreFolder);
+            Assert.Equal(Path.Combine(this.packages.Root, "Metadata"), configuration.DebugSourceFolder);
+            Assert.Equal(new[] { false, true }, configuration.GetPackageDirectories().Select(d => d.IsReference));
+        }
+
         /// <summary>TC14, part 2: without a configuration the existing PackagesLocalDirectory of a classic VM is suggested.</summary>
         [Fact]
         public void FindClassicDirectory_SuggestsTheFirstExistingOne()

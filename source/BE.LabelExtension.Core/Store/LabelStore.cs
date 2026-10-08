@@ -165,6 +165,7 @@ namespace BE.LabelExtension.Core.Store
         private void Load(LabelSettings settings, CancellationToken cancellationToken)
         {
             var stopwatch = Stopwatch.StartNew();
+            long managedBefore = GC.GetTotalMemory(forceFullCollection: false);
             IReadOnlyList<PackageDirectory> directories = this.GetPackageDirectories(settings);
             if (directories.Count == 0)
             {
@@ -178,7 +179,9 @@ namespace BE.LabelExtension.Core.Store
             foreach (ILabelSource source in this.sources)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                results.Add(source.Load(request, cancellationToken));
+                LabelSourceResult result = source.Load(request, cancellationToken);
+                request.AddTextLabelFiles(result.LabelFiles);
+                results.Add(result);
             }
 
             Snapshot next = Merge(models, results, this.messages);
@@ -195,8 +198,18 @@ namespace BE.LabelExtension.Core.Store
 
             this.messages.Report(
                 MessageSeverity.Message,
-                $"{next.Index.Count} labels loaded from {next.DocumentCount} files of {next.LabelFiles.Count} label files in {models.Count} models, in {stopwatch.Elapsed.TotalSeconds:0.0} s.");
+                $"{next.Index.Count} labels loaded from {next.DocumentCount} files of {next.LabelFiles.Count} label files in {models.Count} models, in {stopwatch.Elapsed.TotalSeconds:0.0} s. {DescribeMemory(managedBefore)}");
             this.Changed?.Invoke(this, EventArgs.Empty);
+        }
+
+        // Without a forced collection, which would halt every thread of Visual Studio. The
+        // managed memory after loading therefore still holds some garbage of the load.
+        private static string DescribeMemory(long managedBefore)
+        {
+            const long MegaByte = 1024 * 1024;
+            long managedAfter = GC.GetTotalMemory(forceFullCollection: false);
+            using Process process = Process.GetCurrentProcess();
+            return $"Memory: {managedAfter / MegaByte} MB managed, {managedBefore / MegaByte} MB before loading; {process.PrivateMemorySize64 / MegaByte} MB private bytes of the process.";
         }
 
         private static Snapshot Merge(IReadOnlyList<ModelInfo> models, IReadOnlyList<LabelSourceResult> results, IMessageSink messages)

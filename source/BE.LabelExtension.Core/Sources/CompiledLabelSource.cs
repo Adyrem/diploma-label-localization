@@ -11,17 +11,21 @@ namespace BE.LabelExtension.Core.Sources
 {
     /// <summary>
     /// Reads labels that exist only in compiled form, from the files
-    /// <c>&lt;Label file&gt;.Resources.dll</c>. As in the existing tool, the package directories
-    /// are searched recursively. The language is the name of the folder holding the file, the
-    /// label file is the file name up to the first dot. All such labels are read-only.
+    /// <c>&lt;Package&gt;\Resources\&lt;Language&gt;\&lt;Label file&gt;.Resources.dll</c>. The
+    /// language is the name of the folder holding the file, the label file is the file name up
+    /// to the first dot. All such labels are read-only.
     /// </summary>
     /// <remarks>
-    /// Where a <c>.label.txt</c> exists for the same label file and language, it wins; the
-    /// label store leaves out the compiled document then.
+    /// <para>Unlike the existing tool, the search is not recursive. Deeper in the package, in
+    /// the bin folders, lie satellite assemblies of .NET with the same file name pattern; they
+    /// hold no labels.</para>
+    /// <para>Where a <c>.label.txt</c> exists for the same label file and language, it wins.
+    /// The file is then not read at all, because the label store would drop it.</para>
     /// </remarks>
     public sealed class CompiledLabelSource : ILabelSource
     {
         private const string Pattern = "*.Resources.dll";
+        private const string ResourcesFolder = "Resources";
 
         /// <inheritdoc />
         public LabelSourceResult Load(LabelLoadRequest request, CancellationToken cancellationToken)
@@ -49,7 +53,7 @@ namespace BE.LabelExtension.Core.Sources
                     }
 
                     labelFile.AddLanguage(language, path);
-                    if (!request.IsRequested(language))
+                    if (!request.IsRequested(language) || request.HasTextLabelFile(name, language))
                     {
                         continue;
                     }
@@ -77,37 +81,37 @@ namespace BE.LabelExtension.Core.Sources
             return new ModelInfo(package, package, package, ModelLayer.SYS, isLocked: false, isReadOnly: true, packageDirectory, packageDirectory);
         }
 
-        // Recursive search that skips folders it may not read instead of failing as a whole.
-        private static IEnumerable<string> FindFiles(string root, IMessageSink messages, CancellationToken cancellationToken)
+        // Searches <Package>\Resources\<Language> and skips folders it may not read instead of
+        // failing as a whole.
+        private static List<string> FindFiles(string root, IMessageSink messages, CancellationToken cancellationToken)
         {
-            var pending = new Stack<string>();
-            pending.Push(root);
+            var files = new List<string>();
             int skipped = 0;
-            while (pending.Count > 0)
+            string[] List(Func<string[]> list)
             {
-                cancellationToken.ThrowIfCancellationRequested();
-                string folder = pending.Pop();
-                string[] files;
-                string[] folders;
                 try
                 {
-                    files = Directory.GetFiles(folder, Pattern);
-                    folders = Directory.GetDirectories(folder);
+                    return list();
                 }
                 catch (Exception exception) when (exception is IOException || exception is UnauthorizedAccessException)
                 {
                     skipped++;
+                    return Array.Empty<string>();
+                }
+            }
+
+            foreach (string package in List(() => Directory.GetDirectories(root)))
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                string resources = Path.Combine(package, ResourcesFolder);
+                if (!Directory.Exists(resources))
+                {
                     continue;
                 }
 
-                foreach (string file in files)
+                foreach (string language in List(() => Directory.GetDirectories(resources)))
                 {
-                    yield return file;
-                }
-
-                foreach (string child in folders)
-                {
-                    pending.Push(child);
+                    files.AddRange(List(() => Directory.GetFiles(language, Pattern)));
                 }
             }
 
@@ -115,6 +119,8 @@ namespace BE.LabelExtension.Core.Sources
             {
                 messages.Report(MessageSeverity.Warning, $"{skipped} folders below {root} could not be searched for compiled labels.");
             }
+
+            return files;
         }
     }
 }

@@ -119,7 +119,7 @@ namespace BE.LabelExtension.Tests.Store
             string compiledPackage = Path.Combine(this.packages.PackagesDirectory, "DemoCompiled", "Resources");
             string de = this.packages.WriteCompiledLabels(compiledPackage, "DMC", "de", new Dictionary<string, string> { ["DMC1"] = "Kompiliert", ["@DMC2001"] = "Alte Form kompiliert" });
             this.packages.WriteCompiledLabels(compiledPackage, "DMC", "en-US", new Dictionary<string, string> { ["DMC1"] = "Compiled" });
-            string bdm2 = this.packages.WriteCompiledLabels(Path.Combine(this.packages.PackagesDirectory, "BEDemo2", "bin", "Resources"), "BDM2", "de", new Dictionary<string, string> { ["BDM210000001"] = "aus der Ressource" });
+            string bdm2 = this.packages.WriteCompiledLabels(Path.Combine(this.packages.PackagesDirectory, "BEDemo2", "Resources"), "BDM2", "de", new Dictionary<string, string> { ["BDM210000001"] = "aus der Ressource" });
 
             await this.LoadAsync("de", "en-US");
 
@@ -136,6 +136,52 @@ namespace BE.LabelExtension.Tests.Store
             File.Delete(de);
             File.Delete(bdm2);
             Assert.False(File.Exists(de));
+        }
+
+        /// <summary>
+        /// Where a .label.txt exists, the compiled resource of the same label file and language
+        /// is not even read. A damaged one therefore gives no warning.
+        /// </summary>
+        [Fact]
+        public async Task LoadAsync_CompiledResourceWithLabelTxt_IsNotRead()
+        {
+            string folder = Path.Combine(this.packages.PackagesDirectory, "BEDemo2", "Resources", "de");
+            Directory.CreateDirectory(folder);
+            File.WriteAllBytes(Path.Combine(folder, "BDM2.Resources.dll"), new byte[] { 1, 2, 3 });
+
+            await this.LoadAsync("de");
+
+            Assert.Equal("Lieferung", this.store.Find("@BDM2:BDM210000001")?.GetText("de"));
+            Assert.DoesNotContain(this.messages.Messages, m => m.Message.Contains("BDM2.Resources.dll"));
+        }
+
+        /// <summary>
+        /// Only Resources\&lt;Language&gt; directly below the package counts. The bin folders
+        /// hold satellite assemblies of .NET with the same name pattern, which are no labels.
+        /// </summary>
+        [Fact]
+        public async Task LoadAsync_ResourcesOutsideThePackageResourcesFolder_AreIgnored()
+        {
+            string package = Path.Combine(this.packages.PackagesDirectory, "DemoCompiled");
+            this.packages.WriteCompiledLabels(Path.Combine(package, "bin"), "Satellite", "de", new Dictionary<string, string> { ["Message"] = "Keine Label" });
+            this.packages.WriteCompiledLabels(Path.Combine(package, "Resources", "de", "deeper"), "Deeper", "de", new Dictionary<string, string> { ["DEEP1"] = "Zu tief" });
+            this.packages.WriteCompiledLabels(Path.Combine(package, "Resources"), "DMC", "de", new Dictionary<string, string> { ["DMC1"] = "Kompiliert" });
+
+            await this.LoadAsync("de");
+
+            Assert.Equal("Kompiliert", this.store.Find("@DMC:DMC1")?.GetText("de"));
+            Assert.Null(this.store.Find("@Satellite:Message"));
+            Assert.Null(this.store.Find("@Deeper:DEEP1"));
+            Assert.DoesNotContain(this.store.LabelFiles, f => f.Name == "Satellite" || f.Name == "Deeper");
+        }
+
+        /// <summary>F14: the message after loading names the memory.</summary>
+        [Fact]
+        public async Task LoadAsync_Message_NamesTheMemory()
+        {
+            await this.LoadAsync("de");
+
+            Assert.Contains(this.messages.Messages, m => m.Severity == MessageSeverity.Message && m.Message.Contains("MB managed") && m.Message.Contains("MB private bytes"));
         }
 
         /// <summary>TC10: a damaged label file, a missing package directory and a locked file give a message each, the rest is loaded.</summary>

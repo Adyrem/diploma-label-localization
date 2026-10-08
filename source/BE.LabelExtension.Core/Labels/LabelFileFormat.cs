@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace BE.LabelExtension.Core.Labels
@@ -15,15 +16,18 @@ namespace BE.LabelExtension.Core.Labels
     /// spaces is a comment. Only the first comment line after a label counts, comment lines
     /// before the first label are ignored, and empty lines do not count. If an ID appears
     /// twice, the first one wins.</para>
-    /// <para>Writing is always UTF-8 with byte order mark and Windows line endings: each label
-    /// as <c>ID=Text</c>, an empty text as one space, the comment as the following line
-    /// <c> ;Comment</c>.</para>
+    /// <para>Writing is UTF-8 with Windows line endings: each label as <c>ID=Text</c>, an
+    /// empty text as one space, the comment as the following line <c> ;Comment</c>. A file
+    /// keeps its byte order mark as read, a new file gets one. The existing tool always
+    /// writes one.</para>
     /// </remarks>
     public static class LabelFileFormat
     {
         private const string LineBreak = "\r\n";
 
-        /// <summary>UTF-8 with byte order mark, as the existing tool writes.</summary>
+        private static readonly Encoding WithoutByteOrderMark = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
+
+        /// <summary>UTF-8 with byte order mark, for new files and for files read with one.</summary>
         public static Encoding Encoding { get; } = new UTF8Encoding(encoderShouldEmitUTF8Identifier: true);
 
         /// <summary>Reads a label file.</summary>
@@ -41,6 +45,15 @@ namespace BE.LabelExtension.Core.Labels
         /// <returns>The labels and the problems found.</returns>
         public static LabelFileContent Read(Stream stream)
         {
+            if (!stream.CanSeek)
+            {
+                var buffer = new MemoryStream();
+                stream.CopyTo(buffer);
+                buffer.Position = 0;
+                stream = buffer;
+            }
+
+            bool hasByteOrderMark = StartsWithByteOrderMark(stream);
             var entries = new List<LabelEntry>();
             var issues = new List<LabelFileIssue>();
             var seen = new HashSet<string>(StringComparer.Ordinal);
@@ -113,16 +126,23 @@ namespace BE.LabelExtension.Core.Labels
             }
 
             Flush();
-            return new LabelFileContent(entries, issues);
+            return new LabelFileContent(entries, issues, hasByteOrderMark);
         }
+
+        /// <summary>Writes the labels in the given order, with byte order mark, as for a new file.</summary>
+        /// <param name="stream">Receives the content.</param>
+        /// <param name="entries">The labels to write.</param>
+        /// <exception cref="ArgumentException">A key, text or comment contains a line break, or a key an equals sign.</exception>
+        public static void Write(Stream stream, IEnumerable<LabelEntry> entries) => Write(stream, entries, byteOrderMark: true);
 
         /// <summary>Writes the labels in the given order.</summary>
         /// <param name="stream">Receives the content.</param>
         /// <param name="entries">The labels to write.</param>
+        /// <param name="byteOrderMark">Whether to start with the byte order mark, as <see cref="LabelFileContent.HasByteOrderMark"/> of the file read.</param>
         /// <exception cref="ArgumentException">A key, text or comment contains a line break, or a key an equals sign.</exception>
-        public static void Write(Stream stream, IEnumerable<LabelEntry> entries)
+        public static void Write(Stream stream, IEnumerable<LabelEntry> entries, bool byteOrderMark)
         {
-            using var writer = new StreamWriter(stream, Encoding, bufferSize: 65536, leaveOpen: true) { NewLine = LineBreak };
+            using var writer = new StreamWriter(stream, byteOrderMark ? Encoding : WithoutByteOrderMark, bufferSize: 65536, leaveOpen: true) { NewLine = LineBreak };
             foreach (LabelEntry entry in entries)
             {
                 Validate(entry);
@@ -140,12 +160,21 @@ namespace BE.LabelExtension.Core.Labels
         }
 
         /// <summary>
+        /// Writes the labels with byte order mark, as for a new file, see
+        /// <see cref="WriteFile(string, IEnumerable{LabelEntry}, bool)"/>.
+        /// </summary>
+        /// <param name="path">Path of the file of one language.</param>
+        /// <param name="entries">The labels to write.</param>
+        public static void WriteFile(string path, IEnumerable<LabelEntry> entries) => WriteFile(path, entries, byteOrderMark: true);
+
+        /// <summary>
         /// Writes the labels into a temporary file next to <paramref name="path"/>, which then
         /// replaces the old file. A failure leaves the old file untouched.
         /// </summary>
         /// <param name="path">Path of the file of one language.</param>
         /// <param name="entries">The labels to write.</param>
-        public static void WriteFile(string path, IEnumerable<LabelEntry> entries)
+        /// <param name="byteOrderMark">Whether to start with the byte order mark, as <see cref="LabelFileContent.HasByteOrderMark"/> of the file read.</param>
+        public static void WriteFile(string path, IEnumerable<LabelEntry> entries, bool byteOrderMark)
         {
             string directory = Path.GetDirectoryName(Path.GetFullPath(path))!;
             string temporary = Path.Combine(directory, $".{Path.GetFileName(path)}.{Guid.NewGuid():N}.tmp");
@@ -153,7 +182,7 @@ namespace BE.LabelExtension.Core.Labels
             {
                 using (var stream = new FileStream(temporary, FileMode.CreateNew, FileAccess.Write, FileShare.None))
                 {
-                    Write(stream, entries);
+                    Write(stream, entries, byteOrderMark);
                 }
 
                 if (File.Exists(path))
@@ -188,5 +217,22 @@ namespace BE.LabelExtension.Core.Labels
         }
 
         private static bool HasLineBreak(string value) => value.IndexOf('\r') >= 0 || value.IndexOf('\n') >= 0;
+
+        // Looks at the first bytes and goes back, so that the reader sees them as well.
+        private static bool StartsWithByteOrderMark(Stream stream)
+        {
+            long start = stream.Position;
+            byte[] preamble = Encoding.GetPreamble();
+            var head = new byte[preamble.Length];
+            int read = 0;
+            int count;
+            while (read < head.Length && (count = stream.Read(head, read, head.Length - read)) > 0)
+            {
+                read += count;
+            }
+
+            stream.Position = start;
+            return read == preamble.Length && head.SequenceEqual(preamble);
+        }
     }
 }

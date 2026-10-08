@@ -11,10 +11,12 @@ namespace BE.LabelExtension.Core.Labels
         /// <summary>Creates the content.</summary>
         /// <param name="entries">The labels in their order, each ID once.</param>
         /// <param name="issues">The problems found while reading.</param>
-        public LabelFileContent(IReadOnlyList<LabelEntry> entries, IReadOnlyList<LabelFileIssue> issues)
+        /// <param name="hasByteOrderMark">Whether the file starts with the byte order mark of UTF-8.</param>
+        public LabelFileContent(IReadOnlyList<LabelEntry> entries, IReadOnlyList<LabelFileIssue> issues, bool hasByteOrderMark)
         {
             this.Entries = entries;
             this.Issues = issues;
+            this.HasByteOrderMark = hasByteOrderMark;
         }
 
         /// <summary>The labels in their order, each ID once.</summary>
@@ -22,6 +24,12 @@ namespace BE.LabelExtension.Core.Labels
 
         /// <summary>The problems found while reading.</summary>
         public IReadOnlyList<LabelFileIssue> Issues { get; }
+
+        /// <summary>
+        /// Whether the file starts with the byte order mark of UTF-8. Writing keeps it as it
+        /// was, so that saving does not change the first line of a file without one.
+        /// </summary>
+        public bool HasByteOrderMark { get; }
 
         /// <summary>
         /// Whether the file contains a line that is neither a label nor a comment. Such a file
