@@ -198,7 +198,7 @@ namespace BE.LabelExtension.Core.Store
 
             this.messages.Report(
                 MessageSeverity.Message,
-                $"{next.Index.Count} labels loaded from {next.DocumentCount} files of {next.LabelFiles.Count} label files in {models.Count} models, in {stopwatch.Elapsed.TotalSeconds:0.0} s. {DescribeMemory(managedBefore)}");
+                $"{next.Index.Count} labels loaded from {next.DocumentCount} files of {next.LabelFiles.Count} label files ({next.LabelFiles.Count(f => f.IsCompiled)} of them only compiled) in {models.Count} models, in {stopwatch.Elapsed.TotalSeconds:0.0} s. {DescribeMemory(managedBefore)}");
             this.Changed?.Invoke(this, EventArgs.Empty);
         }
 

@@ -66,7 +66,7 @@ namespace BE.LabelExtension.Probes
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 
             string? moniker = ActiveDocumentMoniker(monitor);
-            report.Line($"active document: {moniker ?? "none"}");
+            report.Line($"active document: {ProbeReport.PathShape(moniker)}");
 
             List<object> selected = SelectedObjects(monitor);
             report.Line($"selected objects: {selected.Count}");
@@ -97,12 +97,12 @@ namespace BE.LabelExtension.Probes
 
             if (string.IsNullOrEmpty(xmlPath) || !File.Exists(xmlPath))
             {
-                report.Line($"XML file not found: {xmlPath ?? "none given"}");
+                report.Line($"XML file not found: {ProbeReport.PathShape(xmlPath)}");
                 report.Send(this.sink);
                 return;
             }
 
-            report.Line($"XML file: {xmlPath}");
+            report.Line($"XML file: {ProbeReport.PathShape(xmlPath)}");
             string xml = File.ReadAllText(xmlPath);
             foreach (var (name, labelValues) in nodes)
             {
@@ -172,7 +172,7 @@ namespace BE.LabelExtension.Probes
         {
             string className = ProbeReport.Safe(() => TypeDescriptor.GetClassName(item) ?? string.Empty);
             string componentName = ProbeReport.Safe(() => TypeDescriptor.GetComponentName(item) ?? string.Empty);
-            report.Line($"object {ProbeReport.TypeName(item)}, class name '{className}', component '{componentName}'");
+            report.Line($"object {ProbeReport.TypeName(item)}, class name '{className}', component {(componentName.Length == 0 ? "without name" : "with a name")}");
 
             // The Properties window filters with BrowsableAttribute.Yes; without the filter
             // a designer node shows only ModelElement (findings log, section "Nachtrag: das
@@ -185,7 +185,7 @@ namespace BE.LabelExtension.Probes
             foreach (PropertyDescriptor property in properties)
             {
                 string value = ProbeReport.Safe(() => Convert.ToString(property.GetValue(item)) ?? string.Empty);
-                report.Line($"    {property.Name} = {ProbeReport.Shorten(value, 60)}{(property.IsReadOnly ? " (read-only)" : string.Empty)}");
+                report.Line($"    {property.Name} = {ProbeReport.ValueShape(value)}{(property.IsReadOnly ? " (read-only)" : string.Empty)}");
 
                 if (property.Name == "Name" && !string.IsNullOrEmpty(value))
                 {
@@ -209,7 +209,7 @@ namespace BE.LabelExtension.Probes
             {
                 IReadOnlyList<XmlNodeLocation> found = ElementXmlLocator.FindElements(new StringReader(xml), elementName, value);
                 string verdict = found.Count == 1 ? "unique" : found.Count == 0 ? "not found" : "NOT unique";
-                report.Line($"  <{elementName}>{ProbeReport.Shorten(value, 60)}</{elementName}>: {found.Count} found, {verdict}");
+                report.Line($"  <{elementName}>{ProbeReport.ValueShape(value)}</{elementName}>: {found.Count} found, {verdict}");
                 foreach (XmlNodeLocation location in found.Take(10))
                 {
                     report.Line($"    {location}");

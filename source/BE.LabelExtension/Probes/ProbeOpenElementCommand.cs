@@ -102,7 +102,7 @@ namespace BE.LabelExtension.Probes
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 
             var report = new ProbeReport($"{Title}, way {strategy}");
-            report.Line($"file: {path} (exists: {File.Exists(path)})");
+            report.Line($"file: {ProbeReport.PathShape(path)} (exists: {File.Exists(path)})");
 
             IVsWindowFrame? frame = strategy == "3"
                 ? await OpenWithDteAsync(path!, report)
@@ -145,7 +145,7 @@ namespace BE.LabelExtension.Probes
             try
             {
                 EnvDTE.Window window = dte.ItemOperations.OpenFile(path, EnvDTE.Constants.vsViewKindPrimary);
-                report.Line($"opened with DTE: caption '{ProbeReport.Safe(() => window.Caption)}', kind {ProbeReport.Safe(() => window.Kind)}, object kind {ProbeReport.Safe(() => window.ObjectKind)}, document {ProbeReport.Safe(() => window.Document?.FullName ?? "none")}");
+                report.Line($"opened with DTE: caption '{ProbeReport.Safe(() => ProbeReport.FileShape(window.Caption))}', kind {ProbeReport.Safe(() => window.Kind)}, object kind {ProbeReport.Safe(() => window.ObjectKind)}, document {ProbeReport.Safe(() => ProbeReport.PathShape(window.Document?.FullName))}");
             }
             catch (Exception exception)
             {
@@ -173,7 +173,7 @@ namespace BE.LabelExtension.Probes
             frame.GetProperty((int)__VSFPROPID.VSFPROPID_DocView, out object docView);
             frame.GetProperty((int)__VSFPROPID.VSFPROPID_DocData, out object docData);
 
-            report.Line($"window: caption '{caption}', moniker {moniker}, physical view '{physicalView}', editor type {editorType}");
+            report.Line($"window: caption '{ProbeReport.FileShape(caption as string)}', moniker {ProbeReport.PathShape(moniker as string)}, physical view '{physicalView}', editor type {editorType}");
             report.DescribeObject("document view", docView);
             report.DescribeObject("document data", docData);
             report.Line($"text view available: {VsShellUtilities.GetTextView(frame) != null}");
@@ -199,7 +199,7 @@ namespace BE.LabelExtension.Probes
             ErrorHandler.ThrowOnFailure(lines.GetLineText(0, 0, lastLine, lastIndex, out string text));
 
             IReadOnlyList<int> found = LabelIdOccurrences.Find(text, labelId);
-            report.Line($"cursor: {found.Count} occurrences of {labelId} in the text view ({text.Length} characters)");
+            report.Line($"cursor: {found.Count} occurrences of the {ProbeReport.ValueShape(labelId)} in the text view ({text.Length} characters)");
             if (found.Count < occurrence)
             {
                 report.Line($"cursor: occurrence {occurrence} does not exist");

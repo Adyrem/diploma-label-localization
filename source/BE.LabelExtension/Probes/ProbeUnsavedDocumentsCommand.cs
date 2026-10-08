@@ -63,7 +63,7 @@ namespace BE.LabelExtension.Probes
                     unsaved++;
                 }
 
-                report.Line($"  {state,-8} {info.Moniker} | {ProbeReport.TypeName(info.DocData)} | 0x{info.Flags:X}");
+                report.Line($"  {state,-8} {ProbeReport.PathShape(info.Moniker)} | {ProbeReport.TypeName(info.DocData)} | 0x{info.Flags:X}");
             }
 
             report.Line($"  {count} documents, {unsaved} unsaved");
@@ -73,7 +73,7 @@ namespace BE.LabelExtension.Probes
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
             foreach (EnvDTE.Document document in dte.Documents)
             {
-                report.Line($"  {ProbeReport.Safe(() => document.Saved.ToString()),-6} {ProbeReport.Safe(() => document.Kind)} {ProbeReport.Safe(() => document.FullName)}");
+                report.Line($"  {ProbeReport.Safe(() => document.Saved.ToString()),-6} {ProbeReport.Safe(() => document.Kind)} {ProbeReport.Safe(() => ProbeReport.PathShape(document.FullName))}");
             }
 
             report.Send(this.sink);

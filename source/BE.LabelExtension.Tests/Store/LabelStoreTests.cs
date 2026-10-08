@@ -132,6 +132,7 @@ namespace BE.LabelExtension.Tests.Store
 
             Assert.Equal("Lieferung", this.store.Find("@BDM2:BDM210000001")?.GetText("de"));
             Assert.DoesNotContain(this.store.LabelFiles, f => f.IsCompiled && f.Name == "BDM2");
+            Assert.Contains(this.messages.Messages, m => m.Message.Contains("label files (1 of them only compiled)"));
 
             File.Delete(de);
             File.Delete(bdm2);
