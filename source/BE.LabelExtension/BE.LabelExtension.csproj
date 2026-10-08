@@ -1,11 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <!--
     The extension: VisualStudio.Extensibility running in the Visual Studio process
-    together with MEF, in a single VSIX (variant decision V4).
+    together with MEF, in a single VSIX (decision E3, extension model).
 
     Build with the MSBuild of Visual Studio and with restore and build as two separate
     calls. A combined call evaluates the project before the SDK targets are restored and
-    fails with VSEXT0008 (findings log, section 11).
+    fails with VSEXT0008 (findings log, section "Stolpersteine beim Bau und bei der
+    Bereitstellung").
   -->
   <PropertyGroup>
     <TargetFramework>net48</TargetFramework>

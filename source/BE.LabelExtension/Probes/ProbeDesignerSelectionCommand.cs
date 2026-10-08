@@ -175,7 +175,8 @@ namespace BE.LabelExtension.Probes
             report.Line($"object {ProbeReport.TypeName(item)}, class name '{className}', component '{componentName}'");
 
             // The Properties window filters with BrowsableAttribute.Yes; without the filter
-            // a designer node shows only ModelElement (findings log, section 9.5).
+            // a designer node shows only ModelElement (findings log, section "Nachtrag: das
+            // Objekt hinter ModelElement").
             PropertyDescriptorCollection properties = TypeDescriptor.GetProperties(item, new Attribute[] { BrowsableAttribute.Yes });
             report.Line($"  browsable properties: {properties.Count}");
 

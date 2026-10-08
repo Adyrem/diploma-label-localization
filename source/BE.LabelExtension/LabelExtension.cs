@@ -14,7 +14,7 @@ namespace BE.LabelExtension
 {
     /// <summary>
     /// Entry point of the extension. It runs in the Visual Studio process, because the
-    /// tooltip and the inline display need MEF (variant decision V4). In this mode the
+    /// tooltip and the inline display need MEF (decision E3, extension model). In this mode the
     /// identity comes from source.extension.vsixmanifest, so Metadata stays empty.
     /// </summary>
     [VisualStudioContribution]
