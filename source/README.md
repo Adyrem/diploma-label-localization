@@ -48,7 +48,7 @@ $ide = "C:\Program Files\Microsoft Visual Studio\18\Community\Common7\IDE"
 
 Ohne `/updateconfiguration` registriert Visual Studio die Menüs, Commands und das Tool Window der Extension nicht, auch nach einer Installation per Doppelklick. Danach erscheint das Menü *Extensions > BE-LabelExtension*.
 
-Der Debug-Build enthält dort zusätzlich Probe-Commands für den ersten Durchgang auf der Testumgebung. Sie lesen nur und schreiben ihr Ergebnis in den Bereich *BE-LabelExtension* des Output Window.
+Der Debug-Build enthält dort zusätzlich Probe-Commands für den ersten Durchgang auf der Testumgebung. Sie lesen nur und schreiben ihr Ergebnis in den Bereich *BE-LabelExtension* des Output Window. Pfade, Namen und Werte geben sie nur als Form aus, etwa `C:\<Name>\Metadata\<Name>\<Name>\AxClass\<Name>.xml`, weil die Ergebnisse die Testumgebung verlassen.
 
 ## Ohne Dynamics 365 entwickeln
 
@@ -69,6 +69,7 @@ Die Label-Dateien des Datensatzes sind UTF-8 mit BOM und Windows-Zeilenenden. `.
 | Skript | Zweck |
 | --- | --- |
 | `tools\Get-LabelEnvironmentStructure.ps1` | Liest auf der Testumgebung den Aufbau von Metadaten-Konfiguration, Descriptor, Label-Dateien und kompilierten Ressourcen. Gibt nur Feldnamen, Typen, Anzahlen und Pfade mit Platzhaltern aus. |
+| `tools\Measure-ElementSearch.ps1` | Misst auf der Testumgebung, wie lange eine Textsuche über die XML-Dateien der Elemente dauert, für alle Models, ab Layer VAR, ab Layer CUS und für die beschreibbaren. Gibt nur Anzahlen, Grössen und Zeiten aus. |
 | `tools\Capture-ExistingToolResults.ps1` | Erfasst die Trefferlisten des bestehenden BE-LabelEditor für die Begriffe in `tools\ExistingToolSearchTerms.txt` in allen acht Suchmodi. Das Ergebnis `BE.LabelExtension.Tests\TestData\ExpectedSearchResults.json` ist die Vorgabe für TC04. Die Vorbereitung steht im Kopf des Skripts. |
 
-Beide laufen unter Windows PowerShell 5.1.
+Alle laufen unter Windows PowerShell 5.1.
