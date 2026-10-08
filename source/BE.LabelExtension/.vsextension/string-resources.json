@@ -4,5 +4,6 @@
   "BE.LabelExtension.ProbeOpenElementCommand.DisplayName": "Probe: Open element at a location",
   "BE.LabelExtension.ProbeUnsavedDocumentsCommand.DisplayName": "Probe: List unsaved documents",
   "BE.LabelExtension.ProbeDesignerSelectionCommand.DisplayName": "Probe: Find selected designer node in XML",
+  "BE.LabelExtension.ProbeSearchTimesCommand.DisplayName": "Probe: Measure search times",
   "BE.LabelExtension.ProbeTestErrorCommand.DisplayName": "Probe: Trigger test error"
 }

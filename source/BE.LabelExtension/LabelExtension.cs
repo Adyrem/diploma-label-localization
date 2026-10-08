@@ -42,6 +42,7 @@ namespace BE.LabelExtension
                 MenuChild.Command<Probes.ProbeOpenElementCommand>(),
                 MenuChild.Command<Probes.ProbeUnsavedDocumentsCommand>(),
                 MenuChild.Command<Probes.ProbeDesignerSelectionCommand>(),
+                MenuChild.Command<Probes.ProbeSearchTimesCommand>(),
                 MenuChild.Separator,
                 MenuChild.Command<Probes.ProbeTestErrorCommand>(),
             ],
