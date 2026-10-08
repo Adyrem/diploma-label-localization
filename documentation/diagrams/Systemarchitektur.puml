@@ -34,7 +34,7 @@ node "Visual Studio 2026, Prozess devenv.exe" as VS {
   component "Developer Tools\nvon Dynamics 365" as D365
 }
 
-package "Testprojekt (.NET 8 und .NET Framework 4.8)" as TEST {
+package "Testprojekt (.NET Framework 4.8)" as TEST {
   component "Unit Tests" as UT
 }
 

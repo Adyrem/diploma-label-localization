@@ -646,18 +646,20 @@ Die Extension heisst BE-LabelExtension. Die Lösung liegt im Repository unter
 `source` und besteht aus drei Projekten, `BE.LabelExtension`,
 `BE.LabelExtension.Core` und `BE.LabelExtension.Tests`. Die Kernlogik enthält alles, was ohne
 Visual Studio auskommt, und zielt auf .NET Standard 2.0. Die Extension zielt auf
-.NET Framework 4.8, weil sie im Prozess von Visual Studio läuft, und bindet die
+.NET Framework 4.8, weil sie im Prozess von Visual Studio läuft
+@ms-extensibility-models, und bindet die
 Kernlogik als Assembly ein. Mit .NET Framework 4.8 lief auch die Laufzeitprobe auf
 der Testumgebung. Ein Testprojekt prüft die Kernlogik ohne Visual Studio und ohne
-Dynamics 365. Es zielt auf .NET 8 und auf .NET Framework 4.8. Unter .NET 8 laufen
-die Tests auch ausserhalb von Windows, unter .NET Framework 4.8 auf derselben
-Laufzeit wie im Betrieb. Die Tests verwenden vorerst xUnit. Macht es Probleme,
+Dynamics 365. Es zielt auf .NET Framework 4.8, die Runtime, auf der Visual Studio
+die Extension ausführt. Die Tests verwenden vorerst xUnit. Macht es Probleme,
 lässt es sich durch ein anderes Framework ersetzen, ohne die Kernlogik zu
 ändern.
 
 Weil .NET Standard weder WPF noch das Visual Studio SDK kennt, kann die Kernlogik
 nicht versehentlich von Visual Studio abhängig werden. Damit ist Z8 in der Struktur
-der Lösung verankert. Ausgeliefert wird ein einziges VSIX-Paket mit den Assemblies
+der Lösung verankert. .NET Standard ist dabei keine eigene Runtime, sondern eine
+Spezifikation von Schnittstellen, die .NET Framework 4.8 umsetzt @ms-net-standard.
+Ausgeführt wird die ganze Lösung deshalb auf einer einzigen Runtime. Ausgeliefert wird ein einziges VSIX-Paket mit den Assemblies
 der Extension und der Kernlogik.
 
 #figure(
@@ -803,12 +805,13 @@ der Extension und der Kernlogik.
        hexadezimale Ziffern in Grossbuchstaben, etwa `L3F2A9C15B8047DE1`. Die
        Label-Datei steht wie bisher davor, die User-ID entfällt. Gibt es die
        erzeugte ID in der Label-Datei schon, erzeugt die Extension eine neue.],
-      [Aus der Logik übernommen, die im Betrieb bereits verwendet wird.],
+      [Aus der Logik übernommen, die BE-terna bereits einsetzt.],
 
       [Label-Formen],
       [Die alte Form ohne Doppelpunkt, etwa `@SYS12345`, kommt im Code und in
        Eigenschaften noch an vielen Stellen vor. In der Label-Datei steht sie mit
-       vollständiger ID samt `@`. Suche, Tooltip, Inline-Anzeige, Öffnen im Tool Window,
+       vollständiger ID samt `@`. Ihre Label-Datei ergibt sich nur aus der Datei,
+       in der das Label steht, nicht aus den Buchstaben der ID. Suche, Tooltip, Inline-Anzeige, Öffnen im Tool Window,
        Auswahl im Designer, Bearbeiten, Verwendungssuche, Ersetzen, Kopieren und
        Verschieben verarbeiten beide Formen. Neue Labels entstehen nur in der
        neuen Form, auch beim Kopieren und Verschieben.],
@@ -982,7 +985,7 @@ soweit dieses Kapitel nichts anderes festlegt, siehe @fachliche_regeln.
        beschreibbaren Models.],
 
       [Löschen],
-      [Entfernt das Label in allen beschreibbaren Label-Dateien, ohne Rückfrage
+      [Entfernt das Label in allen Sprachen der Label-Datei, ohne Rückfrage
        und ohne Prüfung der Verwendungen, wie im bestehenden Tool.],
 
       [Speichern],
@@ -1038,8 +1041,8 @@ Methoden.
         [*Klasse*], [*Beschreibung*], [*Wichtige Methoden*],
       ),
       [`LabelId`],
-      [Label-ID in einer der beiden Formen aus @festlegungen. Trennt eine ID in
-       Label-Datei und Label. `FindAll` findet Label-IDs in einer Textzeile, für
+      [Label-ID in einer der beiden Formen aus @festlegungen. Trennt eine ID der
+       neuen Form in Label-Datei und Label, die alte Form bleibt ungeteilt. `FindAll` findet Label-IDs in einer Textzeile, für
        den Ersatz des X++-Editors im Debug-Build und als Fallback aus R07.],
       [`TryParse`\ `Parse`\ `FindAll`],
 
@@ -1338,7 +1341,7 @@ dort auch anzeigen, ob ein Shortcut schon vergeben ist @ms-vs-customize-shortcut
 Getestet wird auf drei Stufen.
 
 - Unit Tests prüfen die Kernlogik ohne Visual Studio und ohne Dynamics 365. Sie
-  laufen bei jedem Build unter .NET 8 und unter .NET Framework 4.8.
+  laufen bei jedem Build unter .NET Framework 4.8.
 - Systemtests prüfen die Extension in Visual Studio. Sie laufen zuerst auf dem
   privaten Gerät mit dem Debug-Build, die Testfälle zum X++-Editor dort über den
   Ersatz aus @festlegungen. Auf der Testumgebung laufen sie in den Durchgängen aus
@@ -1423,8 +1426,8 @@ Entwicklungs-VM. OA04 folgt erst nach Projektabschluss und hat keinen Testfall.
       [TC02],
       [Label-IDs beider Formen parsen und in einer Textzeile finden, dazu
        ungültige Eingaben.],
-      [`@BDM1:L3F2A9C15B8047DE1` und `@SYS12345` werden erkannt und getrennt.
-       Ungültige Eingaben liefern `false` ohne Exception. `FindAll` findet alle IDs
+      [`@BDM1:L3F2A9C15B8047DE1` und `@SYS12345` werden erkannt. Die neue Form
+       wird in Label-Datei und Label getrennt, die alte bleibt ungeteilt. Ungültige Eingaben liefern `false` ohne Exception. `FindAll` findet alle IDs
        einer Zeile mit Position.],
       [FA01\ FA05],
 

@@ -333,7 +333,7 @@ Entwickelt wird für Visual Studio 2026, getestet zusätzlich unter Visual Studi
 wenn die Extension dadurch unter 2022 nicht den vollen Funktionsumfang hat. Fehler,
 die nur unter 2022 auftreten, werden mit tiefer Priorität behoben. Die Extension wird als VSIX-Paket
 ausgeliefert. Welche Erweiterungspunkte ihr zur Verfügung stehen, entscheidet die
-Wahl des Extension-Modells in V4.
+Wahl des Extension-Modells in E3.
 
 In den Label-Prozess von Dynamics 365 lässt sich nicht eingreifen. Das Format der
 Label-Dateien ist damit vorgegeben. Die Extension liest und schreibt diese Dateien
@@ -395,25 +395,32 @@ ausgelieferte Lösungen eingreift.
       [Begleitet die Arbeit an zwei Vorzeigeterminen und bewertet Dokumentation,
        Ergebnis und Präsentation.],
 
-      [Experte],
+      [Experte im Betrieb],
       [Eine fachlich nachvollziehbare Arbeit, deren Ergebnis sich im Unternehmen
        einsetzen lässt.],
-      [Hoch],
-      [Entwickler bei BE-terna. Bewertet die Arbeit zusammen mit der Betreuung und
-       nimmt die Präsentation ab.],
+      [Mittel],
+      [Entwickler bei BE-terna. Berät fachlich und unterstützt bei Tests, bewertet
+       die Arbeit aber nicht.],
+
+      [Experte der TEKO\ Patrick Graber],
+      [Eine Präsentation, die Vorgehen und Ergebnis der Arbeit nachvollziehbar
+       zeigt.],
+      [Tief],
+      [Ist an der Präsentation anwesend und stellt Fragen zur Arbeit. Während des
+       Projekts hat er keinen Einfluss.],
     ),
     caption: [Stakeholderanalyse (eigene Darstellung)]
   ) <stakeholderanalyse>
 ]
 
-Zwei der fünf Rollen aus der Tabelle nehme ich selbst ein, einerseits als
+Zwei der sechs Rollen aus der Tabelle nehme ich selbst ein, einerseits als
 Entwickler, der das Tool täglich benutzt, andererseits als Maintainer, der es
 weiterentwickelt und bereitstellt. Dazu kommt die Rolle des Firmenbetreuers. Das verkürzt die
 Abstimmungswege erheblich, birgt aber die Gefahr, dass Anforderungen aus meiner
 eigenen Arbeitsweise heraus formuliert werden und nicht aus der Sicht der übrigen
-Entwickler. Dagegen wird die Arbeit dem Experten vorgezeigt, sobald erste
-Teile des Konzepts stehen. Der Punkt steht ausserdem als R09 in der
-Risikoanalyse.
+Entwickler. Dagegen gibt der Experte im Betrieb als weiterer Entwickler während der
+Realisierung Rückmeldungen zur Entwicklung und unterstützt bei den Tests. Der Punkt
+steht ausserdem als R09 in der Risikoanalyse.
 
 == Grobe Anforderungen an das neue System
 
@@ -529,8 +536,9 @@ Abhängigkeiten in @detailanforderungen.
 
 === Varianten <varianten>
 
-Die Wahl der IDE ist durch die Aufgabenstellung vorgegeben. Offen sind fünf
-technische Entscheidungen, die den Aufbau der Extension prägen.
+Die Wahl der IDE ist durch die Aufgabenstellung vorgegeben. Offen sind vier
+technische Entscheidungen E1 bis E4, die den Aufbau der Extension prägen. Für jede
+stehen zwei oder drei Varianten zur Wahl.
 
 Mehrere Varianten betreffen die Erweiterungspunkte des Editors von Visual Studio.
 QuickInfo ist das Fenster, das beim Überfahren mit der Maus erscheint. Ein
@@ -558,7 +566,7 @@ Lauf gegen echte Label-Dateien.
             Beispieldaten (eigene Darstellung)]
 ) <demo_quickinfo>
 
-#heading(outlined: false, level: 4)[V1 Zugriff auf die Label-Dateien]
+#heading(outlined: false, level: 4)[E1 Zugriff auf die Label-Dateien]
 
 Microsoft liefert mit den Developer Tools eine Metadata-API aus. Das ist eine
 Sammlung von Assemblies, über die sich die Elemente eines Models lesen und schreiben
@@ -592,8 +600,11 @@ Models ablegt. @verzeichnisstruktur zeigt den Aufbau dieses Ordners.
       [Keine. Die Kernlogik läuft ohne installierte Developer Tools.],
       [Bindet die Extension an die Assemblies der lokalen D365-Installation.],
       [Formatänderungen],
-      [Muss selbst nachgezogen werden, wenn Microsoft das Format ändert.],
-      [Werden von der API abgefangen.],
+      [Ablage und Format der Label-Dateien müssen selbst nachgezogen werden,
+       wenn Microsoft sie ändert.],
+      [Die API findet die Label-Dateien. Ihren Inhalt liefert sie unverarbeitet,
+       Änderungen am Format innerhalb der Datei müssen also auch hier selbst
+       nachgezogen werden.],
       [Testbarkeit],
       [Unit Tests gegen Beispieldateien möglich, ohne D365.],
       [Tests brauchen die Assemblies und ein Package-Verzeichnis.],
@@ -619,45 +630,7 @@ Models ablegt. @verzeichnisstruktur zeigt den Aufbau dieses Ordners.
 Die Angaben zu Target Framework, Geschwindigkeit und Parsen stammen aus der
 Machbarkeitsstudie, siehe @befundprotokoll.
 
-#heading(outlined: false, level: 4)[V2 Zusätzliches Add-in]
-
-Die Extension wird als VSIX-Paket ausgeliefert und klinkt sich über die
-Erweiterungspunkte von Visual Studio ein. Für die Developer Tools von
-Dynamics 365 besteht daneben ein eigenes Add-in-Modell @ms-addins. Ein Add-in ist
-keine VSIX-Datei, sondern eine Klassenbibliothek, die in den Installationsordner
-dieser Tools kopiert und von ihnen geladen wird. Zu entscheiden ist, ob ein
-solches Add-in zusätzlich gebaut wird.
-
-#[
-  #show figure: set align(left)
-  #set text(size: 10pt)
-  #figure(
-    table(
-      align: left,
-      columns: (auto, 1fr, 1fr),
-      table.header(
-        [*Kriterium*],
-        [*A Nur die Extension*],
-        [*B Extension und Add-in*],
-      ),
-      [Zugang],
-      [Alles, was Visual Studio bietet, also Anzeigen im Editor, eigene Fenster
-       und das Selection Tracking im Designer.],
-      [Zusätzlich zwei Menüeinträge, im Menü Dynamics 365 und im Kontextmenü des
-       Element-Designers.],
-      [Auslieferung],
-      [Ein VSIX-Paket.],
-      [Zusätzlich eine Bibliothek, die in den Installationsordner der
-       Developer Tools kopiert wird.],
-      [Abhängigkeit],
-      [Keine zu den Developer Tools.],
-      [Das Add-in wird von diesen geladen und hängt an ihrer Version.],
-    ),
-    caption: [Variantenvergleich Add-in (eigene Darstellung)]
-  ) <variante_anbindung>
-]
-
-#heading(outlined: false, level: 4)[V3 Ablage der Label-Daten zur Laufzeit]
+#heading(outlined: false, level: 4)[E2 Ablage der Label-Daten zur Laufzeit]
 
 #[
   #show figure: set align(left)
@@ -690,7 +663,11 @@ solches Add-in zusätzlich gebaut wird.
   ) <variante_ablage>
 ]
 
-#heading(outlined: false, level: 4)[V4 Extension-Modell]
+Variante A erfüllt NFA02 nicht. Jede Suche müsste alle Label-Dateien neu lesen,
+und schon das einmalige Laden dauert mit dem synthetischen Datensatz rund zwei
+Sekunden, siehe @ist_konsole. Sie scheidet deshalb aus.
+
+#heading(outlined: false, level: 4)[E3 Extension-Modell]
 
 Visual Studio bietet drei Wege, eine Extension zu bauen @ms-extensibility-models
 @ms-inproc-extensions. Sie unterscheiden sich im Target Framework, im Zugriff auf die
@@ -758,7 +735,7 @@ Visual Studio nicht zum Absturz bringen, was für den out-of-process-Betrieb
 spricht. QuickInfo und die Anbindung an das D365-Add-in-Modell verlangen aber
 Zugriff auf VSSDK und MEF und damit den Betrieb im selben Prozess.
 
-#heading(outlined: false, level: 4)[V5 Verfahren der Verwendungssuche]
+#heading(outlined: false, level: 4)[E4 Verfahren der Verwendungssuche]
 
 FA04 verlangt Fundstellen mit Model, Datei, Zeile und Spalte. Dynamics 365 führt
 dafür eine Cross-Reference-Datenbank, die beim Build mit der entsprechenden Option
@@ -814,8 +791,9 @@ im bestehenden BE-LabelEditor seit Jahren im Einsatz, die Metadata-API ist
 dokumentiert und wird für das Auslesen von Labels bereits eingesetzt
 @meyer-labels-net.
 
-Das Add-in-Modell für die Developer Tools ist dokumentiert und liefert die
-beiden genannten Einstiegspunkte @ms-addins. Die Editor-Erweiterbarkeit von Visual
+Die Developer Tools haben zudem ein eigenes Add-in-Modell. Ein Add-in ist eine
+Klassenbibliothek, die in ihren Installationsordner kopiert wird und Einträge im
+Menü Dynamics 365 und im Kontextmenü des Element-Designers erhält @ms-addins. Die Editor-Erweiterbarkeit von Visual
 Studio mit QuickInfo, Taggern und CodeLens ist ebenfalls dokumentiert
 @ms-editor-extension-points.
 
@@ -825,7 +803,7 @@ Risiko.
 
 #heading(outlined: false, level: 4)[Prototypenvergleich zum Extension-Modell]
 
-Zu V4 wurden drei Prototypen gebaut, je einer pro Modell. Sie kompilieren und
+Zu E3 wurden drei Prototypen gebaut, je einer pro Modell. Sie kompilieren und
 paketieren reproduzierbar unter Visual Studio Community 2026 in der Version 18.9.2
 mit dem .NET SDK 10.0.400. Keiner der drei wurde in einer laufenden
 Visual-Studio-Instanz geladen. Belegt ist damit, dass sich die jeweiligen
@@ -922,7 +900,7 @@ neuen Modells wurden nie in einer laufenden Instanz geladen, belegt ist dort nur
 das Kompilieren und Paketieren. Offen ist auch, ob der Label-Resolver von
 Microsoft innerhalb von Visual Studio läuft.
 
-#heading(outlined: false, level: 4)[Zielkonflikt aus V4]
+#heading(outlined: false, level: 4)[Zielkonflikt aus E3]
 
 Der Betrieb ausserhalb des Visual-Studio-Prozesses würde NFA04 am besten erfüllen,
 denn ein Fehler bliebe auf die Extension beschränkt. Er schliesst aber den Zugriff
@@ -953,12 +931,120 @@ Stufe 3 gekürzt.
 
 === Variantenentscheid <variantenentscheid>
 
-Alle fünf Varianten sind entschieden. Wo die Befunde keinen eindeutigen Vorteil
-zeigen, fällt die Wahl auf das einfachere oder bereits erprobte Verfahren. Die
-jeweils andere Möglichkeit bleibt vorgemerkt.
+Entschieden wird in zwei Schritten. Zuerst scheidet jede Variante aus, die eine
+Anforderung aus den Erfolgskriterien nicht erfüllen kann. Die übrigen Varianten
+vergleicht eine Nutzwertanalyse. Jede Variante erhält je Kriterium eine Note von 1
+bis 5. Eine hohe Note ist immer besser für das Projekt, beim Aufwand heisst sie
+also wenig Aufwand. Der Nutzwert ist die Summe der Noten, gewichtet mit dem Gewicht
+des Kriteriums. Die jeweils unterlegene Variante bleibt vorgemerkt.
 
-Der Betrieb ausserhalb des Visual-Studio-Prozesses scheidet aus, aus zwei
-voneinander unabhängigen Gründen.
+#[
+  #show figure: set align(left)
+  #show figure: set block(breakable: false)
+  #set text(size: 10pt)
+  #figure(
+    table(
+      align: left,
+      columns: (auto, auto, 1fr),
+      table.header(
+        [*Kriterium*], [*Gewicht*], [*Grund für das Gewicht*],
+      ),
+      [Aufwand bis zum Code Freeze], [35 %],
+      [Der Plan hat keinen Puffer, siehe R01.],
+      [Erprobtheit], [20 %],
+      [Ein erprobtes Verfahren senkt das Risiko, dass sich ein Problem erst in der
+       Realisierung zeigt.],
+      [Erweiterbarkeit und Wartbarkeit], [20 %],
+      [Z8 verlangt eine Architektur, die sich ohne Umbau erweitern lässt.],
+      [Testbarkeit ohne Dynamics 365], [15 %],
+      [Entwickelt wird ohne Dynamics 365, siehe R04.],
+      [Kriterium der jeweiligen Entscheidung], [10 %],
+      [Ladezeit, Aktualität, Zukunftssicherheit oder Genauigkeit, je nachdem,
+       worin sich die Varianten zusätzlich unterscheiden.],
+    ),
+    caption: [Kriterien der Nutzwertanalyse (eigene Darstellung)]
+  ) <nwa_kriterien>
+]
+
+#heading(outlined: false, level: 4)[E1 Zugriff auf die Label-Dateien]
+
+Hier scheidet keine Variante vorab aus.
+
+#[
+  #show figure: set align(left)
+  #show figure: set block(breakable: false)
+  #set text(size: 10pt)
+  #figure(
+    table(
+      align: left,
+      columns: (auto, auto, auto, auto),
+      table.header(
+        [*Kriterium*], [*Gewicht*], [*A Direkter Dateizugriff*], [*B Metadata-API*],
+      ),
+      [Aufwand], [35 %], [4], [3],
+      [Erprobtheit], [20 %], [5], [3],
+      [Erweiterbarkeit und Wartbarkeit], [20 %], [4], [3],
+      [Testbarkeit ohne Dynamics 365], [15 %], [5], [2],
+      [Ladezeit], [10 %], [5], [3],
+      [Nutzwert], [100 %], [4,45], [2,85],
+    ),
+    caption: [Nutzwertanalyse E1 Zugriff auf die Label-Dateien (eigene Darstellung)]
+  ) <nwa_e1>
+]
+
+Die Wahl fällt auf den direkten Dateizugriff mit eigenem Parser. Die Messung zeigt
+im warmen Zustand keinen Unterschied, beim ersten Zugriff ist der direkte Weg
+schneller. Die Metadata-API parst die Label-Dateien nicht, sondern liefert deren
+Inhalt unverarbeitet. Ihr Vorteil bleibt damit gering, weil der Parser ohnehin
+selbst zu schreiben ist, und sie bindet die Extension an die Version der lokalen
+Installation.
+
+Den grössten Unterschied machen Erprobtheit und Testbarkeit. Ohne die API bleibt die
+Kernlogik frei von Assemblies der lokalen Installation. Das vereinfacht die Tests
+und macht die Arbeit auf einem anderen System nachvollziehbar, auf dem diese
+Assemblies voraussichtlich fehlen. Z8 verlangt genau das. Aus demselben Grund wird
+der Label-Resolver von Microsoft nicht eingesetzt. Er bleibt für FA05 als
+Möglichkeit vorgemerkt.
+
+#heading(outlined: false, level: 4)[E2 Ablage der Label-Daten zur Laufzeit]
+
+Variante A scheidet an NFA02 aus, siehe @variante_ablage.
+
+#[
+  #show figure: set align(left)
+  #show figure: set block(breakable: false)
+  #set text(size: 10pt)
+  #figure(
+    table(
+      align: left,
+      columns: (auto, auto, auto, auto),
+      table.header(
+        [*Kriterium*], [*Gewicht*], [*B Einmal in den Arbeitsspeicher*], [*C Eigener Index*],
+      ),
+      [Aufwand], [35 %], [4], [2],
+      [Erprobtheit], [20 %], [5], [2],
+      [Erweiterbarkeit und Wartbarkeit], [20 %], [3], [4],
+      [Testbarkeit ohne Dynamics 365], [15 %], [4], [3],
+      [Aktualität], [10 %], [4], [3],
+      [Nutzwert], [100 %], [4,00], [2,65],
+    ),
+    caption: [Nutzwertanalyse E2 Ablage der Label-Daten zur Laufzeit (eigene Darstellung)]
+  ) <nwa_e2>
+]
+
+Die Wahl fällt auf das einmalige Laden in den Arbeitsspeicher, also auf das
+Verfahren des bestehenden Tools. Es ist erprobt. Die Ladezeit von rund zwei
+Sekunden stammt aus dem synthetischen Datensatz, auf einem Package-Verzeichnis mit
+vielen Models ist sie nicht gemessen. Ein eigener Index könnte zusätzliche Daten
+dauerhaft halten und lässt sich deshalb besser erweitern. Er brächte aber
+dauerhaften Zustand mit sich, der mit den Dateien abgeglichen werden müsste, ohne
+dass ein Bedarf dafür belegt wäre. Er bleibt als Möglichkeit vorgemerkt, falls sich
+die Suche in der Realisierung als zu langsam erweist.
+
+#heading(outlined: false, level: 4)[E3 Extension-Modell]
+
+Der Betrieb ausserhalb des Visual-Studio-Prozesses, Variante B, scheidet aus, aus
+zwei voneinander unabhängigen Gründen.
 
 FA05 verlangt die Anzeige beim Überfahren einer Label-ID, also am Token im
 Editortext. Ausserhalb des Prozesses gibt es dafür keine Möglichkeit. Ein Tooltip
@@ -975,15 +1061,45 @@ für X++ aus.
 Der Zielkonflikt mit NFA04 wird damit zugunsten der Ziele aufgelöst, weil diese in
 den Erfolgskriterien stehen.
 
-Zwischen dem klassischen VSSDK und dem neuen Modell im selben Prozess fällt die
-Wahl auf das neue Modell. Beide bieten dieselben Möglichkeiten, weil in beiden
-Fällen MEF zur Verfügung steht, und beide teilen dasselbe Absturzrisiko. Den
-Ausschlag gibt die Empfehlung von Microsoft, die das neue Modell für neue
-Erweiterungen nennt, welche auf Dienste des VSSDK angewiesen sind
-@ms-inproc-extensions. Der Prototyp hat gezeigt, dass sich der MEF-Anteil für
-QuickInfo und die Einblendung im Code darin unverändert mitverwenden lässt.
-Microsoft verwendet für die eigenen Developer Tools von Dynamics 365 dieselbe Mischform,
-was die Wahl zusätzlich stützt, siehe @befundprotokoll.
+Zwischen A und C entscheidet die Nutzwertanalyse. Die Testbarkeit unterscheidet die
+beiden nicht, weil die Kernlogik in beiden Fällen getrennt ist. An ihre Stelle tritt
+die Stabilität von Visual Studio aus NFA04.
+
+#[
+  #show figure: set align(left)
+  #show figure: set block(breakable: false)
+  #set text(size: 10pt)
+  #figure(
+    table(
+      align: left,
+      columns: (auto, auto, auto, auto),
+      table.header(
+        [*Kriterium*], [*Gewicht*], [*A VSSDK, in-process*], [*C VS.Extensibility, in-process*],
+      ),
+      [Aufwand], [35 %], [3], [4],
+      [Erprobtheit], [20 %], [5], [3],
+      [Erweiterbarkeit und Wartbarkeit], [20 %], [3], [4],
+      [Stabilität von Visual Studio], [15 %], [3], [4],
+      [Zukunftssicherheit], [10 %], [2], [5],
+      [Nutzwert], [100 %], [3,30], [3,90],
+    ),
+    caption: [Nutzwertanalyse E3 Extension-Modell (eigene Darstellung)]
+  ) <nwa_e3>
+]
+
+Die Wahl fällt auf das neue Modell im selben Prozess. Beide bieten dieselben
+Möglichkeiten im Editor, weil in beiden Fällen MEF zur Verfügung steht, und beide
+teilen dasselbe Absturzrisiko. Das neue Modell definiert Commands und Tool Windows
+im Code statt in einer eigenen Konfigurationsdatei. Seine Commands laufen auf einem
+Background Thread, was ein ungewolltes Einfrieren der Oberfläche vermeidet
+@ms-extensibility-models. Microsoft empfiehlt es für neue Erweiterungen, welche auf
+Dienste des VSSDK angewiesen sind, und beschreibt die Unterstützung im selben Prozess
+zugleich als Angebot für frühe Anwender @ms-inproc-extensions. Das klassische VSSDK
+ist dagegen das Modell, auf dem die meisten Extensions beruhen
+@ms-extensibility-models, und damit das erprobtere. Der Prototyp hat gezeigt, dass
+sich der MEF-Anteil für QuickInfo und die Einblendung im Code im neuen Modell
+unverändert mitverwenden lässt. Microsoft verwendet für die eigenen Developer Tools
+von Dynamics 365 dieselbe Mischform, siehe @befundprotokoll.
 
 Drei Folgen sind dabei in Kauf zu nehmen. Das Target Framework bleibt .NET Framework,
 und die Erweiterung trägt zwei Manifeste, weil sie ihre Identität aus dem
@@ -996,44 +1112,50 @@ mitreisst. Die Anforderung bleibt im Wortlaut bestehen und wird über die Umsetz
 so weit abgedeckt, wie es ohne Prozesstrennung möglich ist. Wie das geschieht und
 wie es nachgewiesen wird, legt das Konzept fest.
 
-Bei V2 entscheiden die Befunde gegen ein zusätzliches Add-in. Es brächte nur zwei
-Menüeinträge, und für das Properties Window besteht darin kein
-Erweiterungspunkt. Was die Ziele verlangen, deckt die Extension selbst ab, denn
-das im Designer gewählte Element lässt sich über das Selection Tracking lesen. Ein
-Add-in würde ausserdem eine zweite Auslieferungsform nötig machen und die Arbeit
-an die Version der Developer Tools binden.
-
-Bei V1 fällt die Wahl auf den direkten Dateizugriff mit eigenem Parser. Die
-Messung zeigt im warmen Zustand keinen Unterschied, und die Metadata-API parst
-die Label-Dateien nicht, sondern liefert deren Inhalt unverarbeitet. Der Vorteil
-der API bleibt damit gering, weil der Parser ohnehin selbst zu schreiben ist.
-
-Den Ausschlag gibt die Abhängigkeit. Ohne die API bleibt die Kernlogik frei von
-Assemblies der lokalen Installation. Das vereinfacht die Tests und macht die
-Arbeit auf einem anderen System nachvollziehbar, auf dem diese Assemblies
-voraussichtlich fehlen. Z8 verlangt genau das. Aus demselben Grund wird der
-Label-Resolver von Microsoft nicht eingesetzt. Er bleibt für FA05 als Möglichkeit
-vorgemerkt.
-
-Bei V3 fällt die Wahl auf das einmalige Laden in den Arbeitsspeicher, also auf das
-Verfahren des bestehenden Tools. Es ist erprobt. Die Ladezeit von rund zwei
-Sekunden stammt aus dem synthetischen Datensatz, auf einem Package-Verzeichnis mit
-vielen Models ist sie nicht gemessen. Ein eigener Index brächte dauerhaften Zustand mit sich, der mit
-den Dateien abgeglichen werden müsste, ohne dass ein Bedarf dafür belegt wäre. Er
-bleibt als Möglichkeit vorgemerkt, falls sich die Suche in der Realisierung als zu
-langsam erweist.
-
-Bei V5 fällt die Wahl aus demselben Grund auf die Textsuche in den XML-Dateien.
-Sie ist im bestehenden Tool erprobt und setzt nichts voraus. Die
-Cross-Reference-Datenbank liefert zwar genauere Treffer, ist aber nur so aktuell
-wie der letzte Build mit Referenzdaten und damit von einem Schritt abhängig, den
-die Extension nicht auslöst. Auch sie bleibt als Möglichkeit vorgemerkt.
-
 Eine Aufteilung in zwei Erweiterungen, also die inhaltliche Arbeit ausserhalb des
 Prozesses und eine bewusst dünne Anzeigeschicht darin, würde beide Anliegen
 teilweise erfüllen. Sie wurde nicht erprobt und ist eine Ableitung aus den
 Befunden, kein Ergebnis. Der Preis wäre ein zusätzlicher Kommunikationsweg und
 eine doppelte Auslieferung.
+
+#heading(outlined: false, level: 4)[E4 Verfahren der Verwendungssuche]
+
+Hier scheidet keine Variante vorab aus.
+
+#[
+  #show figure: set align(left)
+  #show figure: set block(breakable: false)
+  #set text(size: 10pt)
+  #figure(
+    table(
+      align: left,
+      columns: (auto, auto, auto, auto, auto),
+      table.header(
+        [*Kriterium*], [*Gewicht*], [*A Textsuche*], [*B Cross-Reference-Datenbank*], [*C Metadata-API*],
+      ),
+      [Aufwand], [35 %], [5], [3], [1],
+      [Erprobtheit], [20 %], [5], [3], [2],
+      [Erweiterbarkeit und Wartbarkeit], [20 %], [2], [4], [4],
+      [Testbarkeit ohne Dynamics 365], [15 %], [5], [2], [2],
+      [Genauigkeit und Aktualität], [10 %], [4], [3], [5],
+      [Nutzwert], [100 %], [4,30], [3,05], [2,35],
+    ),
+    caption: [Nutzwertanalyse E4 Verfahren der Verwendungssuche (eigene Darstellung)]
+  ) <nwa_e4>
+]
+
+Die Wahl fällt auf die Textsuche in den XML-Dateien. Sie ist im bestehenden Tool
+erprobt und setzt nichts voraus. Die Cross-Reference-Datenbank und die Metadata-API
+liefern semantisch genauere Daten, auf denen sich weitere Funktionen leichter bauen
+liessen. Die Datenbank ist aber nur so aktuell wie der letzte Build mit
+Referenzdaten und damit von einem Schritt abhängig, den die Extension nicht auslöst.
+Die Metadata-API hat den höchsten Aufwand und brächte die Abhängigkeit zurück, die
+E1 vermeidet. Die Cross-Reference-Datenbank bleibt als Möglichkeit vorgemerkt.
+
+=== Wirtschaftlichkeit <wirtschaftlichkeit>
+
+#todo[Wirtschaftlichkeitsrechnung ergänzen, Thema am zweiten Vorzeigetermin vom
+27.10.2026.]
 
 == Projektmanagement
 
@@ -1060,16 +1182,19 @@ Test und Dokumentation liegen bei derselben Person.
       [Fachliche Vertretung der Auftraggeberin gegenüber der Schule.],
       [Betreuende Person], [Stefan Canobbio],
       [Fachliche Begleitung, Vorzeigetermine, Bewertung der Arbeit.],
-      [Experte], [Raphael Bucher],
-      [Zweitbewertung der Arbeit und Abnahme der Präsentation.],
+      [Experte im Betrieb], [Raphael Bucher],
+      [Fachliche Beratung und Unterstützung bei Tests, ohne Bewertung der Arbeit.],
+      [Experte der TEKO], [Patrick Graber],
+      [Teilnahme an der Präsentation und Fragen zur Arbeit.],
     ),
     caption: [Projektorganisation (eigene Darstellung)]
   ) <projektorganisation>
 ]
 
-Während der Diplomarbeit findet keine Abnahme durch BE-terna statt. Vorgesehen ist,
-die Arbeit dem Experten vorzuzeigen und Rückmeldungen einzuholen, sobald erste
-Teile des Konzepts stehen.
+Während der Diplomarbeit findet keine Abnahme durch BE-terna statt. Der Experte im
+Betrieb wird in die Realisierung eingebunden, gibt Rückmeldungen zur Entwicklung und
+unterstützt bei den Tests. Jede Besprechung mit ihm erhält ein Protokoll im
+Anhang.
 
 === Projektplanung
 
@@ -1128,6 +1253,20 @@ Durch die Ferien vom 19.10. bis 21.10.2026 entsteht mit dem 15.10. bis 24.10.202
 der längste zusammenhängende Arbeitsblock des Projekts. Er ist deshalb der
 Realisierung zugeteilt, bei der ein durchgehendes Arbeiten den grössten Nutzen
 bringt.
+
+=== Projektstrukturplan <psp>
+
+Der Projektstrukturplan gliedert die Arbeit in sechs Arbeitspakete entlang der
+Phasen, dazu die Dokumentation, die über alle Phasen läuft. Jedes Arbeitspaket ist
+in Teilpakete von je einem Arbeitstag zerlegt. Der Terminplan in @terminplan_soll
+verteilt dieselben Teilpakete auf die verfügbaren Arbeitstage.
+
+#page(flipped: true, margin: (x: 2cm, y: 2cm))[
+  #figure(
+    image("../diagrams/Projektstrukturplan.png", width: 100%),
+    caption: [Projektstrukturplan (eigene Darstellung)]
+  ) <projektstrukturplan>
+]
 
 === Terminplan (Soll)
 
@@ -1197,7 +1336,7 @@ ist.
       ),
       [M0], [Start Diplomarbeit], [04.09.2026], [04.09.2026], [keine],
       [M1], [Projektinitialisierung abgeschlossen], [26.09.2026], [24.09.2026], [2 Tage früher],
-      [M2], [1. Vorzeigetermin Betreuung], [07.10.2026], [], [],
+      [M2], [1. Vorzeigetermin Betreuung], [07.10.2026], [07.10.2026], [keine],
       [M3], [Konzept abgeschlossen], [08.10.2026], [01.10.2026], [7 Tage früher],
       [M4], [2. Vorzeigetermin Betreuung (zu vereinbaren)], [22.10.2026], [], [],
       [M5], [Code Freeze], [24.10.2026], [], [],
@@ -1263,7 +1402,7 @@ bewertet. Der Risikowert ist ihr Produkt.
        prüfen, auf der nicht entwickelt werden darf. Ein Fehler zeigt sich erst
        beim nächsten Durchgang dort und nicht schon beim Entwickeln.],
       [4], [3], [12],
-      [Der Entscheid zu V1 hält die Kernlogik frei von Assemblies der lokalen
+      [Der Entscheid zu E1 hält die Kernlogik frei von Assemblies der lokalen
        Installation und damit ohne Dynamics 365 testbar. Für die Label-Dateien
        dient ein synthetischer Verzeichnisbaum. Auf der Testumgebung wird nur die
        Editor-Anbindung geprüft, und zwar in gesammelten Durchgängen.],
@@ -1309,7 +1448,8 @@ bewertet. Der Risikowert ist ihr Produkt.
        fallen ohne Blick von aussen erst spät auf.],
       [3], [2], [6],
       [Die beiden Vorzeigetermine mit der Betreuung dienen als Prüfpunkt.
-       Vorgesehen ist zudem, die Arbeit dem Experten vorzuzeigen.],
+       Zudem gibt der Experte im Betrieb Rückmeldungen zur Entwicklung und
+       unterstützt bei den Tests.],
     ),
     caption: [Risikoanalyse (eigene Darstellung)]
   ) <risikoanalyse>
@@ -1384,8 +1524,8 @@ bewertet. Der Risikowert ist ihr Produkt.
       [Wird beobachtet. Die Massnahme ist festgehalten, wird aber nicht aktiv
        verfolgt.],
       [8 -- 12], table.cell(fill: risikofarbe(10))[Mittel],
-      [Die Massnahme wird umgesetzt. Der Stand wird im Controlling-Bericht
-       nachgeführt.],
+      [Die Massnahme wird umgesetzt. Der Stand wird an den Vorzeigeterminen
+       besprochen und im Besprechungsprotokoll festgehalten.],
       [15 -- 25], table.cell(fill: risikofarbe(20))[Hoch],
       [Die Massnahme wird sofort umgesetzt. Tritt das Risiko ein, wird die
        Betreuung informiert.],

@@ -1,0 +1,59 @@
+@startwbs
+' Projektstrukturplan der Diplomarbeit, gleiche Arbeitspakete wie Terminplan_Soll.puml
+' Rendern: plantuml -tpng -charset UTF-8 Projektstrukturplan.puml
+
+<style>
+wbsDiagram {
+  node {
+    FontSize 16
+    MaximumWidth 170
+    Padding 6
+    BackgroundColor White
+  }
+  :depth(0) {
+    FontSize 18
+    BackgroundColor #F4F4F4
+  }
+  :depth(1) {
+    BackgroundColor #F4F4F4
+  }
+}
+</style>
+
+* Diplomarbeit IDE-Erweiterung zentraler Entwicklungsprozesse
+** AP0 Dokumentation laufend
+** AP1 Projektinitialisierung
+*** 1.1 Setup Toolchain, Dokumentationsgerüst, Terminplanung
+*** 1.2 Ausgangslage, Situationsanalyse, Aufgabenstellung
+*** 1.3 Zieldefinition, Abgrenzung, Stakeholder-Analyse
+*** 1.4 Rahmenbedingungen, grobe Anforderungen
+*** 1.5 Varianten, Machbarkeit, Variantenentscheid
+*** 1.6 Risikoanalyse, Qualitäts- und Konfigurationsmanagement
+*** 1.7 Review Initialisierung
+** AP2 Konzept
+*** 2.1 Kontextdiagramm, Geschäftsprozesse, Detailanforderungen
+*** 2.2 Use Cases, Sequenzdiagramme, Klassen, Architektur
+*** 2.3 Testkonzept, GUI-Design, Review Konzept
+** AP3 Realisierung
+*** 3.1 Grundgerüst, Build- und Test-Toolchain
+*** 3.2 Parser, Laden, Dateiüberwachung (Stufe 1)
+*** 3.3 Suche und Ranking (Stufe 1)
+*** 3.4 Tool Window, Trefferliste, Detailansicht (Stufe 1)
+*** 3.5 Bearbeiten, Verschieben, Ersetzen, Einstellungen (Stufe 1)
+*** 3.6 QuickInfo, Inline-Anzeige, Inline-Suche (Stufe 2)
+*** 3.7 Öffnen im Panel, Verwendungssuche (Stufe 2)
+*** 3.8 Extraktion, automatische Übersetzung (Stufe 3)
+** AP4 Tests und Abschluss Realisierung
+*** 4.1 Restarbeiten und Bugfixing
+*** 4.2 Unit- und Integration-Tests, Testprotokoll
+*** 4.3 Code Freeze, Deployment
+** AP5 Dokumentation finalisieren und Review
+*** 5.1 Kapitel Realisierung und Testprotokoll
+*** 5.2 Management Summary, Reflexion, Schlusswort
+*** 5.3 Gesamtreview, Verzeichnisse, Korrektorat, PDF
+** AP6 Präsentation vorbereiten
+*** 6.1 Storyline und Foliengerüst
+*** 6.2 Folien ausarbeiten
+*** 6.3 Onlinepublikation
+*** 6.4 Generalprobe
+@endwbs

@@ -164,6 +164,15 @@ ms-try-parse:
     value: https://learn.microsoft.com/en-us/dotnet/standard/design-guidelines/exceptions-and-performance
     date: 2026-09-26
 
+ms-net-standard:
+  type: Web
+  title: .NET Standard overview
+  author: Microsoft
+  publisher: Microsoft Learn
+  url:
+    value: https://learn.microsoft.com/en-us/dotnet/standard/net-standard
+    date: 2026-10-07
+
 ms-tap:
   type: Web
   title: "Task-based Asynchronous Pattern (TAP): Introduction and overview"

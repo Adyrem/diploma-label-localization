@@ -9,30 +9,6 @@ Abgabe in einer einzigen PDF-Datei, ein separates Dokument genügt nicht. Vorher
 Adresse und Telefonnummer im öffentlichen Repo entfernen und die Screenshots auf interne
 Model-Kürzel und Label-IDs prüfen, weil das Repository öffentlich ist.]
 
-== Controlling-Berichte <controlling>
-
-=== Bericht zu M1, Projektinitialisierung abgeschlossen
-
-#[
-  #show figure: set align(left)
-  #figure(
-    table(
-      align: left,
-      columns: (auto, 1fr, 1fr, 1.4fr),
-      table.header(
-        [*Bereich*], [*Soll*], [*Ist*], [*Beurteilung und Massnahme*],
-      ),
-      [Termin], [M1 am 26.09.2026], [], [],
-      [Aufwand], [56 h für AP1], [], [],
-      [Arbeitspakete], [AP1.1 bis AP1.7 abgeschlossen], [], [],
-      [Risiken], [Bewertung aus @risikoanalyse], [], [],
-      [Qualität], [Review der Initialisierung durchgeführt], [], [],
-      [Nächste Schritte], [AP2 Konzept ab 01.10.2026], [], [],
-    ),
-    caption: [Controlling-Bericht M1 (eigene Darstellung)]
-  ) <controlling_m1>
-]
-
 == Detailplanung und Aufwanderfassung
 
 Der Soll-Aufwand beträgt pro Arbeitstag acht Stunden.
@@ -96,11 +72,29 @@ Der Soll-Aufwand beträgt pro Arbeitstag acht Stunden.
   #figure(
     table(
       columns: (auto, 1fr),
-      [*Datum*], [],
-      [*Teilnehmende*], [],
-      [*Traktanden*], [],
-      [*Beschlüsse*], [],
-      [*Pendenzen*], [],
+      [*Datum*], [07.10.2026],
+      [*Teilnehmende*], [Betreuende Person, Diplomand],
+      [*Traktanden*],
+      [- Abweichungen von der Themeneingabe
+       - Rolle des Experten im Betrieb
+       - Controlling-Berichte
+       - Rahmen der Präsentation
+       - Nächster Vorzeigetermin
+       - Rückmeldung zur Arbeit],
+      [*Beschlüsse*],
+      [- Die Abweichungen von der Themeneingabe sind in Ordnung.
+       - Der Experte im Betrieb bewertet und benotet die Arbeit nicht. Er steht
+         für fachlichen Rat und für Tests zur Verfügung. Jede Besprechung mit ihm
+         erhält ein Protokoll. An der Präsentation nimmt er nicht teil.
+       - Controlling-Berichte entfallen, die Besprechungsprotokolle genügen.
+       - Die Präsentation findet vor Ort statt, mit der Betreuung und einem
+         Experten der TEKO, von 13.45 bis 14.30 Uhr. Davon sind 30 Minuten
+         Präsentation.
+       - Der zweite Vorzeigetermin findet am 27.10.2026 um 20.00 Uhr statt.],
+      [*Pendenzen*],
+      [- Variantenentscheid überprüfen, ob es sich wirklich um Varianten handelt.
+       - Den Unterschied der Framework-Versionen prüfen, ob er nötig ist, und ihn
+         sonst klar begründen.],
     ),
     caption: [Besprechungsprotokoll Vorzeigetermin 1 (eigene Darstellung)]
   ) <protokoll_1>
