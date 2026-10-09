@@ -69,14 +69,36 @@ namespace BE.LabelExtension.Tests.Models
             Assert.Equal(new[] { false, true }, configuration.GetPackageDirectories().Select(d => d.IsReference));
         }
 
-        /// <summary>TC14, part 2: without a configuration the existing PackagesLocalDirectory of a classic VM is suggested.</summary>
+        /// <summary>TC14, part 2: without a configuration the PackagesLocalDirectory of a classic VM is suggested, K: first.</summary>
         [Fact]
-        public void FindClassicDirectory_SuggestsTheFirstExistingOne()
+        public void FindClassicDirectory_SuggestsKFirstThenTheOtherDrivesInOrder()
         {
-            Assert.Equal(@"K:\AOSService\PackagesLocalDirectory", ModelDiscovery.FindClassicDirectory(_ => true));
-            Assert.Equal(@"C:\AOSService\PackagesLocalDirectory", ModelDiscovery.FindClassicDirectory(p => p.StartsWith("C:")));
-            Assert.Null(ModelDiscovery.FindClassicDirectory(_ => false));
+            string[] drives = { @"J:\", @"C:\", @"K:\" };
+
+            Assert.Equal(@"K:\AOSService\PackagesLocalDirectory", ModelDiscovery.FindClassicDirectory(drives, _ => true));
+            Assert.Equal(@"C:\AOSService\PackagesLocalDirectory", ModelDiscovery.FindClassicDirectory(drives, p => !p.StartsWith("K:")));
+            Assert.Equal(@"J:\AOSService\PackagesLocalDirectory", ModelDiscovery.FindClassicDirectory(drives, p => p.StartsWith("J:")));
+            Assert.Null(ModelDiscovery.FindClassicDirectory(drives, _ => false));
             Assert.Empty(new ModelDiscovery(Path.Combine(this.packages.Root, "missing")).ListConfigurations());
+        }
+
+        /// <summary>
+        /// D1 on the classic VM: C:\AOSService\PackagesLocalDirectory existed but was almost
+        /// empty, the packages lay on J:. Only a directory with packages counts.
+        /// </summary>
+        [Fact]
+        public void FindClassicDirectory_EmptyDirectory_IsSkipped()
+        {
+            string empty = Path.Combine(this.packages.Root, "C");
+            Directory.CreateDirectory(Path.Combine(empty, ModelDiscovery.ClassicFolder, "bin"));
+            string real = Path.Combine(this.packages.Root, "J");
+            string package = Path.Combine(real, ModelDiscovery.ClassicFolder, "BEDemo1");
+            Directory.CreateDirectory(Path.Combine(package, "Descriptor"));
+            File.Copy(Path.Combine(this.packages.PackagesDirectory, "BEDemo1", "Descriptor", "BEDemo1.xml"), Path.Combine(package, "Descriptor", "BEDemo1.xml"));
+
+            Assert.False(ModelDiscovery.HasPackages(Path.Combine(empty, ModelDiscovery.ClassicFolder)));
+            Assert.Equal(Path.Combine(real, ModelDiscovery.ClassicFolder), ModelDiscovery.FindClassicDirectory(new[] { empty, real }));
+            Assert.True(ModelDiscovery.HasPackages(this.packages.PackagesDirectory));
         }
 
         [Fact]

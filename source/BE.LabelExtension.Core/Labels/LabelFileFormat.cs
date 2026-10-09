@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using BE.LabelExtension.Core.Files;
 
 namespace BE.LabelExtension.Core.Labels
 {
@@ -36,7 +37,7 @@ namespace BE.LabelExtension.Core.Labels
         public static LabelFileContent Read(string path)
         {
             // Other programs, the existing tool for one, may hold the file open.
-            using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+            using var stream = new FileStream(LongPath.ForAccess(path), FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
             return Read(stream);
         }
 
@@ -176,8 +177,11 @@ namespace BE.LabelExtension.Core.Labels
         /// <param name="byteOrderMark">Whether to start with the byte order mark, as <see cref="LabelFileContent.HasByteOrderMark"/> of the file read.</param>
         public static void WriteFile(string path, IEnumerable<LabelEntry> entries, bool byteOrderMark)
         {
-            string directory = Path.GetDirectoryName(Path.GetFullPath(path))!;
-            string temporary = Path.Combine(directory, $".{Path.GetFileName(path)}.{Guid.NewGuid():N}.tmp");
+            string fullPath = Path.GetFullPath(path);
+            string target = LongPath.ForAccess(fullPath);
+
+            // The temporary name is longer than the target and may need the prefix on its own.
+            string temporary = LongPath.ForAccess(Path.Combine(Path.GetDirectoryName(fullPath)!, $".{Path.GetFileName(path)}.{Guid.NewGuid():N}.tmp"));
             try
             {
                 using (var stream = new FileStream(temporary, FileMode.CreateNew, FileAccess.Write, FileShare.None))
@@ -185,13 +189,13 @@ namespace BE.LabelExtension.Core.Labels
                     Write(stream, entries, byteOrderMark);
                 }
 
-                if (File.Exists(path))
+                if (File.Exists(target))
                 {
-                    File.Replace(temporary, path, destinationBackupFileName: null, ignoreMetadataErrors: true);
+                    File.Replace(temporary, target, destinationBackupFileName: null, ignoreMetadataErrors: true);
                 }
                 else
                 {
-                    File.Move(temporary, path);
+                    File.Move(temporary, target);
                 }
             }
             finally

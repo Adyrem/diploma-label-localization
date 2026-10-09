@@ -176,6 +176,24 @@ namespace BE.LabelExtension.Tests.Store
             Assert.DoesNotContain(this.store.LabelFiles, f => f.Name == "Satellite" || f.Name == "Deeper");
         }
 
+        /// <summary>
+        /// D1: a label file whose path is longer than 260 characters is loaded, not reported as
+        /// unreadable.
+        /// </summary>
+        [Fact]
+        public async Task LoadAsync_LabelFileWithPathLongerThan260Characters_IsLoaded()
+        {
+            string name = "Long" + new string('x', 180);
+            string path = Path.Combine(this.packages.ModelDirectory("BEDemo1", "BEDemo1"), "AxLabelFile", "LabelResources", "de", name + ".de.label.txt");
+            File.WriteAllText(Core.Files.LongPath.ForAccess(path), "LONG1=Langer Pfad\r\n", new System.Text.UTF8Encoding(true));
+
+            await this.LoadAsync("de");
+
+            Assert.True(path.Length > 260);
+            Assert.Equal("Langer Pfad", this.store.Find($"@{name}:LONG1")?.GetText("de"));
+            Assert.DoesNotContain(this.messages.Messages, m => m.Severity != MessageSeverity.Message);
+        }
+
         /// <summary>F14: the message after loading names the memory.</summary>
         [Fact]
         public async Task LoadAsync_Message_NamesTheMemory()

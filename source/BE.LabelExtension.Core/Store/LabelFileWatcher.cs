@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using BE.LabelExtension.Core.Files;
 
 namespace BE.LabelExtension.Core.Store
 {
@@ -213,7 +214,7 @@ namespace BE.LabelExtension.Core.Store
             {
                 try
                 {
-                    var info = new FileInfo(path);
+                    var info = new FileInfo(LongPath.ForAccess(path));
                     return info.Exists ? new Stamp(info.LastWriteTimeUtc.Ticks, info.Length) : new Stamp(0, -1);
                 }
                 catch (Exception exception) when (exception is IOException || exception is UnauthorizedAccessException)

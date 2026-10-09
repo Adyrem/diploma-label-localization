@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using BE.LabelExtension.Core.Diagnostics;
+using BE.LabelExtension.Core.Files;
 using BE.LabelExtension.Core.Labels;
 using BE.LabelExtension.Core.Models;
 
@@ -29,7 +30,7 @@ namespace BE.LabelExtension.Core.Sources
             foreach (ModelInfo model in request.Models)
             {
                 string resources = Path.Combine(model.Directory, "AxLabelFile", "LabelResources");
-                if (!Directory.Exists(resources))
+                if (!LongPath.DirectoryExists(resources))
                 {
                     continue;
                 }
@@ -50,10 +51,10 @@ namespace BE.LabelExtension.Core.Sources
         private static void LoadModel(ModelInfo model, string resources, LabelLoadRequest request, List<LabelFile> found, List<LabelDocument> documents, CancellationToken cancellationToken)
         {
             var labelFiles = new Dictionary<string, LabelFile>(StringComparer.OrdinalIgnoreCase);
-            foreach (string languageFolder in Directory.GetDirectories(resources))
+            foreach (string languageFolder in LongPath.GetDirectories(resources))
             {
                 string language = Path.GetFileName(languageFolder);
-                foreach (string path in Directory.GetFiles(languageFolder, "*" + Suffix))
+                foreach (string path in LongPath.GetFiles(languageFolder, "*" + Suffix))
                 {
                     cancellationToken.ThrowIfCancellationRequested();
 

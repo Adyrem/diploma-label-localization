@@ -15,15 +15,8 @@ namespace BE.LabelExtension.Core.Models
     /// </summary>
     public sealed class ModelDiscovery
     {
-        /// <summary>
-        /// Where the classic development VM keeps its PackagesLocalDirectory, in the order the
-        /// existing tool tries them.
-        /// </summary>
-        public static readonly IReadOnlyList<string> ClassicDirectories = new[]
-        {
-            @"K:\AOSService\PackagesLocalDirectory",
-            @"C:\AOSService\PackagesLocalDirectory",
-        };
+        /// <summary>Where a drive of the classic development VM holds the PackagesLocalDirectory.</summary>
+        public const string ClassicFolder = @"AOSService\PackagesLocalDirectory";
 
         private const string XppSourceFolder = "XppSource";
 
@@ -49,13 +42,40 @@ namespace BE.LabelExtension.Core.Models
         public MetadataConfiguration ReadConfiguration(string name) => MetadataConfiguration.Read(this.ConfigurationFolder, name);
 
         /// <summary>
-        /// Returns the first existing PackagesLocalDirectory of a classic development VM, as the
-        /// existing tool suggests it when there is no metadata configuration.
+        /// Returns the PackagesLocalDirectory of a classic development VM, for when there is no
+        /// metadata configuration: K: first, as in the existing tool, then the other drives in
+        /// alphabetical order. Only a directory that holds a package with a descriptor counts.
+        /// On the test environment an empty one lay on C: and the real one on J:.
         /// </summary>
-        /// <param name="exists">Checks whether a directory exists; replaceable for tests.</param>
-        /// <returns>The directory, or <c>null</c> if none exists.</returns>
-        public static string? FindClassicDirectory(Func<string, bool>? exists = null)
-            => ClassicDirectories.FirstOrDefault(exists ?? Directory.Exists);
+        /// <param name="drives">Root folders of the drives; the fixed drives if <c>null</c>.</param>
+        /// <param name="hasPackages">Checks whether a directory holds packages; replaceable for tests.</param>
+        /// <returns>The directory, or <c>null</c> if no drive has one with packages.</returns>
+        public static string? FindClassicDirectory(IEnumerable<string>? drives = null, Func<string, bool>? hasPackages = null)
+            => (drives ?? FixedDrives())
+                .OrderBy(drive => drive.StartsWith("K", StringComparison.OrdinalIgnoreCase) ? 0 : 1)
+                .ThenBy(drive => drive, StringComparer.OrdinalIgnoreCase)
+                .Select(drive => Path.Combine(drive, ClassicFolder))
+                .FirstOrDefault(hasPackages ?? HasPackages);
+
+        /// <summary>Whether a directory holds at least one package with a model descriptor.</summary>
+        /// <param name="directory">The directory.</param>
+        /// <returns>Whether it holds packages; <c>false</c> if it cannot be read.</returns>
+        public static bool HasPackages(string directory)
+        {
+            try
+            {
+                return Directory.Exists(directory)
+                    && Directory.EnumerateDirectories(directory).Any(package =>
+                    {
+                        string descriptorFolder = Path.Combine(package, "Descriptor");
+                        return Directory.Exists(descriptorFolder) && Directory.EnumerateFiles(descriptorFolder, "*.xml").Any();
+                    });
+            }
+            catch (Exception exception) when (exception is IOException || exception is UnauthorizedAccessException)
+            {
+                return false;
+            }
+        }
 
         /// <summary>
         /// Finds the models in the package directories. A model is a descriptor
@@ -212,5 +232,20 @@ namespace BE.LabelExtension.Core.Models
         }
 
         private static string Normalize(string path) => path.Replace('\\', '/').TrimEnd('/');
+
+        private static IEnumerable<string> FixedDrives()
+        {
+            try
+            {
+                return DriveInfo.GetDrives()
+                    .Where(drive => drive.DriveType == DriveType.Fixed && drive.IsReady)
+                    .Select(drive => drive.RootDirectory.FullName)
+                    .ToList();
+            }
+            catch (Exception exception) when (exception is IOException || exception is UnauthorizedAccessException)
+            {
+                return Array.Empty<string>();
+            }
+        }
     }
 }

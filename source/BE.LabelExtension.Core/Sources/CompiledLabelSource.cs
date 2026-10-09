@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using BE.LabelExtension.Core.Diagnostics;
+using BE.LabelExtension.Core.Files;
 using BE.LabelExtension.Core.Labels;
 using BE.LabelExtension.Core.Models;
 
@@ -100,18 +101,18 @@ namespace BE.LabelExtension.Core.Sources
                 }
             }
 
-            foreach (string package in List(() => Directory.GetDirectories(root)))
+            foreach (string package in List(() => LongPath.GetDirectories(root)))
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 string resources = Path.Combine(package, ResourcesFolder);
-                if (!Directory.Exists(resources))
+                if (!LongPath.DirectoryExists(resources))
                 {
                     continue;
                 }
 
-                foreach (string language in List(() => Directory.GetDirectories(resources)))
+                foreach (string language in List(() => LongPath.GetDirectories(resources)))
                 {
-                    files.AddRange(List(() => Directory.GetFiles(language, Pattern)));
+                    files.AddRange(List(() => LongPath.GetFiles(language, Pattern)));
                 }
             }
 

@@ -109,7 +109,8 @@ namespace BE.LabelExtension.Tests
                 {
                     if (Directory.Exists(this.Root))
                     {
-                        Directory.Delete(this.Root, recursive: true);
+                        // With prefix, so that files with long paths are deleted as well.
+                        Directory.Delete(@"\\?\" + this.Root, recursive: true);
                     }
 
                     return;

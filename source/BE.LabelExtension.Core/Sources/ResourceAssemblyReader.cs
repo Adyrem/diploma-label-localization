@@ -6,6 +6,7 @@ using System.IO;
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
 using System.Resources;
+using BE.LabelExtension.Core.Files;
 using BE.LabelExtension.Core.Labels;
 
 namespace BE.LabelExtension.Core.Sources
@@ -24,7 +25,7 @@ namespace BE.LabelExtension.Core.Sources
         public static IReadOnlyList<LabelEntry> ReadFirstResource(string path)
         {
             // Reading the bytes first leaves the file free; it can be replaced right afterwards.
-            byte[] bytes = File.ReadAllBytes(path);
+            byte[] bytes = File.ReadAllBytes(LongPath.ForAccess(path));
             using var peReader = new PEReader(ImmutableArray.Create(bytes));
             if (!peReader.HasMetadata || peReader.PEHeaders.CorHeader == null)
             {

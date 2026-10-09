@@ -170,9 +170,12 @@ namespace BE.LabelExtension.Probes
         /// </summary>
         private static (string Name, Dictionary<string, string> LabelValues) Describe(object item, ProbeReport report)
         {
+            // For a designer node the class name is the name of the node (D1), so it appears
+            // only when it is a type name.
             string className = ProbeReport.Safe(() => TypeDescriptor.GetClassName(item) ?? string.Empty);
+            string classShape = className == item.GetType().FullName ? className : ProbeReport.ValueShape(className);
             string componentName = ProbeReport.Safe(() => TypeDescriptor.GetComponentName(item) ?? string.Empty);
-            report.Line($"object {ProbeReport.TypeName(item)}, class name '{className}', component {(componentName.Length == 0 ? "without name" : "with a name")}");
+            report.Line($"object {ProbeReport.TypeName(item)}, class name {classShape}, component {(componentName.Length == 0 ? "without name" : "with a name")}");
 
             // The Properties window filters with BrowsableAttribute.Yes; without the filter
             // a designer node shows only ModelElement (findings log, section "Nachtrag: das
