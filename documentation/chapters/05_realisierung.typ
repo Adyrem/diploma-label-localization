@@ -1,6 +1,6 @@
 = Realisierung
 
-== Programmierumgebung / Programmierrichtlinien
+== Programmierumgebung und Richtlinien
 
 === Programmierumgebung
 
@@ -17,39 +17,43 @@
       [], [], [],
       [], [], [],
     ),
-    caption: [Programmierumgebung]
+    caption: [Programmierumgebung (eigene Darstellung)]
   ) <programmierumgebung>
 ]
 
-=== Projektstruktur
-
 === Programmierrichtlinien
-
-=== Testbarkeit und Qualität
 
 == Softwareaufbau
 
-=== Modulstruktur
+=== Projektstruktur
 
 // #figure(
 //   image("../diagrams/Moduluebersicht.png", width: 100%),
-//   caption: [Modulübersicht]
+//   caption: [Modulübersicht (eigene Darstellung)]
 // ) <moduluebersicht>
 
-=== Geschäftslogik
+=== Kernlogik
 
-=== Serviceschicht
+=== Suche und Ranking
+
+=== Anbindung an Visual Studio
 
 == GUI-Implementierung
 
 // #figure(
 //   image("../screenshots/screenshot_01.png", width: 100%),
-//   caption: [GUI]
+//   caption: [GUI (eigene Darstellung)]
 // ) <gui_01>
 
 == Datenzugriff und externe Anbindung
 
-=== Designentscheidungen
+=== Datenzugriff
+
+=== Übersetzungsdienst
+
+== Entscheide und Abweichungen
+
+=== Entscheide in der Realisierung
 
 #[
   #show figure: set align(left)
@@ -64,19 +68,36 @@
       [], [], [],
       [], [], [],
     ),
-    caption: [Designentscheidungen]
-  ) <designentscheidungen>
+    caption: [Entscheide in der Realisierung (eigene Darstellung)]
+  ) <entscheide_realisierung>
 ]
 
-=== Datenzugriff
+=== Abweichungen vom Konzept und vom bestehenden Tool
 
-=== Externe Systemanbindung
+#[
+  #show figure: set align(left)
+  #figure(
+    table(
+      align: left,
+      columns: (auto, 1fr, 1fr),
+      table.header(
+        [*Nr.*], [*Abweichung*], [*Grund*],
+      ),
+      [], [], [],
+      [], [], [],
+      [], [], [],
+    ),
+    caption: [Abweichungen vom Konzept und vom bestehenden Tool (eigene Darstellung)]
+  ) <abweichungen_realisierung>
+]
 
-== Deployment / Inbetriebnahme
+== Deployment und Installation
 
 == Testprotokoll <testprotokoll>
 
-=== Teststrategie
+=== Unit Tests
+
+=== Durchgänge auf der Testumgebung
 
 === Testergebnisse
 
@@ -95,7 +116,7 @@
       [], [], [], [],
       [], [], [], [],
     ),
-    caption: [Übersicht Testergebnisse]
+    caption: [Übersicht Testergebnisse (eigene Darstellung)]
   ) <testergebnisse_uebersicht>
 ]
 
@@ -112,7 +133,7 @@
       [*Status*], [],
       [*Referenz*], [],
     ),
-    caption: [Testergebnis TC01]
+    caption: [Testergebnis TC01 (eigene Darstellung)]
   ) <tc_01>
 ]
 
@@ -129,7 +150,7 @@
       [*Status*], [],
       [*Referenz*], [],
     ),
-    caption: [Testergebnis TC02]
+    caption: [Testergebnis TC02 (eigene Darstellung)]
   ) <tc_02>
 ]
 
@@ -148,8 +169,8 @@
       [], [], [], [],
       [], [], [], [],
     ),
-    caption: [Zielerreichung]
+    caption: [Zielerreichung (eigene Darstellung)]
   ) <zielerreichung>
 ]
 
-== Empfehlungen / Ausblick
+== Empfehlungen

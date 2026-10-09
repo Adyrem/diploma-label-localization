@@ -939,6 +939,7 @@ soweit dieses Kapitel nichts anderes festlegt, siehe @fachliche_regeln.
 
 #[
   #show figure: set align(left)
+  #show figure: set block(breakable: false)
   #set text(size: 9.5pt)
   #figure(
     table(
@@ -949,52 +950,20 @@ soweit dieses Kapitel nichts anderes festlegt, siehe @fachliche_regeln.
       ),
       [Label-Dateien],
       [Je Label-Datei und Sprache gibt es eine Datei
-       `<Label-Datei>.<Sprache>.label.txt`. Eine Zeile `ID=Text` beginnt ein Label,
-       die ID reicht bis zum ersten Gleichheitszeichen. Beginnt die folgende Zeile
-       nach Leerzeichen mit `;` oder `#`, ist sie der Kommentar dieses Labels.
-       Leere Zeilen zählen nicht. Kommt eine ID doppelt vor, gilt die erste, das
-       Output Window meldet die zweite, und sie entfällt beim nächsten Speichern.
-       Geschrieben wird jedes Label als `ID=Text`, der Kommentar als
-       Folgezeile ` ;Kommentar`, in der bisherigen Reihenfolge, neue Labels am
-       Ende, mit Windows-Zeilenenden. Namen von Label-Dateien und Labels können
-       Unterstriche enthalten, etwa `FieldDescriptions_AccountsPayable`
-       @ms-field-help.],
+       `<Label-Datei>.<Sprache>.label.txt`. Jede Zeile `ID=Text` ist ein Label, ein
+       Kommentar steht mit `;` in der Zeile darunter. Neue Labels kommen ans Ende,
+       die übrigen behalten ihre Reihenfolge.],
 
       [Kompilierte Ressourcen],
-      [Die Datei `<Label-Datei>.Resources.dll` liegt in einem Ordner, der nach
-       der Sprache heisst. Ihre erste Manifest-Ressource enthält die Labels als
-       Paare aus ID und Text, ohne Kommentare. Gibt es zur selben Label-Datei und
-       Sprache eine `.label.txt`, gilt diese.],
-
-      [Suchmodi],
-      [Exact match findet Labels, bei denen ID, Text oder Kommentar gleich dem
-       Suchbegriff sind. Die ID zählt dabei mit und ohne Label-Datei. Substring
-       findet Labels, bei denen eines dieser Felder den Suchbegriff enthält.
-       Anything like that zerlegt den Suchbegriff in Wörter. Getrennt wird an
-       Leerzeichen, Komma, Punkt und Bindestrich. Die Wörter werden in ID und Text
-       gesucht. MatchWord findet den Suchbegriff als ganzes Wort in Text oder
-       Kommentar oder als vollständige ID. Gross- und Kleinschreibung spielen
-       dabei keine Rolle. Label id findet genau das Label mit dieser
-       vollständigen ID.],
-
-      [Verwendungssuche],
-      [Gesucht wird in den XML-Dateien aller Models. Ist das auf der
-       Testumgebung zu langsam, beschränkt die Extension die Suche wie das
-       bestehende Tool auf Models, deren Layer gleich hoch oder höher ist als der
-       des Models mit dem Label. Referenzen umgestellt werden nur in
-       beschreibbaren Models.],
-
-      [Löschen],
-      [Entfernt das Label in allen Sprachen der Label-Datei, ohne Rückfrage
-       und ohne Prüfung der Verwendungen, wie im bestehenden Tool.],
+      [Labels ohne Label-Datei stehen in einer kompilierten Ressource
+       `<Label-Datei>.Resources.dll`. Gibt es für dieselbe Sprache auch die
+       Label-Datei, gilt diese.],
 
       [Speichern],
-      [Anlegen, Extraktion, Ersetzen und Kopieren oder Verschieben mit Umstellen
-       der Referenzen speichern die betroffenen Label-Dateien sofort, weil danach
-       Code oder Eigenschaften auf das Label zeigen können. Ändern und Löschen
-       bleiben im Label Store, bis der Entwickler speichert. Beim Schliessen von
-       Visual Studio fragt die Extension wie das bestehende Tool, ob
-       ungespeicherte Änderungen gespeichert werden sollen.],
+      [Anlegen, Extraktion, Ersetzen sowie Kopieren und Verschieben mit Umstellen der
+       Referenzen speichern sofort, weil danach Code auf das Label zeigen kann.
+       Änderungen und Löschungen speichert der Entwickler selbst. Beim Schliessen
+       von Visual Studio fragt die Extension nach.],
     ),
     caption: [Fachliche Regeln aus dem bestehenden Tool (eigene Darstellung)]
   ) <fachliche_regeln>

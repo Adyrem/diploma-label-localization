@@ -1310,7 +1310,7 @@ ist.
       [AP0], [Dokumentation laufend], [04.09.], [31.10.], [--], [04.09.], [], [],
       [AP1], [Projektinitialisierung], [04.09.], [26.09.], [7], [04.09.], [24.09.], [2 Tage früher],
       [AP2], [Konzept], [01.10.], [08.10.], [3], [25.09.], [01.10.], [7 Tage früher],
-      [AP3], [Realisierung], [09.10.], [21.10.], [8], [], [], [],
+      [AP3], [Realisierung], [09.10.], [21.10.], [8], [02.10.], [], [],
       [AP4], [Tests und Abschluss Realisierung], [22.10.], [24.10.], [3], [], [], [],
       [AP5], [Dokumentation finalisieren und Review], [29.10.], [31.10.], [3], [], [], [],
       [AP6], [Präsentation vorbereiten], [05.11.], [12.11.], [4], [], [], [],
