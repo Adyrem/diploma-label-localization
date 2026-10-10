@@ -256,7 +256,7 @@ namespace BE.LabelExtension.ToolWindow
                     : translation == null ? "missing, the label file does not exist in this language"
                     : ReferenceEquals(translation.LabelFile, label.LabelFile) && label.LabelFile.IsReadOnly ? string.Empty
                     : ReadOnlyReason(translation.LabelFile);
-                var row = new TranslationRow(language, translation?.Text ?? string.Empty, translation?.Comment ?? string.Empty, !canChange, hint);
+                var row = new TranslationRow(language, translation?.Text ?? string.Empty, translation?.Comment ?? string.Empty, !canChange, canChange || translation != null, hint);
                 row.PropertyChanged += (_, _) => this.OnTranslationEdited(label, row);
                 rows.Add(row);
             }

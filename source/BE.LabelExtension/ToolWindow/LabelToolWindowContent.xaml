@@ -168,12 +168,31 @@
                   <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
                 <TextBlock Grid.Column="0" Text="{Binding Language}" />
-                <TextBox Grid.Column="1" Text="{Binding Text, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                         IsReadOnly="{Binding IsReadOnly}" AutomationProperties.Name="Text"
-                         Style="{DynamicResource {x:Static styles:VsResourceKeys.TextBoxStyleKey}}" />
-                <TextBox Grid.Column="2" Margin="4,0,0,0" Text="{Binding Comment, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                         IsReadOnly="{Binding IsReadOnly}" AutomationProperties.Name="Comment"
-                         Style="{DynamicResource {x:Static styles:VsResourceKeys.TextBoxStyleKey}}" />
+                <!--
+                  Read-only: the text can be selected and copied, the fields are dimmed.
+                  No file in this language: the fields are disabled, there is nothing to enter.
+                -->
+                <Grid Grid.Column="1" Grid.ColumnSpan="2">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*" />
+                    <ColumnDefinition Width="*" />
+                  </Grid.ColumnDefinitions>
+                  <Grid.Style>
+                    <Style TargetType="Grid">
+                      <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsReadOnly}" Value="True">
+                          <Setter Property="Opacity" Value="0.7" />
+                        </DataTrigger>
+                      </Style.Triggers>
+                    </Style>
+                  </Grid.Style>
+                  <TextBox Grid.Column="0" Text="{Binding Text, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                           IsReadOnly="{Binding IsReadOnly}" IsEnabled="{Binding HasFile}" AutomationProperties.Name="Text"
+                           Style="{DynamicResource {x:Static styles:VsResourceKeys.TextBoxStyleKey}}" />
+                  <TextBox Grid.Column="1" Margin="4,0,0,0" Text="{Binding Comment, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                           IsReadOnly="{Binding IsReadOnly}" IsEnabled="{Binding HasFile}" AutomationProperties.Name="Comment"
+                           Style="{DynamicResource {x:Static styles:VsResourceKeys.TextBoxStyleKey}}" />
+                </Grid>
                 <TextBlock Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding Hint}" FontStyle="Italic" Opacity="0.7">
                   <TextBlock.Style>
                     <Style TargetType="TextBlock">

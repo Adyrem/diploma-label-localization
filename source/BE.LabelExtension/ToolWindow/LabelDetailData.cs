@@ -50,13 +50,15 @@ namespace BE.LabelExtension.ToolWindow
         /// <param name="text">The text, empty if the translation is missing.</param>
         /// <param name="comment">The comment, empty if there is none.</param>
         /// <param name="isReadOnly">Whether the translation cannot be changed.</param>
+        /// <param name="hasFile">Whether the label file exists in this language; without, there is nothing to show or enter.</param>
         /// <param name="hint">Why it cannot be changed, or that it is missing.</param>
-        public TranslationRow(string language, string text, string comment, bool isReadOnly, string hint)
+        public TranslationRow(string language, string text, string comment, bool isReadOnly, bool hasFile, string hint)
         {
             this.Language = language;
             this.text = text;
             this.comment = comment;
             this.IsReadOnly = isReadOnly;
+            this.HasFile = hasFile;
             this.Hint = hint;
         }
 
@@ -80,9 +82,19 @@ namespace BE.LabelExtension.ToolWindow
             set => this.SetProperty(ref this.comment, value ?? string.Empty);
         }
 
-        /// <summary>Whether the translation cannot be changed.</summary>
+        /// <summary>
+        /// Whether the translation cannot be changed. Its text can still be selected and copied,
+        /// for example to reuse a label of the platform.
+        /// </summary>
         [DataMember]
         public bool IsReadOnly { get; }
+
+        /// <summary>
+        /// Whether the label file exists in this language. Without, the fields are disabled, so
+        /// nobody types what cannot be saved (RE27).
+        /// </summary>
+        [DataMember]
+        public bool HasFile { get; }
 
         /// <summary>Why the translation cannot be changed, or that it is missing; empty otherwise.</summary>
         [DataMember]
