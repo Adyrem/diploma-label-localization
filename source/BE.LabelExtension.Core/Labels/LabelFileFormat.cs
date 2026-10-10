@@ -13,7 +13,8 @@ namespace BE.LabelExtension.Core.Labels
     /// </summary>
     /// <remarks>
     /// <para>Reading follows the existing tool. A line <c>ID=Text</c> starts a label, the ID
-    /// reaches up to the first equals sign. A line that starts with <c>;</c> or <c>#</c> after
+    /// reaches up to the first equals sign, without spaces and tabs at its end; the existing
+    /// tool keeps those. A line that starts with <c>;</c> or <c>#</c> after
     /// spaces is a comment. Only the first comment line after a label counts, comment lines
     /// before the first label are ignored, and empty lines do not count. If an ID appears
     /// twice, the first one wins.</para>
@@ -103,15 +104,19 @@ namespace BE.LabelExtension.Core.Labels
                     continue;
                 }
 
+                // Spaces and tabs before the equals sign are not part of the ID. Files of the
+                // platform contain lines such as "ID =Text"; the existing tool keeps the space
+                // in the ID, so the ID used in code does not find such a label there.
                 int equals = line.IndexOf('=');
-                if (equals <= 0)
+                string id = equals > 0 ? line.Substring(0, equals).TrimEnd(' ', '\t') : string.Empty;
+                if (id.Length == 0)
                 {
                     issues.Add(new LabelFileIssue(LabelFileIssueKind.InvalidLine, lineNumber, null));
                     continue;
                 }
 
                 Flush();
-                key = line.Substring(0, equals);
+                key = id;
                 text = line.Substring(equals + 1);
                 if (text == " ")
                 {

@@ -194,6 +194,18 @@ namespace BE.LabelExtension.Tests.Store
             Assert.DoesNotContain(this.messages.Messages, m => m.Severity != MessageSeverity.Message);
         }
 
+        /// <summary>F17: a label written "ID =Text" is found by the ID without the space.</summary>
+        [Fact]
+        public async Task LoadAsync_SpaceBeforeEqualsSign_LabelIsFoundByItsId()
+        {
+            File.AppendAllText(this.packages.LabelFilePath("BEDemo1", "BEDemo1", "BDM1", "de"), "BDM1SPACE =Mit Leerzeichen\r\n");
+
+            await this.LoadAsync("de");
+
+            Assert.Equal("Mit Leerzeichen", this.store.Find("@BDM1:BDM1SPACE")?.GetText("de"));
+            Assert.DoesNotContain(this.messages.Messages, m => m.Severity != MessageSeverity.Message);
+        }
+
         /// <summary>F14: the message after loading names the memory.</summary>
         [Fact]
         public async Task LoadAsync_Message_NamesTheMemory()

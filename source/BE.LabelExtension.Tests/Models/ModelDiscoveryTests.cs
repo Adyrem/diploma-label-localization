@@ -163,7 +163,7 @@ namespace BE.LabelExtension.Tests.Models
             Assert.False(model.IsLocked);
         }
 
-        /// <summary>TC13: the model of an XML file in a package directory and of a .xpp file in XppSource.</summary>
+        /// <summary>TC13: the model of an XML file in a package directory and of a .xpp file in XppSource, on both kinds of environment.</summary>
         [Fact]
         public void FindModelFor_ElementFileAndXppSourceFile_FindTheModel()
         {
@@ -171,8 +171,12 @@ namespace BE.LabelExtension.Tests.Models
             string xml = Path.Combine(this.packages.ModelDirectory("BEDemo2", "BEDemo2"), "AxTable", "BDMDelivery.xml");
             string xpp = Path.Combine(this.packages.Root, "Metadata", "XppSource", "BEDemo1", "AxClass_BDMDeliveryHelper.xpp");
 
+            // On the classic development VM the X++ editor works below the PackagesLocalDirectory (D1).
+            string classicXpp = Path.Combine(@"J:\AosService\PackagesLocalDirectory", "bin", "XppSource", "BEDemo2", "AxTable_BDMDelivery.xpp");
+
             Assert.Equal("BEDemo2", ModelDiscovery.FindModelFor(xml, models)?.Name);
             Assert.Equal("BEDemo1", ModelDiscovery.FindModelFor(xpp, models)?.Name);
+            Assert.Equal("BEDemo2", ModelDiscovery.FindModelFor(classicXpp, models)?.Name);
             Assert.Null(ModelDiscovery.FindModelFor(Path.Combine(this.packages.Root, "elsewhere", "file.xml"), models));
         }
 

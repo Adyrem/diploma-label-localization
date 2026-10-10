@@ -133,7 +133,9 @@ namespace BE.LabelExtension.Core.Models
         /// <summary>
         /// Finds the model a file belongs to, for the label file to suggest when extracting a
         /// text. Understands paths in the package directories and in XppSource, where the X++
-        /// editor of the Unified Developer Experience works.
+        /// editor works: <c>&lt;ModelStoreFolder&gt;\XppSource\&lt;Model&gt;</c> on the Unified
+        /// Developer Experience, <c>PackagesLocalDirectory\bin\XppSource\&lt;Model&gt;</c> on the
+        /// classic development VM.
         /// </summary>
         /// <param name="filePath">Path of an element file or a <c>.xpp</c> file.</param>
         /// <param name="models">The known models.</param>

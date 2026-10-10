@@ -131,6 +131,39 @@ namespace BE.LabelExtension.Tests.Labels
             Assert.Equal("x = y", entry.Text);
         }
 
+        /// <summary>
+        /// F17: files of the platform contain lines such as "ID =Text". Spaces and tabs before
+        /// the equals sign are not part of the ID; writing drops them.
+        /// </summary>
+        [Theory]
+        [InlineData("BDM1SPACE =Text\r\n")]
+        [InlineData("BDM1SPACE\t=Text\r\n")]
+        [InlineData("BDM1SPACE \t =Text\r\n")]
+        public void Read_SpaceBeforeEqualsSign_IsNotPartOfTheId(string line)
+        {
+            LabelFileContent content = Read(line);
+
+            Assert.Equal("BDM1SPACE", content.Entries.Single().Key);
+            Assert.Equal("Text", content.Entries.Single().Text);
+            Assert.Empty(content.Issues);
+            Assert.Equal(Encoding.UTF8.GetBytes("BDM1SPACE=Text\r\n"), RoundTrip(Encoding.UTF8.GetBytes(line)));
+        }
+
+        [Fact]
+        public void Read_OnlySpacesBeforeEqualsSign_MarksTheFileAsDamaged()
+        {
+            Assert.True(Read("A=First\n \t=no key\n").IsDamaged);
+        }
+
+        [Fact]
+        public void Read_SameIdWithAndWithoutSpace_IsADuplicate()
+        {
+            LabelFileContent content = Read("A=First\nA =Second\n");
+
+            Assert.Equal("First", content.Entries.Single().Text);
+            Assert.Equal(LabelFileIssueKind.DuplicateId, content.Issues.Single().Kind);
+        }
+
         [Fact]
         public void Read_OneSpace_IsAnEmptyText()
         {
