@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AxReport xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>BDMDeliveryNote</Name>
+	<Designs>
+		<AxReportDesign>
+			<Name>Report</Name>
+			<Text><![CDATA[<Textbox Name="Caption"><Value>=Labels!@BDM1:BDM110000003 & ": " & Fields!Address.Value</Value></Textbox><Textbox Name="Legacy"><Value>=Labels!@BDM1:BDM110000003</Value></Textbox>]]></Text>
+		</AxReportDesign>
+	</Designs>
+</AxReport>

@@ -28,6 +28,7 @@ namespace BE.LabelExtension.Core.Store
         private readonly IReadOnlyList<ILabelSource> sources;
         private readonly LabelFileWatcher watcher;
         private readonly IMessageSink messages;
+        private readonly object swapGate = new();
         private Snapshot? snapshot;
         private CancellationTokenSource? currentLoad;
         private int loading;
@@ -46,7 +47,7 @@ namespace BE.LabelExtension.Core.Store
             this.watcher.ExternalChange += (sender, e) => this.ExternalChange?.Invoke(this, e);
         }
 
-        /// <summary>Raised when a load has completed and the index has been replaced.</summary>
+        /// <summary>Raised when the index has been replaced, after a load or when labels were added or removed.</summary>
         public event EventHandler? Changed;
 
         /// <summary>Raised when loaded writable label files changed from outside.</summary>
@@ -60,6 +61,9 @@ namespace BE.LabelExtension.Core.Store
 
         /// <summary>The models found by the last load.</summary>
         public IReadOnlyList<ModelInfo> Models => this.Current.Models;
+
+        /// <summary>The languages of the last load.</summary>
+        public IReadOnlyList<string> Languages => this.Current.Languages;
 
         /// <summary>The label files found by the last load, also those without a loaded language.</summary>
         public IReadOnlyList<LabelFile> LabelFiles => this.Current.LabelFiles;
@@ -90,6 +94,23 @@ namespace BE.LabelExtension.Core.Store
         /// <param name="fullId">The complete label ID.</param>
         /// <returns>The label, or <c>null</c> if the ID is unknown.</returns>
         public Label? Find(string fullId) => this.Current.Index.TryGetValue(fullId, out Label? label) ? label : null;
+
+        /// <summary>
+        /// Adds and removes single labels without loading, for creating, copying and deleting.
+        /// Like a load it builds a new index, so a search running at the same time sees either
+        /// the old or the new state.
+        /// </summary>
+        /// <param name="added">Labels to add; a label with the same ID is replaced.</param>
+        /// <param name="removed">Labels to remove.</param>
+        internal void Apply(IReadOnlyCollection<Label> added, IReadOnlyCollection<Label> removed)
+        {
+            lock (this.swapGate)
+            {
+                Volatile.Write(ref this.snapshot, this.Current.With(added, removed));
+            }
+
+            this.Changed?.Invoke(this, EventArgs.Empty);
+        }
 
         /// <summary>Finds the model a file belongs to, see <see cref="ModelDiscovery.FindModelFor"/>.</summary>
         /// <param name="filePath">Path of an element file or a <c>.xpp</c> file.</param>
@@ -190,17 +211,20 @@ namespace BE.LabelExtension.Core.Store
                 results.Add(result);
             }
 
-            Snapshot next = Merge(models, results, this.messages);
+            Snapshot next = Merge(models, results, settings.LoadLanguages.ToList(), this.messages);
             cancellationToken.ThrowIfCancellationRequested();
 
-            // Changes not yet saved survive the reload.
-            foreach (Label unsaved in this.Current.Index.Values.Where(l => l.IsModified))
+            lock (this.swapGate)
             {
-                next.Index[unsaved.Id.FullId] = unsaved;
-            }
+                // Changes not yet saved survive the reload.
+                foreach (Label unsaved in this.Current.Index.Values.Where(l => l.IsModified))
+                {
+                    next.Index[unsaved.Id.FullId] = unsaved;
+                }
 
-            next.Seal();
-            Volatile.Write(ref this.snapshot, next);
+                next.Seal();
+                Volatile.Write(ref this.snapshot, next);
+            }
             this.watcher.Start(next.WatchedFiles);
 
             this.messages.Report(
@@ -219,7 +243,7 @@ namespace BE.LabelExtension.Core.Store
             return $"Memory: {managedAfter / MegaByte} MB managed, {managedBefore / MegaByte} MB before loading; {process.PrivateMemorySize64 / MegaByte} MB private bytes of the process.";
         }
 
-        private static Snapshot Merge(IReadOnlyList<ModelInfo> models, IReadOnlyList<LabelSourceResult> results, IMessageSink messages)
+        private static Snapshot Merge(IReadOnlyList<ModelInfo> models, IReadOnlyList<LabelSourceResult> results, IReadOnlyList<string> languages, IMessageSink messages)
         {
             // A .label.txt wins over the compiled resources of the same label file and language.
             List<LabelFile> textFiles = results.SelectMany(r => r.LabelFiles).Where(f => !f.IsCompiled).ToList();
@@ -287,7 +311,7 @@ namespace BE.LabelExtension.Core.Store
                 .Select(d => d.Path)
                 .ToList();
 
-            return new Snapshot(models, labelFiles, index, documents.Count, watched);
+            return new Snapshot(models, labelFiles, languages, index, documents.Count, watched);
         }
 
         private static string Key(string labelFile, string language) => labelFile + "|" + language;
@@ -296,10 +320,11 @@ namespace BE.LabelExtension.Core.Store
         {
             public static readonly Snapshot Empty = CreateEmpty();
 
-            public Snapshot(IReadOnlyList<ModelInfo> models, IReadOnlyList<LabelFile> labelFiles, Dictionary<string, Label> index, int documentCount, IReadOnlyList<string> watchedFiles)
+            public Snapshot(IReadOnlyList<ModelInfo> models, IReadOnlyList<LabelFile> labelFiles, IReadOnlyList<string> languages, Dictionary<string, Label> index, int documentCount, IReadOnlyList<string> watchedFiles)
             {
                 this.Models = models;
                 this.LabelFiles = labelFiles;
+                this.Languages = languages;
                 this.Index = index;
                 this.DocumentCount = documentCount;
                 this.WatchedFiles = watchedFiles;
@@ -308,6 +333,8 @@ namespace BE.LabelExtension.Core.Store
             public IReadOnlyList<ModelInfo> Models { get; }
 
             public IReadOnlyList<LabelFile> LabelFiles { get; }
+
+            public IReadOnlyList<string> Languages { get; }
 
             public Dictionary<string, Label> Index { get; }
 
@@ -326,9 +353,46 @@ namespace BE.LabelExtension.Core.Store
                 this.All = labels;
             }
 
+            /// <summary>
+            /// A copy with labels added and removed. The sorted array is taken over and changed
+            /// in place of sorting all labels again.
+            /// </summary>
+            public Snapshot With(IReadOnlyCollection<Label> added, IReadOnlyCollection<Label> removed)
+            {
+                var index = new Dictionary<string, Label>(this.Index, StringComparer.Ordinal);
+                var gone = new HashSet<Label>(removed);
+                foreach (Label label in removed)
+                {
+                    if (index.TryGetValue(label.Id.FullId, out Label? present) && ReferenceEquals(present, label))
+                    {
+                        index.Remove(label.Id.FullId);
+                    }
+                }
+
+                foreach (Label label in added)
+                {
+                    if (index.TryGetValue(label.Id.FullId, out Label? replaced))
+                    {
+                        gone.Add(replaced);
+                    }
+
+                    index[label.Id.FullId] = label;
+                }
+
+                var all = this.All.Where(l => !gone.Contains(l)).ToList();
+                var byId = Comparer<Label>.Create((a, b) => string.CompareOrdinal(a.Id.FullId, b.Id.FullId));
+                foreach (Label label in added)
+                {
+                    int position = all.BinarySearch(label, byId);
+                    all.Insert(position < 0 ? ~position : position, label);
+                }
+
+                return new Snapshot(this.Models, this.LabelFiles, this.Languages, index, this.DocumentCount, this.WatchedFiles) { All = all.ToArray() };
+            }
+
             private static Snapshot CreateEmpty()
             {
-                var empty = new Snapshot(Array.Empty<ModelInfo>(), Array.Empty<LabelFile>(), new Dictionary<string, Label>(), 0, Array.Empty<string>());
+                var empty = new Snapshot(Array.Empty<ModelInfo>(), Array.Empty<LabelFile>(), Array.Empty<string>(), new Dictionary<string, Label>(), 0, Array.Empty<string>());
                 empty.Seal();
                 return empty;
             }

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>BDMDeliveryHelper</Name>
+	<SourceCode>
+		<Declaration><![CDATA[
+/// <summary>
+/// Synthetic class of the test data, with label IDs in code.
+/// </summary>
+internal final class BDMDeliveryHelper
+{
+}
+]]></Declaration>
+		<Methods>
+			<Method>
+				<Name>caption</Name>
+				<Source><![CDATA[
+    public static str caption()
+    {
+        return strFmt("%1 %2", "@BDM1:BDM110000003", "@SYS12345");
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>legacyCaption</Name>
+				<Source><![CDATA[
+    public static str legacyCaption()
+    {
+        // Single quotes, which the existing tool turns into double quotes when replacing.
+        return '@BDM1:BDM110000003' + literalStr(@SYS123456);
+    }
+
+]]></Source>
+			</Method>
+		</Methods>
+	</SourceCode>
+</AxClass>

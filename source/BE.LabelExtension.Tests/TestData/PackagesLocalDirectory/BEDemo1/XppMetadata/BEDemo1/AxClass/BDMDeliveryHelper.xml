@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>BDMDeliveryHelper</Name>
+	<SourceCode>
+		<Declaration><![CDATA[
+/// <summary>
+/// Synthetic copy the build puts under XppMetadata. The usage search never reads it (B21).
+/// </summary>
+internal final class BDMDeliveryHelper
+{
+    str caption = "@BDM1:BDM110000003";
+}
+]]></Declaration>
+		<Methods />
+	</SourceCode>
+</AxClass>

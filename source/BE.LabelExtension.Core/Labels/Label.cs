@@ -42,6 +42,12 @@ namespace BE.LabelExtension.Core.Labels
         /// <summary>Whether a change is not yet in the label files.</summary>
         public bool IsModified { get; set; }
 
+        /// <summary>
+        /// Whether the label is deleted, but the deletion is not saved yet. The search skips
+        /// it; saving removes it from the label files and the label store.
+        /// </summary>
+        public bool IsDeleted { get; internal set; }
+
         /// <summary>Returns the translation in one language.</summary>
         /// <param name="language">The language, compared without case.</param>
         /// <returns>The translation, or <c>null</c> if it is missing.</returns>

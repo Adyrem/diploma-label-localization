@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<AxTable xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>BDMDelivery</Name>
+	<SourceCode>
+		<Declaration><![CDATA[
+public class BDMDelivery extends common
+{
+}
+]]></Declaration>
+		<Methods />
+	</SourceCode>
+	<Label>@BDM2:BDM210000001</Label>
+	<Fields>
+		<AxTableField xmlns=""
+			i:type="AxTableFieldString">
+			<Name>DeliveryAddress</Name>
+			<HelpText>@BDM1:BDM110000003</HelpText>
+			<Label>@BDM1:BDM110000003</Label>
+		</AxTableField>
+		<AxTableField xmlns=""
+			i:type="AxTableFieldString">
+			<Name>LegacyCaption</Name>
+			<Label>@SYS12345</Label>
+		</AxTableField>
+	</Fields>
+</AxTable>
