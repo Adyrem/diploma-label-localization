@@ -2,9 +2,198 @@
               xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
               xmlns:vs="http://schemas.microsoft.com/visualstudio/extensibility/2022/xaml"
               xmlns:styles="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.15.0">
-  <Grid Margin="8">
-    <TextBlock Text="{Binding StatusText}"
-               TextWrapping="Wrap"
-               Foreground="{DynamicResource {x:Static styles:VsBrushes.ToolWindowTextKey}}" />
+  <!--
+    Search, hit list, details and status stacked, so the window works narrow at the side
+    (concept, GUI design). Columns have fixed widths, the same in header and rows, because
+    their number follows the loaded languages.
+  -->
+  <Grid Background="{DynamicResource {x:Static styles:VsBrushes.ToolWindowBackgroundKey}}"
+        TextElement.Foreground="{DynamicResource {x:Static styles:VsBrushes.ToolWindowTextKey}}">
+    <!-- Implicit styles do not reach into templates; the inherited foreground does. -->
+    <Grid.Resources>
+      <Style TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource {x:Static styles:VsBrushes.ToolWindowTextKey}}" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+      </Style>
+    </Grid.Resources>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="2*" MinHeight="80" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" MinHeight="90" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+
+    <!-- Toolbar -->
+    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="6,6,6,2">
+      <Button Content="Save" Command="{Binding SaveCommand}" MinWidth="70" Padding="8,2"
+              Style="{DynamicResource {x:Static styles:VsResourceKeys.ButtonStyleKey}}" />
+      <TextBlock Text="{Binding PendingText}" Margin="8,0,0,0" />
+    </StackPanel>
+
+    <!-- Search mode and term -->
+    <Grid Grid.Row="1" Margin="6,2,6,4">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="Auto" />
+        <ColumnDefinition Width="*" />
+      </Grid.ColumnDefinitions>
+      <ComboBox Grid.Column="0" MinWidth="200" Margin="0,0,6,0"
+                ItemsSource="{Binding SearchModes}" SelectedIndex="{Binding SelectedModeIndex, Mode=TwoWay}"
+                AutomationProperties.Name="Search mode"
+                Style="{DynamicResource {x:Static styles:VsResourceKeys.ComboBoxStyleKey}}" />
+      <TextBox Grid.Column="1" Text="{Binding SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+               AutomationProperties.Name="Search term"
+               Style="{DynamicResource {x:Static styles:VsResourceKeys.TextBoxStyleKey}}">
+        <TextBox.InputBindings>
+          <KeyBinding Key="Return" Command="{Binding SearchCommand}" />
+        </TextBox.InputBindings>
+      </TextBox>
+    </Grid>
+
+    <!-- Hit list: lock, label ID and one column per loaded language -->
+    <ScrollViewer Grid.Row="2" Margin="6,0,6,0" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+      <DockPanel>
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="4,0,0,2">
+          <TextBlock Width="20" />
+          <TextBlock Width="240" Text="Label ID" FontWeight="Bold" />
+          <ItemsControl ItemsSource="{Binding Columns}">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate>
+                <StackPanel Orientation="Horizontal" />
+              </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <TextBlock Width="200" Text="{Binding}" FontWeight="Bold" />
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+        <ListBox ItemsSource="{Binding Hits}" SelectedIndex="{Binding SelectedHitIndex, Mode=TwoWay}"
+                 AutomationProperties.Name="Hits"
+                 Background="Transparent" BorderThickness="0"
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                 VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling">
+          <ListBox.ItemTemplate>
+            <DataTemplate>
+              <StackPanel Orientation="Horizontal">
+                <TextBlock Width="20" Text="&#xE72E;" FontFamily="Segoe MDL2 Assets" ToolTip="Read-only">
+                  <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                      <Setter Property="Foreground" Value="{DynamicResource {x:Static styles:VsBrushes.ToolWindowTextKey}}" />
+                      <Setter Property="Visibility" Value="Hidden" />
+                      <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsReadOnly}" Value="True">
+                          <Setter Property="Visibility" Value="Visible" />
+                        </DataTrigger>
+                      </Style.Triggers>
+                    </Style>
+                  </TextBlock.Style>
+                </TextBlock>
+                <TextBlock Width="240" Text="{Binding Id}" TextTrimming="CharacterEllipsis">
+                  <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                      <Setter Property="Foreground" Value="{DynamicResource {x:Static styles:VsBrushes.ToolWindowTextKey}}" />
+                      <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsModified}" Value="True">
+                          <Setter Property="FontWeight" Value="Bold" />
+                          <Setter Property="ToolTip" Value="Not saved" />
+                        </DataTrigger>
+                      </Style.Triggers>
+                    </Style>
+                  </TextBlock.Style>
+                </TextBlock>
+                <ItemsControl ItemsSource="{Binding Cells}">
+                  <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                      <StackPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                  </ItemsControl.ItemsPanel>
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                      <TextBlock Width="200" Text="{Binding Text}" TextTrimming="CharacterEllipsis" Padding="0,0,8,0">
+                        <TextBlock.Style>
+                          <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="{DynamicResource {x:Static styles:VsBrushes.ToolWindowTextKey}}" />
+                            <Style.Triggers>
+                              <DataTrigger Binding="{Binding IsMissing}" Value="True">
+                                <Setter Property="FontStyle" Value="Italic" />
+                                <Setter Property="Opacity" Value="0.6" />
+                              </DataTrigger>
+                            </Style.Triggers>
+                          </Style>
+                        </TextBlock.Style>
+                      </TextBlock>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+      </DockPanel>
+    </ScrollViewer>
+
+    <GridSplitter Grid.Row="3" Height="5" HorizontalAlignment="Stretch" ResizeDirection="Rows" Background="Transparent" />
+
+    <!-- Details of the selected label -->
+    <DockPanel Grid.Row="4" Margin="6,2,6,2" DataContext="{Binding Detail}">
+      <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,4">
+        <TextBlock Text="{Binding Id}" FontWeight="Bold" Margin="0,0,8,0" />
+        <TextBlock Text="{Binding Info}" TextWrapping="Wrap" />
+      </StackPanel>
+      <Grid DockPanel.Dock="Top" Margin="0,0,0,2">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="60" />
+          <ColumnDefinition Width="2*" />
+          <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <TextBlock Grid.Column="0" Text="Language" FontWeight="Bold" />
+        <TextBlock Grid.Column="1" Text="Text" FontWeight="Bold" />
+        <TextBlock Grid.Column="2" Text="Comment" FontWeight="Bold" Margin="4,0,0,0" />
+      </Grid>
+      <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <ItemsControl ItemsSource="{Binding Translations}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate>
+              <Grid Margin="0,1,0,1">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="60" />
+                  <ColumnDefinition Width="2*" />
+                  <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                  <RowDefinition Height="Auto" />
+                  <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Column="0" Text="{Binding Language}" />
+                <TextBox Grid.Column="1" Text="{Binding Text, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         IsReadOnly="{Binding IsReadOnly}" AutomationProperties.Name="Text"
+                         Style="{DynamicResource {x:Static styles:VsResourceKeys.TextBoxStyleKey}}" />
+                <TextBox Grid.Column="2" Margin="4,0,0,0" Text="{Binding Comment, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         IsReadOnly="{Binding IsReadOnly}" AutomationProperties.Name="Comment"
+                         Style="{DynamicResource {x:Static styles:VsResourceKeys.TextBoxStyleKey}}" />
+                <TextBlock Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding Hint}" FontStyle="Italic" Opacity="0.7">
+                  <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                      <Setter Property="Foreground" Value="{DynamicResource {x:Static styles:VsBrushes.ToolWindowTextKey}}" />
+                      <Style.Triggers>
+                        <DataTrigger Binding="{Binding Hint}" Value="">
+                          <Setter Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                      </Style.Triggers>
+                    </Style>
+                  </TextBlock.Style>
+                </TextBlock>
+              </Grid>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </ScrollViewer>
+    </DockPanel>
+
+    <!-- Status -->
+    <TextBlock Grid.Row="5" Margin="6,2,6,6" Text="{Binding StatusText}" TextWrapping="Wrap" />
   </Grid>
 </DataTemplate>

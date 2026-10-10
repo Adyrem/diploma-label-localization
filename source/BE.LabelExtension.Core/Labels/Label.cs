@@ -84,6 +84,24 @@ namespace BE.LabelExtension.Core.Labels
         }
 
         /// <summary>
+        /// Replaces the translation in its language or adds it. The array is replaced as a whole,
+        /// so a search running at the same time sees either the old or the new state.
+        /// </summary>
+        /// <param name="translation">The new translation.</param>
+        internal void SetTranslation(Translation translation)
+        {
+            lock (this)
+            {
+                Translation[] current = this.translations;
+                int index = Array.FindIndex(current, t => string.Equals(t.Language, translation.Language, StringComparison.OrdinalIgnoreCase));
+                Translation[] next = new Translation[index >= 0 ? current.Length : current.Length + 1];
+                Array.Copy(current, next, current.Length);
+                next[index >= 0 ? index : current.Length] = translation;
+                this.translations = next;
+            }
+        }
+
+        /// <summary>
         /// Returns the instance of an equal text or comment the label already holds, otherwise
         /// the value itself. In the label files of the platform the comment is the same in every
         /// language, and de-CH often has the text of de; sharing saves that memory.
