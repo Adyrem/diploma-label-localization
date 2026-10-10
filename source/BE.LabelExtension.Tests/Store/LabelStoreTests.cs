@@ -43,7 +43,7 @@ namespace BE.LabelExtension.Tests.Store
             Assert.True(this.store.IsLoaded);
             Assert.Equal(29 + 4 + 12 + 9 + 3, this.store.Count);
             Assert.Equal("Lieferadresse", this.store.Find("@BDM1:BDM110000003")?.GetText("de"));
-            Assert.Equal("Address the goods are delivered to", this.store.Find("@BDM1:BDM110000003")?.Translations["en-US"].Comment);
+            Assert.Equal("Address the goods are delivered to", this.store.Find("@BDM1:BDM110000003")?.GetTranslation("en-US")!.Comment);
             Assert.Equal(string.Empty, this.store.Find("@BDM1:BDM110000021")?.GetText("de"));
             Assert.Contains(this.messages.Messages, m => m.Severity == MessageSeverity.Message && m.Message.StartsWith("57 labels loaded"));
         }
@@ -67,8 +67,8 @@ namespace BE.LabelExtension.Tests.Store
 
             Label label = this.store.Find("@BDM1:BDM110000001")!;
             Assert.Equal("Cliente", label.GetText("it-CH"));
-            Assert.Equal("BDM1_Extension", label.Translations["it-CH"].LabelFile.Name);
-            Assert.Equal("BDM1", label.Translations["de"].LabelFile.Name);
+            Assert.Equal("BDM1_Extension", label.GetTranslation("it-CH")!.LabelFile.Name);
+            Assert.Equal("BDM1", label.GetTranslation("de")!.LabelFile.Name);
             Assert.Null(this.store.Find("@BDM1_Extension:BDM110000001"));
         }
 
@@ -204,6 +204,24 @@ namespace BE.LabelExtension.Tests.Store
 
             Assert.Equal("Mit Leerzeichen", this.store.Find("@BDM1:BDM1SPACE")?.GetText("de"));
             Assert.DoesNotContain(this.messages.Messages, m => m.Severity != MessageSeverity.Message);
+        }
+
+        /// <summary>
+        /// F14: a text or comment equal to one in another language of the same label is held
+        /// once. In the files of the platform the comment is the same in every language.
+        /// </summary>
+        [Fact]
+        public async Task LoadAsync_EqualTextsAndCommentsOfALabel_AreSharedAndStoredSortedById()
+        {
+            File.AppendAllText(this.packages.LabelFilePath("BEDemo1", "BEDemo1", "BDM1", "de"), "BDM1SHARED=Gleich\r\n ;Same comment\r\n");
+            File.AppendAllText(this.packages.LabelFilePath("BEDemo1", "BEDemo1", "BDM1", "en-US"), "BDM1SHARED=Gleich\r\n ;Same comment\r\n");
+
+            await this.LoadAsync("de", "en-US");
+
+            Label label = this.store.Find("@BDM1:BDM1SHARED")!;
+            Assert.Same(label.GetTranslation("de")!.Text, label.GetTranslation("en-US")!.Text);
+            Assert.Same(label.GetTranslation("de")!.Comment, label.GetTranslation("en-US")!.Comment);
+            Assert.Equal(this.store.Labels.Select(l => l.Id.FullId).OrderBy(id => id, StringComparer.Ordinal), this.store.Labels.Select(l => l.Id.FullId));
         }
 
         /// <summary>F14: the message after loading names the memory.</summary>

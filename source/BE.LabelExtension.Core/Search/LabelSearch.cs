@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 using BE.LabelExtension.Core.Labels;
 using BE.LabelExtension.Core.Store;
 
@@ -32,6 +34,9 @@ namespace BE.LabelExtension.Core.Search
     /// </remarks>
     public sealed class LabelSearch
     {
+        // The highest score of any mode, that of Anything like that.
+        private const int MaxScore = 1000;
+
         private static readonly char[] WordSeparators = { ' ', ',', '.', '-' };
 
         private readonly LabelStore store;
@@ -55,7 +60,7 @@ namespace BE.LabelExtension.Core.Search
                 return label == null ? Array.Empty<SearchHit>() : new[] { new SearchHit(label, 1) };
             }
 
-            return Search(this.store.Labels, query, cancellationToken);
+            return SearchSorted(this.store.SortedLabels, query, cancellationToken);
         }
 
         /// <summary>
@@ -68,6 +73,16 @@ namespace BE.LabelExtension.Core.Search
         /// <returns>The hits, the most relevant first.</returns>
         public static IReadOnlyList<SearchHit> Search(IEnumerable<Label> labels, SearchQuery query, CancellationToken cancellationToken = default)
         {
+            Label[] sorted = labels.ToArray();
+            Array.Sort(sorted, (a, b) => string.CompareOrdinal(a.Id.FullId, b.Id.FullId));
+            return SearchSorted(sorted, query, cancellationToken);
+        }
+
+        // The labels are sorted by complete ID, ordinal. Each hit becomes one number, the score
+        // descending in the upper half and the position in the lower one, so sorting numbers
+        // gives score descending and then complete ID, without comparing strings (F14).
+        private static IReadOnlyList<SearchHit> SearchSorted(Label[] labels, SearchQuery query, CancellationToken cancellationToken)
+        {
             if (query.Term.Length == 0)
             {
                 return Array.Empty<SearchHit>();
@@ -79,44 +94,80 @@ namespace BE.LabelExtension.Core.Search
                 return Array.Empty<SearchHit>();
             }
 
-            List<SearchHit> hits = labels
-                .AsParallel()
-                .WithCancellation(cancellationToken)
-                .Select(label => (Label: label, Score: score(label)))
-                .Where(scored => scored.Score > 0)
-                .Select(scored => new SearchHit(scored.Label, scored.Score))
-                .ToList();
+            var parts = new List<List<long>>();
+            if (labels.Length > 0)
+            {
+                Parallel.ForEach(
+                    Partitioner.Create(0, labels.Length, Math.Max(1024, labels.Length / (Environment.ProcessorCount * 8))),
+                    new ParallelOptions { CancellationToken = cancellationToken },
+                    () => new List<long>(),
+                    (range, state, found) =>
+                    {
+                        for (int i = range.Item1; i < range.Item2; i++)
+                        {
+                            int value = score(labels[i]);
+                            if (value > 0)
+                            {
+                                found.Add(((long)(MaxScore - value) << 32) | (uint)i);
+                            }
+                        }
 
-            hits.Sort((a, b) => a.Score != b.Score
-                ? b.Score.CompareTo(a.Score)
-                : string.CompareOrdinal(a.Label.Id.FullId, b.Label.Id.FullId));
+                        return found;
+                    },
+                    found =>
+                    {
+                        lock (parts)
+                        {
+                            parts.Add(found);
+                        }
+                    });
+            }
+
+            long[] keys = new long[parts.Sum(p => p.Count)];
+            int next = 0;
+            foreach (List<long> part in parts)
+            {
+                part.CopyTo(keys, next);
+                next += part.Count;
+            }
+
+            Array.Sort(keys);
+            var hits = new SearchHit[keys.Length];
+            for (int k = 0; k < keys.Length; k++)
+            {
+                hits[k] = new SearchHit(labels[(int)(keys[k] & uint.MaxValue)], MaxScore - (int)(keys[k] >> 32));
+            }
+
             return hits;
         }
 
         private static Func<Label, int>? CreateScorer(SearchQuery query)
         {
             string term = query.Term;
-            StringComparison comparison = query.CaseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
             switch (query.Mode)
             {
                 case SearchMode.ExactMatch:
+                    StringComparison comparison = query.CaseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
                     return label => ScoreLanguages(
                         label,
-                        string.Equals(label.Id.FullId, term, comparison) || string.Equals(label.Id.Key, term, comparison),
+                        string.Equals(label.Id.FullId, term, comparison) || label.Id.KeyEquals(term, comparison),
                         text => string.Equals(text, term, comparison));
 
                 case SearchMode.Substring:
-                    return label => ScoreLanguages(
-                        label,
-                        label.Id.FullId.IndexOf(term, comparison) >= 0,
-                        text => text.IndexOf(term, comparison) >= 0);
+                    Func<string, bool> contains = Contains(term, query.CaseSensitive);
+                    return label => ScoreLanguages(label, contains(label.Id.FullId), contains);
 
                 case SearchMode.MatchWord:
                     var word = new Regex(@"\b" + Regex.Escape(term) + @"\b", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+
+                    // The expression can only match where the term occurs under its case rule,
+                    // which is quick to check. Most fields fail that check.
+                    CharFolding.FoldedTerm lowered = CharFolding.RegexIgnoreCase.Prepare(term);
+                    Func<string, bool> isWord = field => lowered.IndexOf(field, 0) >= 0 && word.IsMatch(field);
                     return label => ScoreMatchWord(
                         label,
-                        string.Equals(label.Id.FullId, term, StringComparison.OrdinalIgnoreCase) || string.Equals(label.Id.Key, term, StringComparison.OrdinalIgnoreCase),
-                        word);
+                        string.Equals(label.Id.FullId, term, StringComparison.OrdinalIgnoreCase) || label.Id.KeyEquals(term, StringComparison.OrdinalIgnoreCase),
+                        isWord);
 
                 case SearchMode.AnythingLike:
                     string[] words = term.Split(WordSeparators, StringSplitOptions.RemoveEmptyEntries);
@@ -125,12 +176,20 @@ namespace BE.LabelExtension.Core.Search
                         return null;
                     }
 
+                    CharFolding folding = query.CaseSensitive ? CharFolding.Ordinal : CharFolding.OrdinalIgnoreCase;
+                    CharFolding.FoldedTerm[] prepared = words.Select(folding.Prepare).ToArray();
                     return label =>
                     {
-                        int best = Coverage(label.Id.FullId, words, comparison);
-                        foreach (Translation translation in label.Translations.Values)
+                        int best = Coverage(label.Id.FullId, prepared);
+                        string? previous = null;
+                        foreach (Translation translation in label.TranslationArray)
                         {
-                            best = Math.Max(best, Coverage(translation.Text, words, comparison));
+                            // A text shared with the language before scores the same.
+                            if (!ReferenceEquals(translation.Text, previous))
+                            {
+                                previous = translation.Text;
+                                best = Math.Max(best, Coverage(previous, prepared));
+                            }
                         }
 
                         return best;
@@ -144,15 +203,23 @@ namespace BE.LabelExtension.Core.Search
             }
         }
 
+        private static Func<string, bool> Contains(string term, bool caseSensitive)
+        {
+            CharFolding.FoldedTerm prepared = (caseSensitive ? CharFolding.Ordinal : CharFolding.OrdinalIgnoreCase).Prepare(term);
+            return field => prepared.IndexOf(field, 0) >= 0;
+        }
+
         // Exact match and Substring: text 2, otherwise ID 3, otherwise comment 1, per language.
         private static int ScoreLanguages(Label label, bool idMatches, Func<string, bool> fits)
         {
+            var text = default(FieldResult);
+            var comment = default(FieldResult);
             int best = 0;
-            foreach (Translation translation in label.Translations.Values)
+            foreach (Translation translation in label.TranslationArray)
             {
-                int score = fits(translation.Text) ? 2
+                int score = text.Fits(translation.Text, fits) ? 2
                     : idMatches ? 3
-                    : translation.Comment != null && fits(translation.Comment) ? 1
+                    : translation.Comment != null && comment.Fits(translation.Comment, fits) ? 1
                     : 0;
                 best = Math.Max(best, score);
             }
@@ -161,14 +228,16 @@ namespace BE.LabelExtension.Core.Search
         }
 
         // MatchWord: ID 2, otherwise whole word of the text 3, otherwise of the comment 1, per language.
-        private static int ScoreMatchWord(Label label, bool idMatches, Regex word)
+        private static int ScoreMatchWord(Label label, bool idMatches, Func<string, bool> isWord)
         {
+            var text = default(FieldResult);
+            var comment = default(FieldResult);
             int best = 0;
-            foreach (Translation translation in label.Translations.Values)
+            foreach (Translation translation in label.TranslationArray)
             {
                 int score = idMatches ? 2
-                    : word.IsMatch(translation.Text) ? 3
-                    : translation.Comment != null && word.IsMatch(translation.Comment) ? 1
+                    : text.Fits(translation.Text, isWord) ? 3
+                    : translation.Comment != null && comment.Fits(translation.Comment, isWord) ? 1
                     : 0;
                 best = Math.Max(best, score);
             }
@@ -176,12 +245,47 @@ namespace BE.LabelExtension.Core.Search
             return best;
         }
 
+        // Remembers the last field checked. The labels share equal texts and comments among
+        // their languages (Label.Share), and the comment is usually the same in every language,
+        // so most of them need checking only once per label.
+        private struct FieldResult
+        {
+            private string? field;
+            private bool fits;
+
+            public bool Fits(string value, Func<string, bool> check)
+            {
+                if (!ReferenceEquals(value, this.field))
+                {
+                    this.field = value;
+                    this.fits = check(value);
+                }
+
+                return this.fits;
+            }
+        }
+
         /// <summary>
         /// Anything like that for one field: the mean share of the field the words cover, times
         /// 1000 and truncated. Removing a word means removing all of its occurrences, as
         /// <see cref="string.Replace(string, string)"/> does from left to right.
         /// </summary>
+        /// <param name="field">The field, ID or text.</param>
+        /// <param name="words">The words of the term.</param>
+        /// <param name="comparison">Ordinal, or ordinal without case.</param>
+        /// <returns>The score of the field, 0 to 1000.</returns>
         internal static int Coverage(string field, IReadOnlyList<string> words, StringComparison comparison)
+        {
+            CharFolding folding = comparison switch
+            {
+                StringComparison.Ordinal => CharFolding.Ordinal,
+                StringComparison.OrdinalIgnoreCase => CharFolding.OrdinalIgnoreCase,
+                _ => throw new ArgumentOutOfRangeException(nameof(comparison), comparison, "Only ordinal comparisons are supported."),
+            };
+            return Coverage(field, words.Select(folding.Prepare).ToArray());
+        }
+
+        private static int Coverage(string field, CharFolding.FoldedTerm[] words)
         {
             if (field.Length == 0)
             {
@@ -189,21 +293,21 @@ namespace BE.LabelExtension.Core.Search
             }
 
             long restSum = 0;
-            foreach (string word in words)
+            foreach (CharFolding.FoldedTerm word in words)
             {
                 int occurrences = 0;
-                int index = field.IndexOf(word, comparison);
+                int index = word.IndexOf(field, 0);
                 while (index >= 0)
                 {
                     occurrences++;
-                    index = field.IndexOf(word, index + word.Length, comparison);
+                    index = word.IndexOf(field, index + word.Length);
                 }
 
                 restSum += field.Length - (occurrences * word.Length);
             }
 
             // 1000 * (n - restSum / length) / n, in integers so the truncation is exact.
-            long total = (long)words.Count * field.Length;
+            long total = (long)words.Length * field.Length;
             return (int)(1000L * (total - restSum) / total);
         }
     }

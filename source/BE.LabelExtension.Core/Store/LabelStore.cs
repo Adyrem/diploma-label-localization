@@ -64,8 +64,14 @@ namespace BE.LabelExtension.Core.Store
         /// <summary>The label files found by the last load, also those without a loaded language.</summary>
         public IReadOnlyList<LabelFile> LabelFiles => this.Current.LabelFiles;
 
-        /// <summary>All loaded labels.</summary>
-        public IReadOnlyCollection<Label> Labels => this.Current.Index.Values;
+        /// <summary>
+        /// All loaded labels, sorted by complete ID, ordinal. An array the search can split among
+        /// the processors without locking.
+        /// </summary>
+        public IReadOnlyList<Label> Labels => this.Current.All;
+
+        /// <summary>The same array, for the search, which ranks equal scores by the position in it.</summary>
+        internal Label[] SortedLabels => this.Current.All;
 
         /// <summary>The number of loaded labels.</summary>
         public int Count => this.Current.Index.Count;
@@ -193,6 +199,7 @@ namespace BE.LabelExtension.Core.Store
                 next.Index[unsaved.Id.FullId] = unsaved;
             }
 
+            next.Seal();
             Volatile.Write(ref this.snapshot, next);
             this.watcher.Start(next.WatchedFiles);
 
@@ -255,7 +262,9 @@ namespace BE.LabelExtension.Core.Store
                         index.Add(id.FullId, label);
                     }
 
-                    if (!label.TryAddTranslation(new Translation(document.Language, entry.Text, entry.Comment, document.LabelFile)))
+                    string text = label.Share(entry.Text);
+                    string? comment = entry.Comment == null ? null : label.Share(entry.Comment);
+                    if (!label.TryAddTranslation(new Translation(document.Language, text, comment, document.LabelFile)))
                     {
                         duplicates++;
                         duplicateExample ??= $"{id.FullId} in {document.Language} from {document.Path}";
@@ -285,7 +294,7 @@ namespace BE.LabelExtension.Core.Store
 
         private sealed class Snapshot
         {
-            public static readonly Snapshot Empty = new(Array.Empty<ModelInfo>(), Array.Empty<LabelFile>(), new Dictionary<string, Label>(), 0, Array.Empty<string>());
+            public static readonly Snapshot Empty = CreateEmpty();
 
             public Snapshot(IReadOnlyList<ModelInfo> models, IReadOnlyList<LabelFile> labelFiles, Dictionary<string, Label> index, int documentCount, IReadOnlyList<string> watchedFiles)
             {
@@ -301,6 +310,28 @@ namespace BE.LabelExtension.Core.Store
             public IReadOnlyList<LabelFile> LabelFiles { get; }
 
             public Dictionary<string, Label> Index { get; }
+
+            /// <summary>
+            /// The labels of the index as an array sorted by complete ID, ordinal, set by
+            /// <see cref="Seal"/> once the index is complete. The search ranks equal scores by
+            /// the position in this array instead of comparing IDs.
+            /// </summary>
+            public Label[] All { get; private set; } = Array.Empty<Label>();
+
+            public void Seal()
+            {
+                string[] ids = this.Index.Keys.ToArray();
+                Label[] labels = this.Index.Values.ToArray();
+                Array.Sort(ids, labels, StringComparer.Ordinal);
+                this.All = labels;
+            }
+
+            private static Snapshot CreateEmpty()
+            {
+                var empty = new Snapshot(Array.Empty<ModelInfo>(), Array.Empty<LabelFile>(), new Dictionary<string, Label>(), 0, Array.Empty<string>());
+                empty.Seal();
+                return empty;
+            }
 
             public int DocumentCount { get; }
 

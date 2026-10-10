@@ -50,6 +50,11 @@ namespace BE.LabelExtension.Tests.Labels
         [InlineData("@SYS12345 ")]
         [InlineData("\"@SYS12345\"")]
         [InlineData("Lieferadresse")]
+        [InlineData("@SYS12345\n")]
+        [InlineData("@SYS12A")]
+        [InlineData("@BDM1:L3:F2")]
+        [InlineData("@BDÄ:L3F2")]
+        [InlineData("@@SYS12345")]
         public void TryParse_Invalid_ReturnsFalseWithoutException(string? text)
         {
             Assert.False(LabelId.TryParse(text, out _));
@@ -99,6 +104,29 @@ namespace BE.LabelExtension.Tests.Labels
             Assert.True(LabelId.TryCreate("DMO", "@DMO1001", out LabelId id));
             Assert.Equal("@DMO1001", id.FullId);
             Assert.True(id.IsLegacy);
+        }
+
+        [Theory]
+        [InlineData("BDM 1", "BDM110000003")]
+        [InlineData("BDM1", "BDM1 10000003")]
+        [InlineData("", "BDM110000003")]
+        [InlineData("BDM1", "")]
+        public void TryCreate_InvalidPart_ReturnsFalse(string prefix, string key)
+        {
+            Assert.False(LabelId.TryCreate(prefix, key, out _));
+        }
+
+        [Fact]
+        public void KeyEquals_ComparesTheLabelPartWithoutCuttingItOut()
+        {
+            LabelId id = LabelId.Parse("@BDM1:L3F2A9C15B8047DE1");
+
+            Assert.True(id.KeyEquals("L3F2A9C15B8047DE1", StringComparison.Ordinal));
+            Assert.True(id.KeyEquals("l3f2a9c15b8047de1", StringComparison.OrdinalIgnoreCase));
+            Assert.False(id.KeyEquals("l3f2a9c15b8047de1", StringComparison.Ordinal));
+            Assert.False(id.KeyEquals("L3F2A9C15B8047DE", StringComparison.Ordinal));
+            Assert.True(LabelId.Parse("@SYS12345").KeyEquals("@SYS12345", StringComparison.Ordinal));
+            Assert.False(default(LabelId).KeyEquals("x", StringComparison.Ordinal));
         }
 
         [Theory]
