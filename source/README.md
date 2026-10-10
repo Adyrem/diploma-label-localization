@@ -71,6 +71,8 @@ $env:BELABELEXTENSION_PACKAGES_DIRECTORY = "$env:TEMP\pld-demo"
 & "$ide\devenv.exe" /rootsuffix Exp
 ```
 
+Tooltip und Inline-Anzeige hängen sich an den X++-Editor der Developer Tools. Ohne ihn zeigt der Debug-Build beides auch in Textdateien mit der Endung `.xpp` und erkennt die Label-IDs dort über eine Regex statt über die Classification. Eine solche Datei, etwa mit `return "@BDM1:BDM110000003";`, genügt zum Ausprobieren.
+
 Die Label-Dateien des Datensatzes sind UTF-8 mit BOM und Windows-Zeilenenden. `.gitattributes` schützt sie vor einer Umwandlung durch Git, weil TC01 sie Byte für Byte vergleicht.
 
 ## Werkzeuge

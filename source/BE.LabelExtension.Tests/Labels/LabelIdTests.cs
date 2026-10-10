@@ -140,6 +140,34 @@ namespace BE.LabelExtension.Tests.Labels
             Assert.Equal(expected, LabelFile.GetIdPrefix(labelFile));
         }
 
+        /// <summary>
+        /// TC02 for the label recognition: the X++ editor classifies the token with the opening
+        /// quote of the string literal, as the feasibility study observed.
+        /// </summary>
+        [Theory]
+        [InlineData("\"@BDM1:L3F2A9C15B8047DE1", "@BDM1:L3F2A9C15B8047DE1")]
+        [InlineData("\"@BDM1:L3F2A9C15B8047DE1\"", "@BDM1:L3F2A9C15B8047DE1")]
+        [InlineData("'@SYS12345'", "@SYS12345")]
+        [InlineData("  @SYS12345 ", "@SYS12345")]
+        [InlineData("@SYS12345", "@SYS12345")]
+        [InlineData("(@SYS12345)", "@SYS12345")]
+        public void TryParseToken_ClassifiedToken_GivesTheId(string token, string expected)
+        {
+            Assert.True(LabelId.TryParseToken(token, out LabelId id));
+            Assert.Equal(expected, id.FullId);
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData("\"")]
+        [InlineData("\"Lieferadresse\"")]
+        [InlineData("\"@SYS12345 @SYS67890\"")]
+        public void TryParseToken_NoSingleId_IsFalse(string? token)
+        {
+            Assert.False(LabelId.TryParseToken(token, out _));
+        }
+
         [Fact]
         public void Equality_IsOrdinalOnTheFullId()
         {

@@ -99,6 +99,49 @@ namespace BE.LabelExtension.Core.Labels
             return true;
         }
 
+        /// <summary>
+        /// Reads the label ID from a token the X++ editor classifies as a label. Such a token
+        /// starts with the opening quote of the string literal (findings log, section on the
+        /// label recognition), may end with the closing one and may be surrounded by spaces.
+        /// </summary>
+        /// <param name="token">Text of the classified token.</param>
+        /// <param name="id">The ID if the method returns <c>true</c>.</param>
+        /// <returns>Whether the token holds a label ID.</returns>
+        public static bool TryParseToken(string? token, out LabelId id)
+        {
+            id = default;
+            if (token == null)
+            {
+                return false;
+            }
+
+            string text = token.Trim();
+            if (text.Length > 0 && (text[0] == '"' || text[0] == '\''))
+            {
+                char quote = text[0];
+                text = text.Substring(1);
+                if (text.Length > 0 && text[text.Length - 1] == quote)
+                {
+                    text = text.Substring(0, text.Length - 1);
+                }
+            }
+
+            if (TryParse(text, out id))
+            {
+                return true;
+            }
+
+            // Anything else around the ID, such as a parenthesis.
+            IReadOnlyList<LabelIdMatch> found = FindAll(text);
+            if (found.Count == 1)
+            {
+                id = found[0].Id;
+                return true;
+            }
+
+            return false;
+        }
+
         /// <summary>Parses a complete label ID.</summary>
         /// <param name="text">The label ID.</param>
         /// <returns>The parsed ID.</returns>

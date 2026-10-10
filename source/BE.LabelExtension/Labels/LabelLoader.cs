@@ -49,8 +49,17 @@ namespace BE.LabelExtension.Labels
             SharedServices.Loader = this;
         }
 
+        /// <summary>Raised when the options page saved settings, after <see cref="Settings"/> holds them.</summary>
+        public event EventHandler? SettingsChanged;
+
         /// <summary>The settings of the last load, with defaults for what is not set.</summary>
         public LabelSettings Settings { get; private set; } = LabelSettingsDefaults.Complete(null);
+
+        /// <summary>The label store it loads, for the tooltip and the inline display.</summary>
+        public LabelStore Store => this.store;
+
+        /// <summary>Runs work nobody waits for, also that of the editor parts.</summary>
+        public ExtensionTasks Tasks => this.tasks;
 
         /// <summary>Starts the first load unless it has started already. Returns at once.</summary>
         public void EnsureLoaded()
@@ -116,6 +125,7 @@ namespace BE.LabelExtension.Labels
                 LabelSettings next = this.ReadSettings();
                 bool reload = this.Settings.RequiresReload(next);
                 this.Settings = next;
+                this.SettingsChanged?.Invoke(this, EventArgs.Empty);
                 if (reload)
                 {
                     this.messages.Report(MessageSeverity.Message, "The settings changed what is loaded; the labels are loaded again.");
