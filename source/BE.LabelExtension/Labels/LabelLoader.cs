@@ -67,6 +67,7 @@ namespace BE.LabelExtension.Labels
             if (Interlocked.Exchange(ref this.started, 1) == 0)
             {
                 this.Settings = this.ReadSettings();
+                this.ReportUnknownLanguages(this.Settings);
                 this.StartLoad();
             }
         }
@@ -113,16 +114,21 @@ namespace BE.LabelExtension.Labels
             }
         }
 
-        // After the options page saved: load again if what the load uses changed (F4).
+        // After the options page saved: check the language codes, and load again if what the
+        // load uses changed (F4).
         private void OnSettingsSaved()
             => this.errorBoundary.Run("Apply settings", () =>
             {
                 if (Volatile.Read(ref this.started) == 0)
                 {
+                    // Nothing is loaded yet, the first load reads the settings. The codes are
+                    // checked now, while the user looks at them.
+                    this.ReportUnknownLanguages(LabelSettingsDefaults.Complete(LabelSettingsFile.Load(LabelSettingsFile.DefaultPath)));
                     return;
                 }
 
                 LabelSettings next = this.ReadSettings();
+                this.ReportUnknownLanguages(next);
                 bool reload = this.Settings.RequiresReload(next);
                 this.Settings = next;
                 this.SettingsChanged?.Invoke(this, EventArgs.Empty);
@@ -132,6 +138,27 @@ namespace BE.LabelExtension.Labels
                     this.Reload();
                 }
             });
+
+        /// <summary>
+        /// Warns about language codes that Windows does not predefine, with the field of the
+        /// options page they stand in (RE52). The settings stay as entered.
+        /// </summary>
+        private void ReportUnknownLanguages(LabelSettings settings)
+        {
+            var fields = new (string Field, IEnumerable<string?> Codes)[]
+            {
+                ("Languages to load", settings.LoadLanguages),
+                ("Languages to create", settings.CreateLanguages),
+                ("Source language", string.IsNullOrEmpty(settings.SourceLanguage) ? Array.Empty<string?>() : new[] { settings.SourceLanguage }),
+            };
+            foreach ((string field, IEnumerable<string?> codes) in fields)
+            {
+                foreach (string code in LanguageCodes.Unknown(codes))
+                {
+                    this.messages.Report(MessageSeverity.Warning, $"{field}: \"{code}\" is not a language Windows knows, such as de or de-CH. The setting is kept as entered.");
+                }
+            }
+        }
 
         /// <summary>
         /// The settings of the settings file with defaults for what is not set (FA11). Without
