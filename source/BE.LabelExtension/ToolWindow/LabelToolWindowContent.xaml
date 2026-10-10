@@ -25,12 +25,26 @@
       <RowDefinition Height="Auto" />
     </Grid.RowDefinitions>
 
-    <!-- Toolbar -->
-    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="6,6,6,2">
-      <Button Content="Save" Command="{Binding SaveCommand}" MinWidth="70" Padding="8,2"
+    <!--
+      Toolbar as in the wireframe. It wraps when the window is narrow. The label file is where
+      New creates and where Copy to and Move to go.
+    -->
+    <WrapPanel Grid.Row="0" Orientation="Horizontal" Margin="6,6,6,2">
+      <Button Content="Save" Command="{Binding SaveCommand}" Margin="0,0,4,2" MinWidth="60" Padding="8,2"
               Style="{DynamicResource {x:Static styles:VsResourceKeys.ButtonStyleKey}}" />
-      <TextBlock Text="{Binding PendingText}" Margin="8,0,0,0" />
-    </StackPanel>
+      <Button Content="Save and insert" Command="{Binding SaveAndInsertCommand}" Margin="0,0,4,2" Padding="8,2"
+              Style="{DynamicResource {x:Static styles:VsResourceKeys.ButtonStyleKey}}" />
+      <Button Content="Insert" Command="{Binding InsertCommand}" Margin="0,0,10,2" MinWidth="60" Padding="8,2"
+              Style="{DynamicResource {x:Static styles:VsResourceKeys.ButtonStyleKey}}" />
+      <ComboBox MinWidth="120" Margin="0,0,4,2" ItemsSource="{Binding LabelFiles}" SelectedIndex="{Binding SelectedLabelFileIndex, Mode=TwoWay}"
+                AutomationProperties.Name="Label file"
+                Style="{DynamicResource {x:Static styles:VsResourceKeys.ComboBoxStyleKey}}" />
+      <Button Content="New" Command="{Binding NewCommand}" Margin="0,0,10,2" MinWidth="60" Padding="8,2"
+              Style="{DynamicResource {x:Static styles:VsResourceKeys.ButtonStyleKey}}" />
+      <Button Content="Settings" Command="{Binding SettingsCommand}" Margin="0,0,10,2" MinWidth="60" Padding="8,2"
+              Style="{DynamicResource {x:Static styles:VsResourceKeys.ButtonStyleKey}}" />
+      <TextBlock Text="{Binding PendingText}" Margin="0,0,0,2" />
+    </WrapPanel>
 
     <!-- Search mode and term -->
     <Grid Grid.Row="1" Margin="6,2,6,4">
@@ -100,6 +114,10 @@
                           <Setter Property="FontWeight" Value="Bold" />
                           <Setter Property="ToolTip" Value="Not saved" />
                         </DataTrigger>
+                        <DataTrigger Binding="{Binding IsDeleted}" Value="True">
+                          <Setter Property="TextDecorations" Value="Strikethrough" />
+                          <Setter Property="ToolTip" Value="Deleted, not saved" />
+                        </DataTrigger>
                       </Style.Triggers>
                     </Style>
                   </TextBlock.Style>
@@ -137,12 +155,51 @@
 
     <GridSplitter Grid.Row="3" Height="5" HorizontalAlignment="Stretch" ResizeDirection="Rows" Background="Transparent" />
 
-    <!-- Details of the selected label -->
-    <DockPanel Grid.Row="4" Margin="6,2,6,2" DataContext="{Binding Detail}">
-      <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,4">
-        <TextBlock Text="{Binding Id}" FontWeight="Bold" Margin="0,0,8,0" />
-        <TextBlock Text="{Binding Info}" TextWrapping="Wrap" />
-      </StackPanel>
+    <!--
+      Details of the selected label, or of a new label until it is created. The actions on a
+      label and those on a new label replace each other.
+    -->
+    <DockPanel Grid.Row="4" Margin="6,2,6,2">
+      <DockPanel DockPanel.Dock="Top" Margin="0,0,0,4">
+        <TextBlock DockPanel.Dock="Left" Text="{Binding Detail.Id}" FontWeight="Bold" Margin="0,0,8,0" />
+        <TextBlock Text="{Binding Detail.Info}" TextWrapping="Wrap" />
+      </DockPanel>
+      <WrapPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,4">
+        <WrapPanel.Style>
+          <Style TargetType="WrapPanel">
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding Detail.IsDraft}" Value="True">
+                <Setter Property="Visibility" Value="Collapsed" />
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </WrapPanel.Style>
+        <Button Content="Delete" Command="{Binding DeleteCommand}" Margin="0,0,4,2" MinWidth="60" Padding="8,2"
+                Style="{DynamicResource {x:Static styles:VsResourceKeys.ButtonStyleKey}}" />
+        <Button Content="{Binding CopyText}" Command="{Binding CopyCommand}" Margin="0,0,4,2" MinWidth="60" Padding="8,2"
+                Style="{DynamicResource {x:Static styles:VsResourceKeys.ButtonStyleKey}}" />
+        <Button Content="{Binding MoveText}" Command="{Binding MoveCommand}" Margin="0,0,4,2" MinWidth="60" Padding="8,2"
+                Style="{DynamicResource {x:Static styles:VsResourceKeys.ButtonStyleKey}}" />
+        <Button Content="Replace" Command="{Binding ReplaceCommand}" Margin="0,0,4,2" MinWidth="60" Padding="8,2"
+                Style="{DynamicResource {x:Static styles:VsResourceKeys.ButtonStyleKey}}" />
+      </WrapPanel>
+      <WrapPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,4">
+        <WrapPanel.Style>
+          <Style TargetType="WrapPanel">
+            <!-- In the style, not on the element, so the trigger can override it. -->
+            <Setter Property="Visibility" Value="Collapsed" />
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding Detail.IsDraft}" Value="True">
+                <Setter Property="Visibility" Value="Visible" />
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </WrapPanel.Style>
+        <Button Content="Create" Command="{Binding CreateCommand}" Margin="0,0,4,2" MinWidth="60" Padding="8,2"
+                Style="{DynamicResource {x:Static styles:VsResourceKeys.ButtonStyleKey}}" />
+        <Button Content="Cancel" Command="{Binding CancelNewCommand}" Margin="0,0,4,2" MinWidth="60" Padding="8,2"
+                Style="{DynamicResource {x:Static styles:VsResourceKeys.ButtonStyleKey}}" />
+      </WrapPanel>
       <Grid DockPanel.Dock="Top" Margin="0,0,0,2">
         <Grid.ColumnDefinitions>
           <ColumnDefinition Width="60" />
@@ -154,7 +211,7 @@
         <TextBlock Grid.Column="2" Text="Comment" FontWeight="Bold" Margin="4,0,0,0" />
       </Grid>
       <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-        <ItemsControl ItemsSource="{Binding Translations}">
+        <ItemsControl ItemsSource="{Binding Detail.Translations}">
           <ItemsControl.ItemTemplate>
             <DataTemplate>
               <Grid Margin="0,1,0,1">

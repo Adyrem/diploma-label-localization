@@ -140,8 +140,23 @@ namespace BE.LabelExtension.Core.Usages
         /// <param name="messages">Receives every file that could not be changed.</param>
         /// <returns>The files changed.</returns>
         public static IReadOnlyList<string> Replace(IEnumerable<string> files, string oldId, string newId, IMessageSink messages)
+            => Replace(files, oldId, newId, messages, out _);
+
+        /// <summary>
+        /// Replaces the uses of one label ID by another in the given files and names the files
+        /// that could not be changed, for example before moving deletes the original.
+        /// </summary>
+        /// <param name="files">The files, usually from <see cref="FindFiles"/>.</param>
+        /// <param name="oldId">The complete label ID used so far.</param>
+        /// <param name="newId">The complete label ID to use instead.</param>
+        /// <param name="messages">Receives every file that could not be changed.</param>
+        /// <param name="failed">The files that could not be read or written.</param>
+        /// <returns>The files changed.</returns>
+        public static IReadOnlyList<string> Replace(IEnumerable<string> files, string oldId, string newId, IMessageSink messages, out IReadOnlyList<string> failed)
         {
             var changed = new List<string>();
+            var notChanged = new List<string>();
+            failed = notChanged;
             foreach (string file in files)
             {
                 try
@@ -157,6 +172,7 @@ namespace BE.LabelExtension.Core.Usages
                 catch (Exception exception) when (exception is IOException || exception is UnauthorizedAccessException)
                 {
                     messages.Report(MessageSeverity.Error, $"References to {oldId} could not be changed in {file} ({exception.Message})");
+                    notChanged.Add(file);
                 }
             }
 

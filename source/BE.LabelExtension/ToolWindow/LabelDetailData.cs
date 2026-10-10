@@ -4,27 +4,36 @@ using Microsoft.VisualStudio.Extensibility.UI;
 
 namespace BE.LabelExtension.ToolWindow
 {
-    /// <summary>The detail view: the selected label with one row per loaded language.</summary>
+    /// <summary>
+    /// The detail view: the selected label with one row per loaded language, or a new label
+    /// with one row per language to create.
+    /// </summary>
     [DataContract]
     internal sealed class LabelDetailData : NotifyPropertyChangedObject
     {
         /// <summary>The detail view without a label.</summary>
-        public static readonly LabelDetailData Empty = new(string.Empty, "Select a label to see and change its translations.", new List<TranslationRow>());
+        public static readonly LabelDetailData Empty = new(string.Empty, "Select a label to see and change its translations.", new List<TranslationRow>(), isDraft: false);
 
         /// <summary>Creates the detail view.</summary>
-        /// <param name="id">The complete label ID, empty for none.</param>
+        /// <param name="id">The complete label ID, empty for none and for a new label.</param>
         /// <param name="info">Label file, model and whether the label can be changed.</param>
-        /// <param name="translations">One row per loaded language.</param>
-        public LabelDetailData(string id, string info, IReadOnlyList<TranslationRow> translations)
+        /// <param name="translations">One row per loaded language, or per language to create.</param>
+        /// <param name="isDraft">Whether this is a new label, which gets its ID when the developer creates it.</param>
+        public LabelDetailData(string id, string info, IReadOnlyList<TranslationRow> translations, bool isDraft)
         {
             this.Id = id;
             this.Info = info;
             this.Translations = translations;
+            this.IsDraft = isDraft;
         }
 
         /// <summary>The complete label ID.</summary>
         [DataMember]
         public string Id { get; }
+
+        /// <summary>Whether this is a new label; the view shows Create and Cancel instead of the actions on a label.</summary>
+        [DataMember]
+        public bool IsDraft { get; }
 
         /// <summary>Label file, model and whether the label can be changed.</summary>
         [DataMember]

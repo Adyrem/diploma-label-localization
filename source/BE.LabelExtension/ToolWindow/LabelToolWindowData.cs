@@ -9,6 +9,9 @@ namespace BE.LabelExtension.ToolWindow
     /// members marked with <see cref="DataMemberAttribute"/>; the user's input arrives as
     /// changed properties.
     /// </summary>
+    /// <remarks>
+    /// The commands are set once by <see cref="LabelWindowController"/> before the window shows.
+    /// </remarks>
     [DataContract]
     internal sealed class LabelToolWindowData : NotifyPropertyChangedObject
     {
@@ -20,18 +23,18 @@ namespace BE.LabelExtension.ToolWindow
         private int selectedHitIndex = -1;
         private LabelDetailData detail = LabelDetailData.Empty;
         private string pendingText = string.Empty;
+        private IReadOnlyList<string> labelFiles = new List<string>();
+        private int selectedLabelFileIndex = -1;
+        private string copyText = "Copy to";
+        private string moveText = "Move to";
 
         /// <summary>Creates the data context.</summary>
         /// <param name="searchModes">Names of the search modes, as in the existing tool.</param>
         /// <param name="selectedModeIndex">The mode selected at first.</param>
-        /// <param name="searchCommand">Searches at once, for Enter in the search field.</param>
-        /// <param name="saveCommand">Saves all changes.</param>
-        public LabelToolWindowData(IReadOnlyList<string> searchModes, int selectedModeIndex, AsyncCommand searchCommand, AsyncCommand saveCommand)
+        public LabelToolWindowData(IReadOnlyList<string> searchModes, int selectedModeIndex)
         {
             this.SearchModes = searchModes;
             this.selectedModeIndex = selectedModeIndex;
-            this.SearchCommand = searchCommand;
-            this.SaveCommand = saveCommand;
         }
 
         /// <summary>Names of the search modes.</summary>
@@ -56,18 +59,90 @@ namespace BE.LabelExtension.ToolWindow
 
         /// <summary>Searches at once.</summary>
         [DataMember]
-        public AsyncCommand SearchCommand { get; }
+        public AsyncCommand SearchCommand { get; set; } = null!;
 
         /// <summary>Saves all changes; disabled while there are none.</summary>
         [DataMember]
-        public AsyncCommand SaveCommand { get; }
+        public AsyncCommand SaveCommand { get; set; } = null!;
 
-        /// <summary>How many labels are not saved, next to the Save button.</summary>
+        /// <summary>Saves all changes and inserts the ID of the label in the editor (FA14).</summary>
+        [DataMember]
+        public AsyncCommand SaveAndInsertCommand { get; set; } = null!;
+
+        /// <summary>Inserts the ID of the label at the cursor of the active editor (FA14).</summary>
+        [DataMember]
+        public AsyncCommand InsertCommand { get; set; } = null!;
+
+        /// <summary>Starts a new label in the selected label file (FA02).</summary>
+        [DataMember]
+        public AsyncCommand NewCommand { get; set; } = null!;
+
+        /// <summary>Opens the options page (FA11).</summary>
+        [DataMember]
+        public AsyncCommand SettingsCommand { get; set; } = null!;
+
+        /// <summary>Creates the new label and gives it its ID.</summary>
+        [DataMember]
+        public AsyncCommand CreateCommand { get; set; } = null!;
+
+        /// <summary>Discards the new label.</summary>
+        [DataMember]
+        public AsyncCommand CancelNewCommand { get; set; } = null!;
+
+        /// <summary>Deletes the label once saved (FA03).</summary>
+        [DataMember]
+        public AsyncCommand DeleteCommand { get; set; } = null!;
+
+        /// <summary>Copies the label into the selected label file (FA03).</summary>
+        [DataMember]
+        public AsyncCommand CopyCommand { get; set; } = null!;
+
+        /// <summary>Moves the label into the selected label file (FA03).</summary>
+        [DataMember]
+        public AsyncCommand MoveCommand { get; set; } = null!;
+
+        /// <summary>Replaces the uses of the label by another label (FA13).</summary>
+        [DataMember]
+        public AsyncCommand ReplaceCommand { get; set; } = null!;
+
+        /// <summary>How many labels are not saved, next to the buttons.</summary>
         [DataMember]
         public string PendingText
         {
             get => this.pendingText;
             set => this.SetProperty(ref this.pendingText, value);
+        }
+
+        /// <summary>The label files new labels can be created in, copied and moved to.</summary>
+        [DataMember]
+        public IReadOnlyList<string> LabelFiles
+        {
+            get => this.labelFiles;
+            set => this.SetProperty(ref this.labelFiles, value);
+        }
+
+        /// <summary>Index of the selected label file, -1 for none, set by the user.</summary>
+        [DataMember]
+        public int SelectedLabelFileIndex
+        {
+            get => this.selectedLabelFileIndex;
+            set => this.SetProperty(ref this.selectedLabelFileIndex, value);
+        }
+
+        /// <summary>Caption of the button Copy to, with the selected label file.</summary>
+        [DataMember]
+        public string CopyText
+        {
+            get => this.copyText;
+            set => this.SetProperty(ref this.copyText, value);
+        }
+
+        /// <summary>Caption of the button Move to, with the selected label file.</summary>
+        [DataMember]
+        public string MoveText
+        {
+            get => this.moveText;
+            set => this.SetProperty(ref this.moveText, value);
         }
 
         /// <summary>Headers of the language columns of the hit list, one per loaded language.</summary>
@@ -94,7 +169,7 @@ namespace BE.LabelExtension.ToolWindow
             set => this.SetProperty(ref this.selectedHitIndex, value);
         }
 
-        /// <summary>The selected label with its translations.</summary>
+        /// <summary>The selected label with its translations, or a new label.</summary>
         [DataMember]
         public LabelDetailData Detail
         {
@@ -102,7 +177,7 @@ namespace BE.LabelExtension.ToolWindow
             set => this.SetProperty(ref this.detail, value);
         }
 
-        /// <summary>Result of the last search or the state of loading.</summary>
+        /// <summary>Result of the last search or action, or the state of loading.</summary>
         [DataMember]
         public string StatusText
         {
@@ -116,17 +191,20 @@ namespace BE.LabelExtension.ToolWindow
     internal sealed class HitRow : NotifyPropertyChangedObject
     {
         private bool isModified;
+        private bool isDeleted;
 
         /// <summary>Creates a row.</summary>
         /// <param name="id">The complete label ID.</param>
         /// <param name="isReadOnly">Whether the label cannot be changed.</param>
         /// <param name="isModified">Whether the label has changes not yet saved.</param>
+        /// <param name="isDeleted">Whether the label is deleted, not yet saved.</param>
         /// <param name="cells">The texts in the loaded languages.</param>
-        public HitRow(string id, bool isReadOnly, bool isModified, ObservableList<HitCell> cells)
+        public HitRow(string id, bool isReadOnly, bool isModified, bool isDeleted, ObservableList<HitCell> cells)
         {
             this.Id = id;
             this.IsReadOnly = isReadOnly;
             this.isModified = isModified;
+            this.isDeleted = isDeleted;
             this.Cells = cells;
         }
 
@@ -144,6 +222,14 @@ namespace BE.LabelExtension.ToolWindow
         {
             get => this.isModified;
             set => this.SetProperty(ref this.isModified, value);
+        }
+
+        /// <summary>Whether the label is deleted, not yet saved; shown struck through.</summary>
+        [DataMember]
+        public bool IsDeleted
+        {
+            get => this.isDeleted;
+            set => this.SetProperty(ref this.isDeleted, value);
         }
 
         /// <summary>The texts in the loaded languages, in the order of the columns.</summary>

@@ -298,10 +298,12 @@ namespace BE.LabelExtension.Core.Store
                 this.store.Apply(Array.Empty<Label>(), removed);
             }
 
-            this.messages.Report(MessageSeverity.Message, $"Saved {saved} labels, {removed.Count} of them deleted, in {written.Count} files.");
+            this.messages.Report(MessageSeverity.Message, $"Saved {Counted(saved, "label")}, {removed.Count} of them deleted, in {Counted(written.Count, "file")}.");
             this.Changed?.Invoke(this, EventArgs.Empty);
             return saved;
         }
+
+        private static string Counted(int count, string noun) => count == 1 ? $"1 {noun}" : $"{count} {noun}s";
 
         private static bool IsExtension(LabelFile labelFile)
             => labelFile.Name.EndsWith(ExtensionSuffix, StringComparison.OrdinalIgnoreCase)
@@ -368,8 +370,6 @@ namespace BE.LabelExtension.Core.Store
                 }
             }
 
-            this.store.Apply(new[] { label }, Array.Empty<Label>());
-
             // Languages that are not loaded are not in the store; they are written directly.
             using (this.store.Watcher.Suspend())
             {
@@ -379,7 +379,9 @@ namespace BE.LabelExtension.Core.Store
                 }
             }
 
+            // Saved before it enters the store, so that a search started by the store shows it saved.
             this.Save(new[] { label });
+            this.store.Apply(new[] { label }, Array.Empty<Label>());
             this.messages.Report(MessageSeverity.Message, $"{id.FullId} {verb} in {labelFile.Name}, model {labelFile.Model.Name}.");
             return label;
         }

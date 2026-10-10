@@ -6,6 +6,7 @@ using BE.LabelExtension.Core.Store;
 using BE.LabelExtension.Diagnostics;
 using BE.LabelExtension.Labels;
 using BE.LabelExtension.Threading;
+using BE.LabelExtension.ToolWindow;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.Extensibility;
 using Microsoft.VisualStudio.Extensibility.Commands;
@@ -80,6 +81,10 @@ namespace BE.LabelExtension
             serviceCollection.AddSingleton(provider => SharedServices.Changes = new LabelChanges(
                 provider.GetRequiredService<LabelStore>(),
                 provider.GetRequiredService<IMessageSink>()));
+            serviceCollection.AddSingleton<LabelOperations>();
+
+            // One controller for the tool window and the shortcuts.
+            serviceCollection.AddSingleton<LabelWindowController>();
         }
     }
 }
