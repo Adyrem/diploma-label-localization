@@ -23,6 +23,8 @@
       <RowDefinition Height="Auto" />
       <RowDefinition Height="*" MinHeight="90" />
       <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" MinHeight="60" />
+      <RowDefinition Height="Auto" />
     </Grid.RowDefinitions>
 
     <!--
@@ -174,6 +176,8 @@
             </Style.Triggers>
           </Style>
         </WrapPanel.Style>
+        <Button Content="Find references" Command="{Binding FindReferencesCommand}" Margin="0,0,4,2" MinWidth="60" Padding="8,2"
+                Style="{DynamicResource {x:Static styles:VsResourceKeys.ButtonStyleKey}}" />
         <Button Content="Delete" Command="{Binding DeleteCommand}" Margin="0,0,4,2" MinWidth="60" Padding="8,2"
                 Style="{DynamicResource {x:Static styles:VsResourceKeys.ButtonStyleKey}}" />
         <Button Content="{Binding CopyText}" Command="{Binding CopyCommand}" Margin="0,0,4,2" MinWidth="60" Padding="8,2"
@@ -269,7 +273,46 @@
       </ScrollViewer>
     </DockPanel>
 
+    <GridSplitter Grid.Row="5" Height="5" HorizontalAlignment="Stretch" ResizeDirection="Rows" Background="Transparent" />
+
+    <!--
+      Uses of the label (FA04): the own models first, then the others as they are found. The
+      symbol of a row opens the element at the use; the line itself shows as tooltip.
+    -->
+    <DockPanel Grid.Row="6" Margin="6,2,6,2">
+      <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,4">
+        <TextBlock Text="{Binding ReferencesTitle}" FontWeight="Bold" Margin="0,0,8,0" />
+        <TextBlock Text="{Binding ReferencesStatus}" />
+      </StackPanel>
+      <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="4,0,0,2">
+        <TextBlock Width="44" Text="Go to" FontWeight="Bold" />
+        <TextBlock Width="120" Text="Model" FontWeight="Bold" />
+        <TextBlock Width="280" Text="File" FontWeight="Bold" />
+        <TextBlock Width="50" Text="Line" FontWeight="Bold" />
+        <TextBlock Width="60" Text="Column" FontWeight="Bold" />
+      </StackPanel>
+      <ListBox ItemsSource="{Binding References}" AutomationProperties.Name="References"
+               Background="Transparent" BorderThickness="0"
+               VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling">
+        <ListBox.ItemTemplate>
+          <DataTemplate>
+            <!-- Implicit styles do not reach into the template, the foreground is set here. -->
+            <StackPanel Orientation="Horizontal" ToolTip="{Binding LineText}"
+                        TextElement.Foreground="{DynamicResource {x:Static styles:VsBrushes.ToolWindowTextKey}}">
+              <Button Width="30" Margin="0,0,14,0" Padding="0" MinHeight="0" Command="{Binding GoCommand}" Content="&#xE8A7;" FontFamily="Segoe MDL2 Assets"
+                      ToolTip="Open the element at this use" AutomationProperties.Name="Go to"
+                      Style="{DynamicResource {x:Static styles:VsResourceKeys.ButtonStyleKey}}" />
+              <TextBlock Width="120" Text="{Binding Model}" TextTrimming="CharacterEllipsis" />
+              <TextBlock Width="280" Text="{Binding File}" TextTrimming="CharacterEllipsis" />
+              <TextBlock Width="50" Text="{Binding Line}" />
+              <TextBlock Width="60" Text="{Binding Column}" />
+            </StackPanel>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+    </DockPanel>
+
     <!-- Status -->
-    <TextBlock Grid.Row="5" Margin="6,2,6,6" Text="{Binding StatusText}" TextWrapping="Wrap" />
+    <TextBlock Grid.Row="7" Margin="6,2,6,6" Text="{Binding StatusText}" TextWrapping="Wrap" />
   </Grid>
 </DataTemplate>

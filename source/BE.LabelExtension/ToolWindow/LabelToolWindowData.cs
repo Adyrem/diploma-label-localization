@@ -27,6 +27,9 @@ namespace BE.LabelExtension.ToolWindow
         private int selectedLabelFileIndex = -1;
         private string copyText = "Copy to";
         private string moveText = "Move to";
+        private string referencesTitle = "References";
+        private string referencesStatus = string.Empty;
+        private ObservableList<ReferenceRow> references = new();
 
         /// <summary>Creates the data context.</summary>
         /// <param name="searchModes">Names of the search modes, as in the existing tool.</param>
@@ -104,6 +107,34 @@ namespace BE.LabelExtension.ToolWindow
         /// <summary>Replaces the uses of the label by another label (FA13).</summary>
         [DataMember]
         public AsyncCommand ReplaceCommand { get; set; } = null!;
+
+        /// <summary>Searches the uses of the label in all models (FA04).</summary>
+        [DataMember]
+        public AsyncCommand FindReferencesCommand { get; set; } = null!;
+
+        /// <summary>Head of the area References, with the label searched for.</summary>
+        [DataMember]
+        public string ReferencesTitle
+        {
+            get => this.referencesTitle;
+            set => this.SetProperty(ref this.referencesTitle, value);
+        }
+
+        /// <summary>State of the usage search: running, the number found, the time it took.</summary>
+        [DataMember]
+        public string ReferencesStatus
+        {
+            get => this.referencesStatus;
+            set => this.SetProperty(ref this.referencesStatus, value);
+        }
+
+        /// <summary>The uses found so far, the own models first.</summary>
+        [DataMember]
+        public ObservableList<ReferenceRow> References
+        {
+            get => this.references;
+            set => this.SetProperty(ref this.references, value);
+        }
 
         /// <summary>How many labels are not saved, next to the buttons.</summary>
         [DataMember]
@@ -184,6 +215,52 @@ namespace BE.LabelExtension.ToolWindow
             get => this.statusText;
             set => this.SetProperty(ref this.statusText, value);
         }
+    }
+
+    /// <summary>A use of a label in the area References (FA04).</summary>
+    [DataContract]
+    internal sealed class ReferenceRow : NotifyPropertyChangedObject
+    {
+        /// <summary>Creates a row.</summary>
+        /// <param name="model">The model of the element.</param>
+        /// <param name="file">The XML file, relative to the model.</param>
+        /// <param name="line">The line, starting at 1.</param>
+        /// <param name="column">The column, starting at 1.</param>
+        /// <param name="lineText">The line itself, as tooltip.</param>
+        /// <param name="goCommand">Opens the element at the use.</param>
+        public ReferenceRow(string model, string file, int line, int column, string lineText, AsyncCommand goCommand)
+        {
+            this.Model = model;
+            this.File = file;
+            this.Line = line;
+            this.Column = column;
+            this.LineText = lineText;
+            this.GoCommand = goCommand;
+        }
+
+        /// <summary>The model of the element.</summary>
+        [DataMember]
+        public string Model { get; }
+
+        /// <summary>The XML file, relative to the model, such as AxTable\BDMDelivery.xml.</summary>
+        [DataMember]
+        public string File { get; }
+
+        /// <summary>The line, starting at 1.</summary>
+        [DataMember]
+        public int Line { get; }
+
+        /// <summary>The column, starting at 1.</summary>
+        [DataMember]
+        public int Column { get; }
+
+        /// <summary>The line itself, as tooltip.</summary>
+        [DataMember]
+        public string LineText { get; }
+
+        /// <summary>Opens the element at the use.</summary>
+        [DataMember]
+        public AsyncCommand GoCommand { get; }
     }
 
     /// <summary>One label in the hit list.</summary>

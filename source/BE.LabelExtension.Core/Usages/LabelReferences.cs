@@ -100,6 +100,8 @@ namespace BE.LabelExtension.Core.Usages
             int line = 1;
             int lineStart = 0;
             int counted = 0;
+            IReadOnlyList<(int Start, int End)> code = CodeRanges(text);
+            int codeOccurrence = 0;
             foreach (int position in Positions(text, labelId, IsReport(path)))
             {
                 for (; counted < position; counted++)
@@ -113,7 +115,8 @@ namespace BE.LabelExtension.Core.Usages
 
                 int lineEnd = text.IndexOf('\n', position);
                 string lineText = text.Substring(lineStart, (lineEnd < 0 ? text.Length : lineEnd) - lineStart).Trim();
-                usages.Add(new LabelUsage(model, path, line, position - lineStart + 1, lineText));
+                bool inCode = code.Any(r => position >= r.Start && position < r.End);
+                usages.Add(new LabelUsage(model, path, line, position - lineStart + 1, lineText, inCode ? ++codeOccurrence : 0));
             }
 
             return usages;
@@ -200,6 +203,66 @@ namespace BE.LabelExtension.Core.Usages
 
             result.Append(text, copied, text.Length - copied);
             return result.ToString();
+        }
+
+        /// <summary>
+        /// The uses of a label ID in X++ code, such as the text of the X++ editor, in order. With
+        /// <see cref="LabelUsage.CodeOccurrence"/> they lead from a use in the XML file to the
+        /// same use in the editor.
+        /// </summary>
+        /// <param name="code">The code.</param>
+        /// <param name="labelId">The complete label ID.</param>
+        /// <returns>The positions of the ID.</returns>
+        public static IReadOnlyList<int> FindInCode(string code, string labelId) => Positions(code, labelId, isReport: false).ToList();
+
+        /// <summary>
+        /// The parts of an element file that hold X++ code: the CDATA sections of the elements
+        /// Declaration and Source. Other CDATA sections, such as the design of a report, are no
+        /// code the X++ editor shows.
+        /// </summary>
+        internal static IReadOnlyList<(int Start, int End)> CodeRanges(string text)
+        {
+            const string Open = "<![CDATA[";
+            const string Close = "]]>";
+            var ranges = new List<(int Start, int End)>();
+            int open = text.IndexOf(Open, StringComparison.Ordinal);
+            while (open >= 0)
+            {
+                int start = open + Open.Length;
+                int end = text.IndexOf(Close, start, StringComparison.Ordinal);
+                if (end < 0)
+                {
+                    break;
+                }
+
+                if (IsCodeElement(text, open))
+                {
+                    ranges.Add((start, end));
+                }
+
+                open = text.IndexOf(Open, end + Close.Length, StringComparison.Ordinal);
+            }
+
+            return ranges;
+        }
+
+        // The start tag directly before the CDATA section: <Source> or <Declaration>.
+        private static bool IsCodeElement(string text, int cdata)
+        {
+            int close = cdata - 1;
+            while (close >= 0 && char.IsWhiteSpace(text[close]))
+            {
+                close--;
+            }
+
+            int open = close >= 0 && text[close] == '>' ? text.LastIndexOf('<', close) : -1;
+            if (open < 0)
+            {
+                return false;
+            }
+
+            string tag = text.Substring(open + 1, close - open - 1).Trim();
+            return tag == "Source" || tag == "Declaration";
         }
 
         /// <summary>The positions of the ID within one of the patterns, in order.</summary>

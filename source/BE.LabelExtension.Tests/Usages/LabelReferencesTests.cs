@@ -112,6 +112,43 @@ namespace BE.LabelExtension.Tests.Usages
             Assert.Empty(LabelReferences.Positions(text, "@A:B", isReport: false));
         }
 
+        /// <summary>
+        /// TC29 in the core logic: uses in code are numbered in the order of the XML file, uses in
+        /// properties and in the design of a report are not code.
+        /// </summary>
+        [Fact]
+        public void Find_CodeAndProperties_NumbersTheUsesInCode()
+        {
+            var usages = LabelReferences.Find(this.models, "@BDM1:BDM110000003", CancellationToken.None).ToList();
+
+            Assert.Equal(new[] { 1, 2 }, usages.Where(u => u.Path == this.ClassFile).Select(u => u.CodeOccurrence));
+            Assert.All(usages.Where(u => u.Path == this.TableFile || u.Path == this.ReportFile), u => Assert.False(u.IsInCode));
+        }
+
+        /// <summary>The same uses in the code the X++ editor shows, so the n-th use leads to the same place.</summary>
+        [Fact]
+        public void FindInCode_CodeOfTheEditor_FindsTheSameUses()
+        {
+            const string Code = "public static str caption()\r\n{\r\n    return strFmt(\"%1 %2\", \"@BDM1:BDM110000003\", \"@SYS12345\");\r\n}\r\n"
+                + "public static str legacyCaption()\r\n{\r\n    return '@BDM1:BDM110000003' + literalStr(@SYS123456);\r\n}\r\n";
+
+            var positions = LabelReferences.FindInCode(Code, "@BDM1:BDM110000003");
+
+            Assert.Equal(2, positions.Count);
+            Assert.Equal(Code.IndexOf("@BDM1"), positions[0]);
+            Assert.Single(LabelReferences.FindInCode(Code, "@SYS123456"));
+        }
+
+        [Fact]
+        public void CodeRanges_OnlySourceAndDeclaration()
+        {
+            const string Xml = "<Declaration><![CDATA[a]]></Declaration><Text><![CDATA[b]]></Text><Source>\n<![CDATA[c]]></Source>";
+
+            var ranges = LabelReferences.CodeRanges(Xml);
+
+            Assert.Equal(new[] { "a", "c" }, ranges.Select(r => Xml.Substring(r.Start, r.End - r.Start)));
+        }
+
         public void Dispose() => this.packages.Dispose();
     }
 }

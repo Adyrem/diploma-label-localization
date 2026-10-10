@@ -40,6 +40,41 @@ namespace BE.LabelExtension.Core.Elements
                 .ToList();
         }
 
+        /// <summary>
+        /// Describes the property a use of a label ID stands in, such as
+        /// <c>HelpText of DeliveryAddress</c>: the XML element at the line and the name of the
+        /// nearest node that has one. The designer cannot be steered to the node (D1), so this
+        /// tells the developer where to look.
+        /// </summary>
+        /// <param name="xml">Content of the XML file.</param>
+        /// <param name="line">The line of the use, starting at 1.</param>
+        /// <param name="labelId">The complete label ID.</param>
+        /// <returns>The description, or <c>null</c> if the XML cannot be read or has no such element.</returns>
+        public static string? DescribeProperty(string xml, int line, string labelId)
+        {
+            XDocument document;
+            try
+            {
+                using var reader = XmlReader.Create(new StringReader(xml), new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit });
+                document = XDocument.Load(reader, LoadOptions.SetLineInfo);
+            }
+            catch (XmlException)
+            {
+                return null;
+            }
+
+            XElement? property = document.Descendants()
+                .FirstOrDefault(e => !e.HasElements && ((IXmlLineInfo)e).LineNumber == line && e.Value.Contains(labelId));
+            if (property == null)
+            {
+                return null;
+            }
+
+            XElement? owner = property.Ancestors().FirstOrDefault(a => a.Elements().Any(c => c.Name.LocalName == "Name" && !c.HasElements));
+            string? name = owner?.Elements().First(c => c.Name.LocalName == "Name" && !c.HasElements).Value;
+            return string.IsNullOrWhiteSpace(name) ? property.Name.LocalName : $"{property.Name.LocalName} of {name}";
+        }
+
         private static string PathOf(XElement element)
             => string.Join("/", element.AncestorsAndSelf().Reverse().Select(e => e.Name.LocalName));
     }

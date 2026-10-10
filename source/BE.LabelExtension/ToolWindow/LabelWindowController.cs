@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -8,8 +9,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using BE.LabelExtension.Core.Diagnostics;
 using BE.LabelExtension.Core.Labels;
+using BE.LabelExtension.Core.Models;
 using BE.LabelExtension.Core.Search;
 using BE.LabelExtension.Core.Store;
+using BE.LabelExtension.Core.Usages;
 using BE.LabelExtension.Elements;
 using BE.LabelExtension.Labels;
 using BE.LabelExtension.Settings;
@@ -38,6 +41,15 @@ namespace BE.LabelExtension.ToolWindow
         /// <summary>The most hits the list shows.</summary>
         public const int MaxRows = 1000;
 
+        /// <summary>The most uses the area References shows, like the hit list.</summary>
+        public const int MaxReferences = 1000;
+
+        // Uses found in parallel go into the list in batches, not one message to Visual Studio each.
+        private static readonly TimeSpan ReferenceBatch = TimeSpan.FromMilliseconds(250);
+
+        // Index of the search mode Label id in Modes.
+        private const int LabelIdMode = 6;
+
         private static readonly TimeSpan TypingDelay = TimeSpan.FromMilliseconds(250);
 
         // The modes in the order and with the names of the existing tool.
@@ -65,6 +77,7 @@ namespace BE.LabelExtension.ToolWindow
         private readonly ExtensionTasks tasks;
         private readonly object gate = new();
         private CancellationTokenSource? searchCancellation;
+        private CancellationTokenSource? referenceSearch;
         private IReadOnlyList<Label> shown = Array.Empty<Label>();
         private IReadOnlyList<string> languages = Array.Empty<string>();
         private IReadOnlyList<LabelFile> labelFiles = Array.Empty<LabelFile>();
@@ -107,6 +120,7 @@ namespace BE.LabelExtension.ToolWindow
                 CopyCommand = new AsyncCommand((_, cancellationToken) => this.RelocateAsync(move: false, cancellationToken)),
                 MoveCommand = new AsyncCommand((_, cancellationToken) => this.RelocateAsync(move: true, cancellationToken)),
                 ReplaceCommand = new AsyncCommand((_, cancellationToken) => this.ReplaceAsync(cancellationToken)),
+                FindReferencesCommand = new AsyncCommand((_, _) => this.FindReferencesOfDetailAsync()),
             };
             this.UpdateCommands();
             this.Data.PropertyChanged += this.OnDataChanged;
@@ -209,6 +223,60 @@ namespace BE.LabelExtension.ToolWindow
             return Task.CompletedTask;
         }
 
+        /// <summary>Searches for a text, for the search from the editor (FA07). The search mode stays.</summary>
+        /// <param name="text">The text.</param>
+        public void SearchFor(string text)
+        {
+            this.Data.SearchText = text;
+            this.ScheduleSearch(TimeSpan.Zero);
+        }
+
+        /// <summary>
+        /// Opens a label in the detail view, for the command on a label ID in the code (FA08).
+        /// The hit list shows it as well, with the search mode Label id.
+        /// </summary>
+        /// <param name="id">The label ID.</param>
+        /// <returns>Why the label cannot be shown, or <c>null</c> if it is.</returns>
+        public string? OpenLabel(LabelId id)
+        {
+            if (!this.store.IsLoaded)
+            {
+                return "Labels are being loaded. Open the label again when they are loaded.";
+            }
+
+            if (this.store.Find(id) is not Label label || label.IsDeleted)
+            {
+                return $"{id.FullId} is not a known label.";
+            }
+
+            this.Data.SelectedModeIndex = LabelIdMode;
+            this.Data.SearchText = id.FullId;
+            this.ShowDetail(label);
+            return null;
+        }
+
+        /// <summary>
+        /// Searches the uses of a label in all models, the own ones first (FA04, F16). The uses
+        /// appear while the search runs; a new search replaces the running one.
+        /// </summary>
+        /// <param name="id">The label ID.</param>
+        public void FindReferences(LabelId id)
+        {
+            var cancellation = new CancellationTokenSource();
+            Interlocked.Exchange(ref this.referenceSearch, cancellation)?.Cancel();
+            var rows = new ObservableList<ReferenceRow>();
+            this.Data.References = rows;
+            this.Data.ReferencesTitle = $"References to {id.FullId}";
+            this.Data.ReferencesStatus = "searching your models";
+
+            var (own, others) = LabelUsageSearch.Split(this.store.Models, this.loader.PackageDirectories(), !string.IsNullOrWhiteSpace(this.loader.Settings.MetadataConfiguration));
+            string? debugSourceFolder = this.loader.DebugSourceFolder();
+            _ = this.tasks.Factory.RunAsync(() => this.errorBoundary.RunAsync(
+                "Find references",
+                token => this.SearchReferencesAsync(id, own, others, rows, debugSourceFolder, token),
+                cancellation.Token));
+        }
+
         /// <inheritdoc />
         public void Dispose()
         {
@@ -216,6 +284,85 @@ namespace BE.LabelExtension.ToolWindow
             this.store.Changed -= this.OnStoreChanged;
             this.changes.Changed -= this.OnChangesChanged;
             Interlocked.Exchange(ref this.searchCancellation, null)?.Cancel();
+            Interlocked.Exchange(ref this.referenceSearch, null)?.Cancel();
+        }
+
+        private Task FindReferencesOfDetailAsync()
+        {
+            if (this.detailLabel is Label label)
+            {
+                this.FindReferences(label.Id);
+            }
+
+            return Task.CompletedTask;
+        }
+
+        private async Task SearchReferencesAsync(LabelId id, IReadOnlyList<ModelInfo> own, IReadOnlyList<ModelInfo> others, ObservableList<ReferenceRow> rows, string? debugSourceFolder, CancellationToken cancellationToken)
+        {
+            var queue = new ConcurrentQueue<LabelUsage>();
+            int found = 0;
+            int ownDone = 0;
+            var stopwatch = Stopwatch.StartNew();
+            Task search = Task.Run(
+                () => LabelUsageSearch.Run(
+                    own,
+                    others,
+                    id.FullId,
+                    usage =>
+                    {
+                        queue.Enqueue(usage);
+                        Interlocked.Increment(ref found);
+                    },
+                    () => Interlocked.Exchange(ref ownDone, 1),
+                    cancellationToken),
+                cancellationToken);
+
+            while (!search.IsCompleted && !cancellationToken.IsCancellationRequested)
+            {
+                await Task.WhenAny(search, Task.Delay(ReferenceBatch, cancellationToken));
+                this.AddReferences(queue, rows, id, debugSourceFolder);
+                this.Data.ReferencesStatus = Volatile.Read(ref ownDone) == 0
+                    ? "searching your models"
+                    : $"searching the other models, {Uses(Volatile.Read(ref found))} found so far";
+            }
+
+            await search;
+            this.AddReferences(queue, rows, id, debugSourceFolder);
+            int total = Volatile.Read(ref found);
+            this.Data.ReferencesStatus = $"{Uses(total)} found in all models in {stopwatch.Elapsed.TotalSeconds:0.0} s"
+                + (total > MaxReferences ? $", the first {MaxReferences} are shown" : string.Empty);
+        }
+
+        private static string Uses(int count) => count == 1 ? "1 use" : $"{count} uses";
+
+        private void AddReferences(ConcurrentQueue<LabelUsage> queue, ObservableList<ReferenceRow> rows, LabelId id, string? debugSourceFolder)
+        {
+            var batch = new List<ReferenceRow>();
+            while (rows.Count + batch.Count < MaxReferences && queue.TryDequeue(out LabelUsage? usage))
+            {
+                batch.Add(this.CreateReferenceRow(usage, id, debugSourceFolder));
+            }
+
+            // Beyond the limit only the count goes on.
+            while (rows.Count + batch.Count >= MaxReferences && queue.TryDequeue(out _))
+            {
+            }
+
+            if (batch.Count > 0)
+            {
+                rows.AddRange(batch);
+            }
+        }
+
+        private ReferenceRow CreateReferenceRow(LabelUsage usage, LabelId id, string? debugSourceFolder)
+        {
+            string directory = usage.Model.Directory.TrimEnd('\\') + "\\";
+            string file = usage.Path.StartsWith(directory, StringComparison.OrdinalIgnoreCase) ? usage.Path.Substring(directory.Length) : Path.GetFileName(usage.Path);
+            var go = new AsyncCommand((_, cancellationToken) => this.errorBoundary.RunAsync(
+                "Go to reference",
+                async token => this.Data.StatusText = await ElementNavigator.OpenAsync(usage, id.FullId, debugSourceFolder, token),
+                cancellationToken));
+            return new ReferenceRow(usage.Model.Name, file, usage.Line, usage.Column, usage.LineText, go);
         }
 
         private void OnDataChanged(object? sender, PropertyChangedEventArgs e)
@@ -375,6 +522,12 @@ namespace BE.LabelExtension.ToolWindow
 
         private void ShowDetail(Label label)
         {
+            // A command from the editor can show a label before the window has opened.
+            if (this.languages.Count == 0)
+            {
+                this.UpdateLanguages();
+            }
+
             var rows = new List<TranslationRow>();
             foreach (string language in this.languages)
             {
@@ -756,6 +909,7 @@ namespace BE.LabelExtension.ToolWindow
             this.Data.CopyCommand.CanExecute = idle && canCopy;
             this.Data.MoveCommand.CanExecute = idle && canCopy && !label!.LabelFile.IsReadOnly;
             this.Data.ReplaceCommand.CanExecute = idle && usable;
+            this.Data.FindReferencesCommand.CanExecute = usable;
         }
 
         // Saved and deleted labels change their marks in the list.

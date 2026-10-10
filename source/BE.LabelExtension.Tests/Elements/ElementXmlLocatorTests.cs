@@ -63,5 +63,18 @@ namespace BE.LabelExtension.Tests.Elements
         {
             Assert.Throws<XmlException>(() => ElementXmlLocator.FindElements(new StringReader("<AxTable><Name>"), "Name", "x"));
         }
+
+        /// <summary>FA04: a use in a property is described by the property and the node with a name.</summary>
+        [Fact]
+        public void DescribeProperty_FieldAndTable_NamesPropertyAndNode()
+        {
+            const string Xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<AxTable>\n\t<Name>BDMDelivery</Name>\n\t<Label>@BDM2:BDM210000001</Label>\n\t<Fields>\n"
+                + "\t\t<AxTableField>\n\t\t\t<Name>DeliveryAddress</Name>\n\t\t\t<HelpText>@BDM1:BDM110000003</HelpText>\n\t\t</AxTableField>\n\t</Fields>\n</AxTable>";
+
+            Assert.Equal("HelpText of DeliveryAddress", ElementXmlLocator.DescribeProperty(Xml, 8, "@BDM1:BDM110000003"));
+            Assert.Equal("Label of BDMDelivery", ElementXmlLocator.DescribeProperty(Xml, 4, "@BDM2:BDM210000001"));
+            Assert.Null(ElementXmlLocator.DescribeProperty(Xml, 3, "@BDM1:BDM110000003"));
+            Assert.Null(ElementXmlLocator.DescribeProperty("<AxTable><Name>", 1, "@BDM1:BDM110000003"));
+        }
     }
 }

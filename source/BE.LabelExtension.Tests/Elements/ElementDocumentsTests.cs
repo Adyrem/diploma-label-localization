@@ -26,6 +26,28 @@ namespace BE.LabelExtension.Tests.Elements
 
         public void Dispose() => this.packages.Dispose();
 
+        /// <summary>FA04: the X++ editor shows an element from XppSource\Model\AxType_Name.xpp.</summary>
+        [Fact]
+        public void XppFile_ElementOfTheModel_IsInXppSource()
+        {
+            ModelInfo model = this.writable.Single(m => m.Name == "BEDemo1");
+            string xml = Path.Combine(model.Directory, "AxClass", "BDMDeliveryHelper.xml");
+
+            Assert.Equal(@"C:\XppSource\BEDemo1\AxClass_BDMDeliveryHelper.xpp", ElementDocuments.XppFile(xml, model, @"C:\XppSource"));
+            Assert.Null(ElementDocuments.XppFile(Path.Combine(model.Directory, "readme.xml"), model, @"C:\XppSource"));
+            Assert.Null(ElementDocuments.XppFile(Path.Combine(model.Directory, "AxClass", "Sub", "X.xml"), model, @"C:\XppSource"));
+        }
+
+        /// <summary>XppSource comes from the metadata configuration, on a classic VM it lies in bin beside the packages.</summary>
+        [Fact]
+        public void XppSourceFolder_ConfigurationOrClassicVm()
+        {
+            ModelInfo model = this.writable.Single(m => m.Name == "BEDemo1");
+
+            Assert.Equal(@"C:\Store\XppSource", ElementDocuments.XppSourceFolder(model, @"C:\Store\XppSource"));
+            Assert.Equal(Path.Combine(this.packages.PackagesDirectory, "bin", "XppSource"), ElementDocuments.XppSourceFolder(model, null));
+        }
+
         /// <summary>The designer opens the XML file itself.</summary>
         [Fact]
         public void ElementFile_XmlOfAWritableModel_IsTheFileItself()

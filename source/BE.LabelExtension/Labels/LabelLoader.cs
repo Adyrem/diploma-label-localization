@@ -61,6 +61,34 @@ namespace BE.LabelExtension.Labels
         /// <summary>Runs work nobody waits for, also that of the editor parts.</summary>
         public ExtensionTasks Tasks => this.tasks;
 
+        /// <summary>The package directories of the current settings, for the usage search.</summary>
+        /// <returns>The directories, those of the metadata configuration first.</returns>
+        public IReadOnlyList<PackageDirectory> PackageDirectories() => this.store.GetPackageDirectories(this.Settings);
+
+        /// <summary>
+        /// The DebugSourceFolder of the metadata configuration, where the X++ editor of the
+        /// Unified Developer Experience keeps its <c>.xpp</c> files; <c>null</c> without a
+        /// configuration, as on a classic VM.
+        /// </summary>
+        /// <returns>The folder, or <c>null</c>.</returns>
+        public string? DebugSourceFolder()
+        {
+            string? name = this.Settings.MetadataConfiguration;
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return null;
+            }
+
+            try
+            {
+                return this.discovery.ReadConfiguration(name!).DebugSourceFolder;
+            }
+            catch (Exception exception) when (exception is IOException || exception is UnauthorizedAccessException || exception is System.Runtime.Serialization.SerializationException)
+            {
+                return null;
+            }
+        }
+
         /// <summary>Starts the first load unless it has started already. Returns at once.</summary>
         public void EnsureLoaded()
         {
