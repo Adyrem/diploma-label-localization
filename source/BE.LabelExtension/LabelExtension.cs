@@ -77,7 +77,7 @@ namespace BE.LabelExtension
                 provider.GetRequiredService<LabelFileWatcher>(),
                 provider.GetRequiredService<IMessageSink>()));
             serviceCollection.AddSingleton<LabelLoader>();
-            serviceCollection.AddSingleton(provider => new LabelChanges(
+            serviceCollection.AddSingleton(provider => SharedServices.Changes = new LabelChanges(
                 provider.GetRequiredService<LabelStore>(),
                 provider.GetRequiredService<IMessageSink>()));
         }

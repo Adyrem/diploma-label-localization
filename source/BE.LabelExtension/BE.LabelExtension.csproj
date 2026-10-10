@@ -17,13 +17,26 @@
     <!-- Runs the new model in-process. Requires RequiresInProcessHosting in LabelExtension. -->
     <VssdkCompatibleExtension>true</VssdkCompatibleExtension>
 
-    <!-- No VSPackage, so there is no pkgdef to merge after installing (OA01). -->
-    <GeneratePkgDefFile>false</GeneratePkgDefFile>
+    <!--
+      The AsyncPackage (F5) brings the options page and the question when Visual Studio
+      closes. Its registration goes into a pkgdef, which the manifest names as an asset.
+    -->
+    <GeneratePkgDefFile>true</GeneratePkgDefFile>
+
+    <!--
+      The pkgdef names the assembly by its path in the extension folder. Without, Visual
+      Studio looks for it by name only, does not find it and cannot create the package.
+    -->
+    <UseCodebase>true</UseCodebase>
   </PropertyGroup>
 
   <ItemGroup>
     <!-- Not referenced automatically in SDK-style .NET Framework projects, needed for MEF. -->
     <Reference Include="System.ComponentModel.Composition" />
+    <!-- ProtectedData, the Data Protection API for the API key (NFA06). -->
+    <Reference Include="System.Security" />
+    <!-- Property grid of the options page. -->
+    <Reference Include="System.Windows.Forms" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -6,6 +7,7 @@ using System.Threading.Tasks;
 using BE.LabelExtension.Core.Diagnostics;
 using BE.LabelExtension.Core.Models;
 using BE.LabelExtension.Core.Store;
+using BE.LabelExtension.Settings;
 using BE.LabelExtension.Threading;
 using Microsoft.VisualStudio.Extensibility;
 using Microsoft.VisualStudio.Extensibility.Shell;
@@ -13,14 +15,12 @@ using Microsoft.VisualStudio.Extensibility.Shell;
 namespace BE.LabelExtension.Labels
 {
     /// <summary>
-    /// Starts loading the labels in the background as soon as they are needed, and offers to
-    /// reload when label files change from outside (FA15).
+    /// Starts loading the labels in the background as soon as they are needed, with the
+    /// settings of the user (FA11). Loads again when the settings change what is loaded (F4),
+    /// and offers to reload when label files change from outside (FA15).
     /// </summary>
     internal sealed class LabelLoader
     {
-        // Until the settings page exists (AP3.5), these languages are loaded.
-        private static readonly string[] DefaultLanguages = { "en-US", "de", "de-CH", "fr-CH", "it-CH" };
-
 #if DEBUG
         // Development without Dynamics 365: points the Debug build at a package directory,
         // for example the synthetic one of the unit tests.
@@ -45,17 +45,19 @@ namespace BE.LabelExtension.Labels
             this.messages = messages;
             this.extensibility = extensibility;
             this.store.ExternalChange += (_, e) => { _ = this.tasks.Factory.RunAsync(() => this.OfferReloadAsync(e)); };
+            LabelSettingsFile.Saved += (_, _) => this.OnSettingsSaved();
+            SharedServices.Loader = this;
         }
 
-        /// <summary>The settings of the last load.</summary>
-        public LabelSettings Settings { get; private set; } = new();
+        /// <summary>The settings of the last load, with defaults for what is not set.</summary>
+        public LabelSettings Settings { get; private set; } = LabelSettingsDefaults.Complete(null);
 
         /// <summary>Starts the first load unless it has started already. Returns at once.</summary>
         public void EnsureLoaded()
         {
             if (Interlocked.Exchange(ref this.started, 1) == 0)
             {
-                this.Settings = this.CreateDefaultSettings();
+                this.Settings = this.ReadSettings();
                 this.StartLoad();
             }
         }
@@ -102,30 +104,66 @@ namespace BE.LabelExtension.Labels
             }
         }
 
-        /// <summary>
-        /// The simple default until the settings page exists (AP3.5): the newest metadata
-        /// configuration, otherwise the PackagesLocalDirectory of a classic development VM.
-        /// </summary>
-        private LabelSettings CreateDefaultSettings()
-        {
-            var settings = new LabelSettings();
-            foreach (string language in DefaultLanguages)
+        // After the options page saved: load again if what the load uses changed (F4).
+        private void OnSettingsSaved()
+            => this.errorBoundary.Run("Apply settings", () =>
             {
-                settings.LoadLanguages.Add(language);
+                if (Volatile.Read(ref this.started) == 0)
+                {
+                    return;
+                }
+
+                LabelSettings next = this.ReadSettings();
+                bool reload = this.Settings.RequiresReload(next);
+                this.Settings = next;
+                if (reload)
+                {
+                    this.messages.Report(MessageSeverity.Message, "The settings changed what is loaded; the labels are loaded again.");
+                    this.Reload();
+                }
+            });
+
+        /// <summary>
+        /// The settings of the settings file with defaults for what is not set (FA11). Without
+        /// a metadata configuration set, the most recently changed one is used; without any
+        /// configuration and directory, the PackagesLocalDirectory of a classic development VM
+        /// (RE22).
+        /// </summary>
+        private LabelSettings ReadSettings()
+        {
+            LabelSettings? saved = null;
+            try
+            {
+                saved = LabelSettingsFile.Load(LabelSettingsFile.DefaultPath);
+            }
+            catch (Exception exception) when (exception is IOException || exception is UnauthorizedAccessException || exception is System.Runtime.Serialization.SerializationException)
+            {
+                this.messages.Report(MessageSeverity.Warning, $"The settings could not be read, the defaults apply: {LabelSettingsFile.DefaultPath} ({exception.Message})");
             }
 
-            string? configuration = this.discovery.ListConfigurations()
-                .OrderByDescending(name => File.GetLastWriteTimeUtc(Path.Combine(this.discovery.ConfigurationFolder, name + ".json")))
-                .FirstOrDefault();
-            if (configuration != null)
+            LabelSettings settings = LabelSettingsDefaults.Complete(saved);
+            IReadOnlyList<string> configurations = this.discovery.ListConfigurations();
+            if (settings.MetadataConfiguration != null && !configurations.Contains(settings.MetadataConfiguration, StringComparer.OrdinalIgnoreCase))
             {
-                settings.MetadataConfiguration = configuration;
-                this.messages.Report(MessageSeverity.Message, $"Using the metadata configuration {configuration}, the most recently changed one.");
+                this.messages.Report(MessageSeverity.Warning, $"The metadata configuration {settings.MetadataConfiguration} of the settings does not exist any more; the most recently changed one is used.");
+                settings.MetadataConfiguration = null;
             }
-            else if (ModelDiscovery.FindClassicDirectory() is string classic)
+
+            if (settings.MetadataConfiguration == null)
             {
-                settings.PackageDirectories.Add(classic);
-                this.messages.Report(MessageSeverity.Message, $"No metadata configuration found, using {classic}.");
+                string? newest = configurations
+                    .OrderByDescending(name => File.GetLastWriteTimeUtc(Path.Combine(this.discovery.ConfigurationFolder, name + ".json")))
+                    .FirstOrDefault();
+                if (newest != null)
+                {
+                    settings.MetadataConfiguration = newest;
+                    this.messages.Report(MessageSeverity.Message, $"Using the metadata configuration {newest}, the most recently changed one.");
+                }
+                else if (settings.PackageDirectories.Count == 0 && ModelDiscovery.FindClassicDirectory() is string classic)
+                {
+                    settings.PackageDirectories.Add(classic);
+                    this.messages.Report(MessageSeverity.Message, $"No metadata configuration found, using {classic}.");
+                }
             }
 
 #if DEBUG
