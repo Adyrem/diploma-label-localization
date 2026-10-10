@@ -8,7 +8,7 @@ using Microsoft.VisualStudio.Extensibility.Commands;
 namespace BE.LabelExtension.Commands
 {
     /// <summary>
-    /// Opens the tool window, from View, Other Windows and from the menu BE-LabelExtension.
+    /// Opens the tool window, from View, Other Windows and from the menu Extensions.
     /// </summary>
     [VisualStudioContribution]
     internal sealed class OpenLabelWindowCommand : Command
@@ -25,7 +25,7 @@ namespace BE.LabelExtension.Commands
         /// <inheritdoc />
         public override CommandConfiguration CommandConfiguration => new("%BE.LabelExtension.OpenLabelWindowCommand.DisplayName%")
         {
-            Placements = [CommandPlacement.KnownPlacements.ViewOtherWindowsMenu],
+            Placements = [CommandPlacement.KnownPlacements.ViewOtherWindowsMenu, CommandPlacement.KnownPlacements.ExtensionsMenu.WithPriority(0x0100)],
             Icon = new(ImageMoniker.KnownValues.Localize, IconSettings.IconAndText),
         };
 

@@ -29,34 +29,23 @@ namespace BE.LabelExtension
 
 #if DEBUG
         /// <summary>
-        /// Menu BE-LabelExtension under Extensions. The Debug build adds the probe commands
-        /// for the first pass on the test environment (D1).
+        /// Submenu BE-LabelExtension under Extensions with the probe commands of the Debug build,
+        /// for the passes on the test environment. The commands of the extension stand in the
+        /// menu Extensions itself, see the shortcut commands.
         /// </summary>
         [VisualStudioContribution]
-        public static MenuConfiguration ExtensionMenu => new("%BE.LabelExtension.Menu.DisplayName%")
+        public static MenuConfiguration ProbeMenu => new("%BE.LabelExtension.Menu.DisplayName%")
         {
-            Placements = [CommandPlacement.KnownPlacements.ExtensionsMenu],
+            Placements = [CommandPlacement.KnownPlacements.ExtensionsMenu.WithPriority(0x0600)],
             Children =
             [
-                MenuChild.Command<OpenLabelWindowCommand>(),
-                MenuChild.Separator,
                 MenuChild.Command<Probes.ProbeOpenElementCommand>(),
                 MenuChild.Command<Probes.ProbeUnsavedDocumentsCommand>(),
                 MenuChild.Command<Probes.ProbeDesignerSelectionCommand>(),
                 MenuChild.Command<Probes.ProbeSearchTimesCommand>(),
+                MenuChild.Command<Probes.ProbeShortcutsCommand>(),
                 MenuChild.Separator,
                 MenuChild.Command<Probes.ProbeTestErrorCommand>(),
-            ],
-        };
-#else
-        /// <summary>Menu BE-LabelExtension under Extensions.</summary>
-        [VisualStudioContribution]
-        public static MenuConfiguration ExtensionMenu => new("%BE.LabelExtension.Menu.DisplayName%")
-        {
-            Placements = [CommandPlacement.KnownPlacements.ExtensionsMenu],
-            Children =
-            [
-                MenuChild.Command<OpenLabelWindowCommand>(),
             ],
         };
 #endif

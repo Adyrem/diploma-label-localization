@@ -1,9 +1,14 @@
 {
   "BE.LabelExtension.Menu.DisplayName": "BE-LabelExtension",
   "BE.LabelExtension.OpenLabelWindowCommand.DisplayName": "BE-LabelExtension Window",
+  "BE.LabelExtension.SaveLabelsCommand.DisplayName": "Save Labels",
+  "BE.LabelExtension.InsertLabelIdCommand.DisplayName": "Insert Label ID",
+  "BE.LabelExtension.SaveAndInsertLabelIdCommand.DisplayName": "Save Labels and Insert ID",
+  "BE.LabelExtension.NewLabelCommand.DisplayName": "New Label",
   "BE.LabelExtension.ProbeOpenElementCommand.DisplayName": "Probe: Open element at a location",
   "BE.LabelExtension.ProbeUnsavedDocumentsCommand.DisplayName": "Probe: List unsaved documents",
   "BE.LabelExtension.ProbeDesignerSelectionCommand.DisplayName": "Probe: Find selected designer node in XML",
   "BE.LabelExtension.ProbeSearchTimesCommand.DisplayName": "Probe: Measure search times",
+  "BE.LabelExtension.ProbeShortcutsCommand.DisplayName": "Probe: List shortcut conflicts",
   "BE.LabelExtension.ProbeTestErrorCommand.DisplayName": "Probe: Trigger test error"
 }

@@ -46,9 +46,18 @@ $ide = "C:\Program Files\Microsoft Visual Studio\18\Community\Common7\IDE"
 & "$ide\devenv.exe" /rootsuffix Exp
 ```
 
-Ohne `/updateconfiguration` registriert Visual Studio die Menüs, Commands und das Tool Window der Extension nicht, auch nach einer Installation per Doppelklick. Danach erscheint das Menü *Extensions > BE-LabelExtension*.
+Ohne `/updateconfiguration` registriert Visual Studio die Menüs, Commands und das Tool Window der Extension nicht, auch nach einer Installation per Doppelklick. Danach stehen im Menü *Extensions* das Tool Window und die Commands mit Shortcuts:
 
-Der Debug-Build enthält dort zusätzlich Probe-Commands für den ersten Durchgang auf der Testumgebung. Sie lesen nur und schreiben ihr Ergebnis in den Bereich *BE-LabelExtension* des Output Window. Pfade, Namen und Werte geben sie nur als Form aus, etwa `C:\<Name>\Metadata\<Name>\<Name>\AxClass\<Name>.xml`, weil die Ergebnisse die Testumgebung verlassen.
+| Command | Shortcut |
+| --- | --- |
+| Save Labels | Ctrl+Shift+Alt+S |
+| Insert Label ID | Ctrl+Shift+Alt+I |
+| Save Labels and Insert ID | Ctrl+Shift+Alt+A |
+| New Label | Ctrl+Shift+Alt+N |
+
+Umbelegen lassen sie sich unter *Tools > Options > Environment > Keyboard*, die Commands heissen dort `BE.LabelExtension.Commands.*`.
+
+Der Debug-Build enthält zusätzlich das Untermenü *Extensions > BE-LabelExtension* mit Probe-Commands für die Durchgänge auf der Testumgebung. Sie lesen nur und schreiben ihr Ergebnis in den Bereich *BE-LabelExtension* des Output Window. Pfade, Namen und Werte geben sie nur als Form aus, etwa `C:\<Name>\Metadata\<Name>\<Name>\AxClass\<Name>.xml`, weil die Ergebnisse die Testumgebung verlassen.
 
 ## Ohne Dynamics 365 entwickeln
 
