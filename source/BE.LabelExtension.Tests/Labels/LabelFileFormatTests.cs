@@ -149,6 +149,21 @@ namespace BE.LabelExtension.Tests.Labels
             Assert.Equal(Encoding.UTF8.GetBytes("BDM1SPACE=Text\r\n"), RoundTrip(Encoding.UTF8.GetBytes(line)));
         }
 
+        /// <summary>Like in the existing tool, spaces and tabs at the start of the line are not part of the ID.</summary>
+        [Theory]
+        [InlineData("  BDM1INDENT=Text\r\n")]
+        [InlineData("\tBDM1INDENT=Text\r\n")]
+        [InlineData(" \t BDM1INDENT \t=Text\r\n")]
+        public void Read_SpaceBeforeTheId_IsNotPartOfIt(string line)
+        {
+            LabelFileContent content = Read(line);
+
+            Assert.Equal("BDM1INDENT", content.Entries.Single().Key);
+            Assert.Equal("Text", content.Entries.Single().Text);
+            Assert.Empty(content.Issues);
+            Assert.Equal(Encoding.UTF8.GetBytes("BDM1INDENT=Text\r\n"), RoundTrip(Encoding.UTF8.GetBytes(line)));
+        }
+
         [Fact]
         public void Read_OnlySpacesBeforeEqualsSign_MarksTheFileAsDamaged()
         {

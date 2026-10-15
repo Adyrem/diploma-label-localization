@@ -169,6 +169,18 @@ namespace BE.LabelExtension.Tests.Store
             Assert.Null(replacement);
         }
 
+        /// <summary>A loaded label with an ID outside the strict form can replace another one.</summary>
+        [Fact]
+        public async Task CheckReplacement_LoadedIdOutsideStrictForm_IsAccepted()
+        {
+            File.AppendAllText(this.packages.LabelFilePath("BEDemo1", "BEDemo1", "BDM1", "de"), "BDM1-OLD.2=Mit Bindestrich\r\n");
+            await this.LoadAsync();
+
+            Assert.Null(this.operations.CheckReplacement(this.store.Find(Original)!, "@BDM1:BDM1-OLD.2", out Label? replacement));
+            Assert.Equal("@BDM1:BDM1-OLD.2", replacement!.Id.FullId);
+            Assert.Equal("@BDM1:BDM1-NONE is not a loaded label.", this.operations.CheckReplacement(this.store.Find(Original)!, "@BDM1:BDM1-NONE", out _));
+        }
+
         [Fact]
         public async Task CheckReplacement_ExistingLabel_IsAccepted()
         {

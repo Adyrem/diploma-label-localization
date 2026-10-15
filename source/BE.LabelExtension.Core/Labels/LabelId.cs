@@ -10,9 +10,13 @@ namespace BE.LabelExtension.Core.Labels
     /// string is the ID, and the label file follows only from the file the label stands in.
     /// </summary>
     /// <remarks>
-    /// The ID keeps only the complete string and where its label part starts. Label file and
+    /// <para>The ID keeps only the complete string and where its label part starts. Label file and
     /// label are cut out when asked for, because the store holds about half a million IDs and
-    /// most of them are never asked (F14).
+    /// most of them are never asked (F14).</para>
+    /// <para>The strict form, letters, digits and underscore, applies to new IDs and to the IDs
+    /// recognized in code (<see cref="TryParse"/>). Labels read from a label file keep their ID
+    /// as it stands there, like in the existing tool, also with a hyphen or a dot
+    /// (<see cref="TryCreate"/>, <see cref="IsStrict"/>).</para>
     /// </remarks>
     public readonly struct LabelId : IEquatable<LabelId>
     {
@@ -45,6 +49,12 @@ namespace BE.LabelExtension.Core.Labels
 
         /// <summary>Whether this is the old form without colon, such as <c>@SYS12345</c>.</summary>
         public bool IsLegacy => this.keyStart == 0;
+
+        /// <summary>
+        /// Whether the ID has the strict form of new IDs, which the code recognition finds. An ID
+        /// read from a label file may have another form, see <see cref="TryCreate"/>.
+        /// </summary>
+        public bool IsStrict => TryParse(this.FullId, out _);
 
         /// <summary>Compares <see cref="Key"/> with a text without cutting it out.</summary>
         /// <param name="text">The text, for example a search term.</param>
@@ -151,29 +161,72 @@ namespace BE.LabelExtension.Core.Labels
 
         /// <summary>
         /// Builds the ID of a label read from a label file. A key that starts with <c>@</c> is an
-        /// old ID and stands for itself; any other key belongs to the label file.
+        /// old ID and stands for itself; any other key belongs to the label file. Like the
+        /// existing tool, it takes the key as it stands, also outside the strict form, for
+        /// example with a hyphen or a dot; see <see cref="IsStrict"/>.
         /// </summary>
         /// <param name="labelFileIdPrefix">
         /// The label file part of the IDs, see <see cref="LabelFile.IdPrefix"/>.
         /// </param>
-        /// <param name="key">The label left of the equals sign.</param>
+        /// <param name="key">The label left of the equals sign, without spaces and tabs around it.</param>
         /// <param name="id">The ID if the method returns <c>true</c>.</param>
-        /// <returns>Whether the key forms a valid label ID.</returns>
+        /// <returns>Whether the key can be an ID at all: not empty, without equals sign and line break.</returns>
         public static bool TryCreate(string labelFileIdPrefix, string key, out LabelId id)
         {
-            if (key.StartsWith("@", StringComparison.Ordinal))
+            id = default;
+            if (string.IsNullOrEmpty(labelFileIdPrefix) || !CanStandInFile(key))
             {
-                return TryParse(key, out id);
+                return false;
             }
 
-            if (!IsPart(labelFileIdPrefix, 0, labelFileIdPrefix.Length) || !IsPart(key, 0, key.Length))
+            if (key[0] == '@')
             {
-                id = default;
-                return false;
+                if (key.Length < 2)
+                {
+                    return false;
+                }
+
+                // Split at the colon like TryParse, so a strict ID gets the same parts either way.
+                int colon = key.IndexOf(':');
+                id = new LabelId(key, colon > 1 && colon < key.Length - 1 ? colon + 1 : 0);
+                return true;
             }
 
             id = new LabelId("@" + labelFileIdPrefix + ":" + key, labelFileIdPrefix.Length + 2);
             return true;
+        }
+
+        /// <summary>
+        /// Whether new IDs can be formed with this label file part: only if it has the strict
+        /// form. A label file named otherwise keeps its labels but gets no new ones.
+        /// </summary>
+        /// <param name="labelFileIdPrefix">The label file part, see <see cref="LabelFile.IdPrefix"/>.</param>
+        /// <returns>Whether it consists of letters, digits and underscore.</returns>
+        public static bool IsStrictLabelFilePart(string labelFileIdPrefix)
+            => labelFileIdPrefix != null && IsPart(labelFileIdPrefix, 0, labelFileIdPrefix.Length);
+
+        /// <summary>
+        /// The characters of an ID outside the strict form, to describe it without the ID itself,
+        /// for example in the results of a test pass. The <c>@</c> at the start and the colon
+        /// between label file and label do not count.
+        /// </summary>
+        /// <param name="id">The ID.</param>
+        /// <returns>The characters, each once, in the order they occur.</returns>
+        public static IReadOnlyList<char> CharactersOutsideStrictForm(LabelId id)
+        {
+            var found = new List<char>();
+            string text = id.FullId ?? string.Empty;
+            for (int i = 1; i < text.Length; i++)
+            {
+                char c = text[i];
+                bool separator = c == ':' && i == id.keyStart - 1;
+                if (!separator && !IsPartCharacter(c) && !found.Contains(c))
+                {
+                    found.Add(c);
+                }
+            }
+
+            return found;
         }
 
         /// <summary>
@@ -220,8 +273,7 @@ namespace BE.LabelExtension.Core.Labels
 
             for (int i = start; i < end; i++)
             {
-                char c = text[i];
-                if (!((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '_'))
+                if (!IsPartCharacter(text[i]))
                 {
                     return false;
                 }
@@ -229,6 +281,12 @@ namespace BE.LabelExtension.Core.Labels
 
             return true;
         }
+
+        private static bool IsPartCharacter(char c) => (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '_';
+
+        // What the label file format can hold left of the equals sign.
+        private static bool CanStandInFile(string? key)
+            => !string.IsNullOrEmpty(key) && key!.IndexOf('=') < 0 && key.IndexOf('\r') < 0 && key.IndexOf('\n') < 0;
 
         // @[A-Za-z]+[0-9]+ as the whole text.
         private static bool IsLegacyForm(string text)

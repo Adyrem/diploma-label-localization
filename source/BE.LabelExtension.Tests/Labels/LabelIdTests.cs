@@ -106,14 +106,63 @@ namespace BE.LabelExtension.Tests.Labels
             Assert.True(id.IsLegacy);
         }
 
+        /// <summary>
+        /// Like the existing tool, a label file keeps IDs outside the strict form; only new IDs
+        /// and the recognition in code need it.
+        /// </summary>
         [Theory]
-        [InlineData("BDM 1", "BDM110000003")]
-        [InlineData("BDM1", "BDM1 10000003")]
+        [InlineData("BDM1", "BDM1-OLD.2", "@BDM1:BDM1-OLD.2", "BDM1-OLD.2")]
+        [InlineData("BDM1", "BDM1 10000003", "@BDM1:BDM1 10000003", "BDM1 10000003")]
+        [InlineData("Demo_en-US", "L1", "@Demo_en-US:L1", "L1")]
+        [InlineData("DMO", "@DMO-1001", "@DMO-1001", "@DMO-1001")]
+        public void TryCreate_KeyOutsideStrictForm_IsKeptAsItStands(string prefix, string key, string fullId, string expectedKey)
+        {
+            Assert.True(LabelId.TryCreate(prefix, key, out LabelId id));
+            Assert.Equal(fullId, id.FullId);
+            Assert.Equal(expectedKey, id.Key);
+            Assert.False(id.IsStrict);
+            Assert.False(LabelId.TryParse(fullId, out _));
+        }
+
+        [Theory]
         [InlineData("", "BDM110000003")]
         [InlineData("BDM1", "")]
-        public void TryCreate_InvalidPart_ReturnsFalse(string prefix, string key)
+        [InlineData("BDM1", "A=B")]
+        [InlineData("BDM1", "@")]
+        public void TryCreate_KeyALabelFileCannotHold_ReturnsFalse(string prefix, string key)
         {
             Assert.False(LabelId.TryCreate(prefix, key, out _));
+        }
+
+        [Fact]
+        public void TryCreate_StrictKey_GivesTheSameIdAsParse()
+        {
+            Assert.True(LabelId.TryCreate("BDM1", "@BDM2:BDM210000001", out LabelId id));
+            Assert.Equal(LabelId.Parse("@BDM2:BDM210000001"), id);
+            Assert.Equal("BDM2", id.File);
+            Assert.True(id.IsStrict);
+        }
+
+        [Theory]
+        [InlineData("BDM1", true)]
+        [InlineData("FieldDescriptions_Demo", true)]
+        [InlineData("Demo_en-US", false)]
+        [InlineData("", false)]
+        public void IsStrictLabelFilePart_OnlyLettersDigitsAndUnderscore(string prefix, bool expected)
+        {
+            Assert.Equal(expected, LabelId.IsStrictLabelFilePart(prefix));
+        }
+
+        /// <summary>Describes an ID outside the strict form without naming it, for test passes.</summary>
+        [Theory]
+        [InlineData("BDM1", "A-B.C-D", "-.")]
+        [InlineData("Demo_en-US", "L1", "-")]
+        [InlineData("BDM1", "A B\tC", " \t")]
+        [InlineData("BDM1", "BDM110000003", "")]
+        public void CharactersOutsideStrictForm_EachOnceWithoutAtAndColon(string prefix, string key, string expected)
+        {
+            Assert.True(LabelId.TryCreate(prefix, key, out LabelId id));
+            Assert.Equal(expected, string.Concat(LabelId.CharactersOutsideStrictForm(id)));
         }
 
         [Fact]

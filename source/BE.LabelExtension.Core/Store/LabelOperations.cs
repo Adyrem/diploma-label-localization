@@ -121,18 +121,20 @@ namespace BE.LabelExtension.Core.Store
                 return "Enter the label ID to use instead.";
             }
 
-            if (!LabelId.TryParse(text, out LabelId id))
+            // A loaded label counts by its complete ID, also outside the strict form.
+            Label? found = this.store.Find(text);
+            if (found == null && !text.StartsWith("@", StringComparison.Ordinal))
             {
                 return $"{text} is not a label ID.";
             }
 
-            if (id == original.Id)
+            if (string.Equals(text, original.Id.FullId, StringComparison.Ordinal))
             {
                 return $"{text} is the label to replace. Enter another label ID.";
             }
 
-            replacement = this.store.Find(id);
-            return replacement == null || replacement.IsDeleted ? $"{text} is not a loaded label." : null;
+            replacement = found == null || found.IsDeleted ? null : found;
+            return replacement == null ? $"{text} is not a loaded label." : null;
         }
 
         /// <summary>

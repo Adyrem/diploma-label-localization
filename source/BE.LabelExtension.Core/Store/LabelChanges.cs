@@ -54,12 +54,13 @@ namespace BE.LabelExtension.Core.Store
 
         /// <summary>
         /// The label files new labels can be created in: writable, not only compiled, and not an
-        /// <c>_Extension</c>, which only holds translations of existing labels (F9, TC07).
+        /// <c>_Extension</c>, which only holds translations of existing labels (F9, TC07). The
+        /// name must form new IDs of the strict form, see <see cref="LabelId.IsStrictLabelFilePart"/>.
         /// </summary>
         /// <returns>The label files, sorted by name.</returns>
         public IReadOnlyList<LabelFile> CreatableLabelFiles()
             => this.store.LabelFiles
-                .Where(f => !f.IsReadOnly && !IsExtension(f))
+                .Where(CanCreateIn)
                 .OrderBy(f => f.Name, StringComparer.OrdinalIgnoreCase)
                 .ThenBy(f => f.Model.Name, StringComparer.OrdinalIgnoreCase)
                 .ToList();
@@ -132,7 +133,7 @@ namespace BE.LabelExtension.Core.Store
         /// <exception cref="ArgumentException">The label file cannot take new labels, or a text contains a line break.</exception>
         public Label? Create(LabelFile labelFile, IReadOnlyList<LabelText> translations)
         {
-            if (labelFile.IsReadOnly || IsExtension(labelFile))
+            if (!CanCreateIn(labelFile))
             {
                 throw new ArgumentException($"New labels cannot be created in {labelFile.Name}.", nameof(labelFile));
             }
@@ -304,6 +305,9 @@ namespace BE.LabelExtension.Core.Store
         }
 
         private static string Counted(int count, string noun) => count == 1 ? $"1 {noun}" : $"{count} {noun}s";
+
+        private static bool CanCreateIn(LabelFile labelFile)
+            => !labelFile.IsReadOnly && !IsExtension(labelFile) && LabelId.IsStrictLabelFilePart(labelFile.IdPrefix);
 
         private static bool IsExtension(LabelFile labelFile)
             => labelFile.Name.EndsWith(ExtensionSuffix, StringComparison.OrdinalIgnoreCase)

@@ -207,6 +207,25 @@ namespace BE.LabelExtension.Tests.Store
         }
 
         /// <summary>
+        /// Like the existing tool, labels with an ID outside the strict form are loaded and
+        /// found; the message names only their characters, so it can leave a test pass (D2).
+        /// </summary>
+        [Fact]
+        public async Task LoadAsync_IdOutsideStrictForm_IsLoadedAndNamedByItsCharacters()
+        {
+            File.AppendAllText(this.packages.LabelFilePath("BEDemo1", "BEDemo1", "BDM1", "de"), "  BDM1-OLD.2=Mit Bindestrich\r\n");
+            string path = Path.Combine(this.packages.ModelDirectory("BEDemo1", "BEDemo1"), "AxLabelFile", "LabelResources", "de", "Demo_en-US.de.label.txt");
+            File.WriteAllText(path, "L1=Datei mit Bindestrich\r\n", new System.Text.UTF8Encoding(true));
+
+            await this.LoadAsync("de");
+
+            Assert.Equal("Mit Bindestrich", this.store.Find("@BDM1:BDM1-OLD.2")?.GetText("de"));
+            Assert.Equal("Datei mit Bindestrich", this.store.Find("@Demo_en-US:L1")?.GetText("de"));
+            Assert.DoesNotContain(this.messages.Messages, m => m.Severity != MessageSeverity.Message);
+            Assert.Contains(this.messages.Messages, m => m.Message == "2 labels have an ID outside the form of letters, digits and underscore, with '-', '.'. They are loaded and found by the search; in code the editor does not recognize them.");
+        }
+
+        /// <summary>
         /// F14: a text or comment equal to one in another language of the same label is held
         /// once. In the files of the platform the comment is the same in every language.
         /// </summary>

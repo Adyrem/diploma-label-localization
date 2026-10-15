@@ -232,6 +232,22 @@ namespace BE.LabelExtension.Tests.Store
             Assert.Throws<ArgumentException>(() => this.changes.Create(this.store.LabelFiles.Single(f => f.Name == "BDM1_Extension"), new[] { new LabelText("it-CH", "x", null) }));
         }
 
+        /// <summary>New IDs have the strict form, so a label file named otherwise gets no new labels.</summary>
+        [Fact]
+        public async Task CreatableLabelFiles_NameOutsideStrictForm_IsLeftOut()
+        {
+            string path = Path.Combine(this.packages.ModelDirectory("BEDemo1", "BEDemo1"), "AxLabelFile", "LabelResources", "de", "Demo_en-US.de.label.txt");
+            File.WriteAllText(path, "L1=Datei mit Bindestrich\r\n", new System.Text.UTF8Encoding(true));
+
+            await this.LoadAsync("de");
+
+            LabelFile file = this.store.LabelFiles.Single(f => f.Name == "Demo_en-US");
+            Assert.False(file.IsReadOnly);
+            Assert.DoesNotContain(file, this.changes.CreatableLabelFiles());
+            Assert.Throws<ArgumentException>(() => this.changes.Create(file, new[] { new LabelText("de", "x", null) }));
+            Assert.NotNull(this.store.Find("@Demo_en-US:L1"));
+        }
+
         /// <summary>TC17 in the core logic: deleting removes the label in all languages of its label file, also those not loaded, once saved.</summary>
         [Fact]
         public async Task DeleteAndSave_RemovesTheLabelFromEveryFile()

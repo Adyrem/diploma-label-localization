@@ -200,6 +200,7 @@ namespace BE.LabelExtension.Core.Store
             }
 
             IReadOnlyList<ModelInfo> models = this.discovery.FindModels(directories, this.messages, cancellationToken);
+            TimeSpan modelsFound = stopwatch.Elapsed;
             var request = new LabelLoadRequest(models, directories, settings.LoadLanguages, this.messages);
 
             var results = new List<LabelSourceResult>();
@@ -211,6 +212,7 @@ namespace BE.LabelExtension.Core.Store
                 results.Add(result);
             }
 
+            TimeSpan filesRead = stopwatch.Elapsed;
             Snapshot next = Merge(models, results, settings.LoadLanguages.ToList(), this.messages);
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -225,11 +227,14 @@ namespace BE.LabelExtension.Core.Store
                 next.Seal();
                 Volatile.Write(ref this.snapshot, next);
             }
+            TimeSpan merged = stopwatch.Elapsed;
             this.watcher.Start(next.WatchedFiles);
 
+            // The phases show where a load on a slow system spends its time (D2).
+            string phases = $"models {modelsFound.TotalSeconds:0.0} s, files {(filesRead - modelsFound).TotalSeconds:0.0} s, merge {(merged - filesRead).TotalSeconds:0.0} s";
             this.messages.Report(
                 MessageSeverity.Message,
-                $"{next.Index.Count} labels loaded from {next.DocumentCount} files of {next.LabelFiles.Count} label files ({next.LabelFiles.Count(f => f.IsCompiled)} of them only compiled) in {models.Count} models, in {stopwatch.Elapsed.TotalSeconds:0.0} s. {DescribeMemory(managedBefore)}");
+                $"{next.Index.Count} labels loaded from {next.DocumentCount} files of {next.LabelFiles.Count} label files ({next.LabelFiles.Count(f => f.IsCompiled)} of them only compiled) in {models.Count} models, in {stopwatch.Elapsed.TotalSeconds:0.0} s ({phases}). {DescribeMemory(managedBefore)}");
             this.Changed?.Invoke(this, EventArgs.Empty);
         }
 
@@ -267,6 +272,8 @@ namespace BE.LabelExtension.Core.Store
             var index = new Dictionary<string, Label>(StringComparer.Ordinal);
             int duplicates = 0;
             string? duplicateExample = null;
+            int notStrict = 0;
+            var notStrictCharacters = new List<char>();
             foreach (LabelDocument document in documents)
             {
                 int invalid = 0;
@@ -284,6 +291,17 @@ namespace BE.LabelExtension.Core.Store
                     {
                         label = new Label(id, document.LabelFile);
                         index.Add(id.FullId, label);
+                        if (!id.IsStrict)
+                        {
+                            notStrict++;
+                            foreach (char character in LabelId.CharactersOutsideStrictForm(id))
+                            {
+                                if (!notStrictCharacters.Contains(character))
+                                {
+                                    notStrictCharacters.Add(character);
+                                }
+                            }
+                        }
                     }
 
                     string text = label.Share(entry.Text);
@@ -306,6 +324,16 @@ namespace BE.LabelExtension.Core.Store
                 messages.Report(MessageSeverity.Warning, (duplicates == 1 ? "1 translation exists" : $"{duplicates} translations exist") + $" in more than one label file; the first one found is used, for example {duplicateExample}.");
             }
 
+            // Named by their characters only, so the message can leave the test environment.
+            if (notStrict > 0)
+            {
+                string characters = notStrictCharacters.Count == 0 ? "in another order of letters and digits" : "with " + string.Join(", ", notStrictCharacters.Select(Describe));
+                messages.Report(
+                    MessageSeverity.Message,
+                    (notStrict == 1 ? "1 label has an ID" : $"{notStrict} labels have an ID")
+                        + $" outside the form of letters, digits and underscore, {characters}. They are loaded and found by the search; in code the editor does not recognize them.");
+            }
+
             List<string> watched = documents
                 .Where(d => !d.LabelFile.IsReadOnly)
                 .Select(d => d.Path)
@@ -315,6 +343,9 @@ namespace BE.LabelExtension.Core.Store
         }
 
         private static string Key(string labelFile, string language) => labelFile + "|" + language;
+
+        private static string Describe(char character)
+            => character == ' ' ? "space" : character == '\t' ? "tab" : char.IsControl(character) ? $"U+{(int)character:X4}" : $"'{character}'";
 
         private sealed class Snapshot
         {
