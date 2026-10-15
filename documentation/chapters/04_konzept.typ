@@ -864,8 +864,8 @@ der Extension und der Kernlogik.
        geöffneter Designer meldet die Änderung danach und bietet an, das Element
        neu zu laden. Das Element muss vorher gespeichert sein, siehe die nächste
        Zeile. Die XML-Datei findet die Extension über Elementtyp und Elementname
-       aus dem Selection Tracking, die Stelle darin über den Namen des gewählten
-       Knotens. Ersetzt wird nur, wenn die Eigenschaft dort genau den angezeigten
+       aus dem Selection Tracking, die Stelle darin über den Namen der gewählten
+       Node. Ersetzt wird nur, wenn die Eigenschaft dort genau den angezeigten
        Text enthält. Ist die Stelle nicht eindeutig, bricht die Extension mit
        einer Meldung ab.],
       [Lesen belegt. Verhalten des Designers auf der Testumgebung beobachtet.
@@ -901,13 +901,13 @@ der Extension und der Kernlogik.
        X++-Editor und setzt den Cursor auf dasselbe Vorkommen der Label-ID, also
        auf das dritte, wenn die Fundstelle das dritte Vorkommen im Code des XML
        ist. Steht sie in einer Eigenschaft, öffnet die Extension das Element im
-       Designer, wählt den Knoten mit der Eigenschaft, etwa ein Feld einer Table,
+       Designer, wählt die Node mit der Eigenschaft, etwa ein Feld einer Table,
        und markiert die Eigenschaft im Properties Window. Gelingt das nicht, ist
        das Element trotzdem geöffnet, nur ohne Sprung an die Fundstelle.],
       [Ablage und Speichern auf der Unified Developer Experience der
        Testumgebung geprüft, auf der klassischen Entwicklungs-VM erst in D1. Wie
        die
-       Extension ein Element öffnet und darin einen Knoten und eine Eigenschaft
+       Extension ein Element öffnet und darin eine Node und eine Eigenschaft
        wählt, ist nicht untersucht. Eine Probe zeigt es in D1, abschliessend
        prüft es D2.],
 
@@ -1592,7 +1592,7 @@ Entwicklungs-VM. OA04 folgt erst nach Projektabschluss und hat keinen Testfall.
       [Alle Fundstellen mit Model, Datei, Zeile und Spalte. Ein Klick auf das
        Symbol einer Fundstelle im Code öffnet das Element im X++-Editor mit dem
        Cursor auf der Label-ID. Bei einer Fundstelle in einer Eigenschaft öffnet
-       sich das Element im Designer mit gewähltem Knoten und markierter
+       sich das Element im Designer mit gewählter Node und markierter
        Eigenschaft, mindestens aber das Element.],
       [FA04],
 
@@ -1738,7 +1738,7 @@ der Anzeige im Editor gehört.
       [Die Extension lädt in Visual Studio 2026 und öffnet ihr Tool Window. Ein
        absichtlich ausgelöster Fehler erscheint im Output Window, Visual Studio
        läuft weiter. Die Probe-Commands versuchen, ein Element an einer Stelle zu
-       öffnen, ungespeicherte Dokumente aufzulisten und zum gewählten Knoten im
+       öffnen, ungespeicherte Dokumente aufzulisten und zur gewählten Node im
        Designer die Stelle im XML zu finden. Sie melden das Ergebnis im Output
        Window.],
 
@@ -1837,7 +1837,7 @@ Unsicherheiten früh zeigen.
        die Metadaten-Konfiguration, einschliesslich eines Models mit nur
        kompilierten Ressourcen (TC25). Mit den Probe-Commands aus AP3.1 ein
        Element im X++-Editor und im Designer an einer Stelle öffnen,
-       ungespeicherte Elemente erkennen und zum gewählten Knoten die Stelle im
+       ungespeicherte Elemente erkennen und zur gewählten Node die Stelle im
        XML finden. Von Hand messen, wie lange eine Textsuche über die
        XML-Dateien aller Models dauert, und prüfen, wie ein geöffneter
        X++-Editor auf eine geänderte XML-Datei reagiert und welche Datei der

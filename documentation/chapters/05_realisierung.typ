@@ -1,4 +1,4 @@
-= Realisierung
+= Realisierung <realisierung>
 
 == Programmierumgebung und Richtlinien
 
@@ -99,60 +99,214 @@
 
 === Durchgänge auf der Testumgebung
 
-=== Testergebnisse
+#heading(outlined: false, level: 4)[D1]
+
+D1 lief am 08.10. und 09.10.2026 auf beiden Systemen der Testumgebung, mit dem
+Debug-Build und den Probe-Commands aus AP3.1. Auf dem System mit der Unified
+Developer Experience lief Visual Studio 2026. Auf der
+klassischen Entwicklungs-VM lief Visual Studio 2022, weil
+Visual Studio 2026 dort Probleme machte. Die Zeiten der Extension stammen aus ihren
+eigenen Meldungen, die des bestehenden Tools aus dessen Anzeige.
 
 #[
   #show figure: set align(left)
+  #set text(size: 9.5pt)
   #figure(
     table(
       align: left,
-      columns: (auto, 1fr, auto, auto),
+      columns: (0.8fr, 1.7fr, 1fr),
       table.header(
-        [*ID*], [*Beschreibung*], [*Status*], [*Referenz*],
+        [*Prüfpunkt*], [*Ergebnis*], [*Folge*],
       ),
-      [], [], [], [],
-      [], [], [], [],
-      [], [], [], [],
-      [], [], [], [],
-      [], [], [], [],
+      [Installation],
+      [Per Doppelklick auf das VSIX installiert.],
+      [Keine.],
+
+      [Fehlerbehandlung (TC22)],
+      [Ein absichtlich ausgelöster Fehler erschien im Output Window, Visual Studio
+       lief weiter.],
+      [Keine.],
+
+      [Laden (TC25)],
+      [392'858 Labels aus 946 Label-Dateien in 185 Models in 12,2 s, darunter 126
+       Label-Dateien, die nur kompiliert vorliegen. Visual Studio blieb bedienbar.
+       Der Speicher von Visual Studio stieg um rund 1 GB.],
+      [Ablage der Labels in AP3.4 verkleinert, Nachmessung in D2.],
+
+      [Suchdauer],
+      [Je Suchmodus zwischen 64 und 405 ms, bei Anything like that ohne Beachtung
+       der Gross- und Kleinschreibung 623 bis 656 ms.],
+      [In AP3.4 optimiert, Nachmessung in D2.],
+
+      [Bestehendes Tool],
+      [Mit nur zwei geladenen Sprachen 23,5 s zum Laden, 282 MB Speicher und je
+       Suche 0,5 bis 1,1 s. Die Trefferzahlen stimmen mit der Extension überein.],
+      [Keine.],
+
+      [Lange Pfade],
+      [18 Label-Dateien von Microsoft mit Pfaden über 260 Zeichen waren nicht
+       lesbar und standen mit Namen im Output Window.],
+      [Behoben, Nachprüfung in D2.],
+
+      [Ungültige IDs],
+      [22 Labels in Dateien von Microsoft mit einem Leerzeichen vor dem
+       Gleichheitszeichen wurden als ungültig verworfen.],
+      [Behoben, Nachprüfung in D2.],
+
+      [Standardverzeichnis der klassischen VM],
+      [Die Packages liegen auf Laufwerk J:. Die Extension wählte das fast leere
+       Verzeichnis auf C: und lud keine Labels.],
+      [Behoben, kann manuell konfiguriert werden.],
+
+      [Element an einer Stelle öffnen],
+      [Die XML-Datei einer Klasse öffnet immer den Designer. Den Code zeigt erst die
+       Datei unter `XppSource`, dort springt der Cursor auf die gesuchte Reference.
+       Auf der klassischen VM liegt sie unter
+       `PackagesLocalDirectory\bin\XppSource`.],
+      [Grundlage für den Sprung an Fundstellen in AP3.7.],
+
+      [Ungespeicherte Elemente],
+      [Ungespeicherte Änderungen im X++-Editor und im Designer sind erkennbar.],
+      [Grundlage für das Schreiben in Elemente.],
+
+      [Gewählte Node im Designer],
+      [Die Auswahl liefert Name und Label eines Felds. Über den Namen findet sich
+       die Node in der XML-Datei eindeutig, über den Wert des Labels nicht.],
+      [Extraktion im Designer sucht über den Namen.],
+
+      [Geänderte XML-Datei bei geöffnetem Element],
+      [Der X++-Editor bietet das Neuladen an. Hat das Element ungespeicherte
+       Änderungen und wird das Neuladen abgelehnt, überschreibt das nächste
+       Speichern die Änderung von aussen.],
+      [Bestätigt die Regel, nie in Elemente mit ungespeicherten Änderungen zu
+       schreiben.],
+
+      [Textsuche über die XML-Dateien],
+      [Über alle 185 Models mit rund 199'000 Dateien und 1,9 GB dauerte sie 24 bis
+       56 s, über die eigenen Models 0,2 bis 0,3 s. Jede Element-Datei liegt
+       zweimal vor, einmal als Ausgabe des Builds.],
+      [Grundlage für den Umfang der Verwendungssuche in AP3.7.],
     ),
-    caption: [Übersicht Testergebnisse (eigene Darstellung)]
-  ) <testergebnisse_uebersicht>
+    caption: [Ergebnisse von D1 (eigene Darstellung)]
+  ) <d1_ergebnisse>
 ]
+
+#heading(outlined: false, level: 4)[D2]
+
+D2 lief am 15.10.2026 auf beiden Systemen der Testumgebung, mit dem Debug-Build
+auf dem Stand von AP3.7. Die klassische Entwicklungs-VM war eine andere als in D1
+und hatte Visual Studio 2026. Für die schreibenden Testfälle wurden in einem
+beschreibbaren Model ein Test-Label, eine Klasse und ein Datentyp angelegt und am
+Ende wieder gelöscht.
 
 #[
   #show figure: set align(left)
+  #set text(size: 9.5pt)
   #figure(
     table(
-      columns: (auto, 1fr),
-      [*ID*], [TC01],
-      [*Beschreibung*], [],
-      [*Vorgehen*], [],
-      [*Erwartetes Ergebnis*], [],
-      [*Tatsächliches Ergebnis*], [],
-      [*Status*], [],
-      [*Referenz*], [],
+      align: left,
+      columns: (0.8fr, 1.7fr, 1fr),
+      table.header(
+        [*Prüfpunkt*], [*Ergebnis*], [*Folge*],
+      ),
+      [Laden],
+      [392'949 Labels aus 946 Label-Dateien in 185 Models in 16,2 s, in D1 waren
+       es 12,2 s. Die 18 Label-Dateien mit langen Pfaden waren jetzt lesbar.],
+      [Auf dem privaten Gerät lädt der Stand von D2 eine gleich grosse Menge
+       synthetischer Labels schneller als der von D1. D3 misst die Ladezeit
+       nochmals, aufgeteilt nach Phasen.],
+
+      [Speicher],
+      [Der Speicher von Visual Studio stieg beim Laden um 963 MB, in D1 um rund
+       1 GB.],
+      [Keine.],
+
+      [Suchdauer],
+      [Je Suchmodus zwischen 85 und 301 ms. Der langsamste Modus, Anything like
+       that ohne Beachtung der Gross- und Kleinschreibung, brauchte in D1 noch 623
+       bis 656 ms.],
+      [Alle Modi unter 500 ms, Messung mit TC35 in D4.],
+
+      [Ungültige IDs],
+      [Die Extension verwarf noch 13 Labels von Microsoft als ungültig, in D1
+       waren es 22. Sie liess in einer ID nur Buchstaben, Ziffern und Unterstrich
+       zu, das bestehende Tool jedes Zeichen.],
+      [Die Extension lädt solche Labels jetzt wie das bestehende Tool,
+       Nachprüfung in D3.],
+
+      [Shortcuts],
+      [Nur Strg+Shift+Alt+S ist bereits belegt, und zwar nur im Scope
+       `VC Image Editor`. Überall sonst gilt der Shortcut der Extension. Search
+       Label und Open in Label Window stehen mit ihren Shortcuts im Kontextmenü
+       des X++-Editors.],
+      [Keine, die Shortcuts bleiben.],
+
+      [Tooltip (TC26)],
+      [Der Tooltip zeigt unter dem Eintrag der Developer Tools alle Sprachen,
+       markiert fehlende Übersetzungen und meldet unbekannte IDs, auch bei der
+       alten Form. Der Eintrag der Extension erschien aber doppelt.],
+      [Behoben, Nachprüfung in D3.],
+
+      [Inline-Anzeige (TC27)],
+      [Die Anzeige stört die Referenzanzeige der Developer Tools nicht. Aus- und
+       Einschalten wirkt sofort und bleibt nach einem Neustart erhalten.],
+      [Keine.],
+
+      [Suche aus dem Editor (TC28)],
+      [Open in Label Window öffnet das Label in der Detailansicht. Search Label
+       sucht den markierten Text, ohne Markierung den ganzen String.],
+      [Keine.],
+
+      [Verwendungssuche (TC29)],
+      [Die Suche fand alle Fundstellen. Ein Klick auf eine Fundstelle im Code
+       öffnete auf der Unified Developer Experience den Designer statt des
+       X++-Editors, weil die Extension die `.xpp`-Datei im falschen Ordner
+       suchte. Fundstellen in Eigenschaften öffneten das Element.],
+      [Behoben, Nachprüfung in D3.],
+
+      [Verschieben mit Referenzen (TC30)],
+      [Für das ungespeicherte Element kam die Rückfrage. Die Referenzen wurden in
+       beiden Fällen umgestellt und blieben nach dem Speichern im X++-Editor
+       erhalten.],
+      [Keine.],
+
+      [Rückfrage beim Beenden],
+      [Beim Beenden von Visual Studio fragte die Extension nach ungespeicherten
+       Labels.],
+      [Die Extension fragt jetzt auch beim Schliessen des Tool Window nach.
+       Nachprüfung in D3.],
+
+      [Darstellung des Tool Window],
+      [Bei vielen Treffern fehlte die senkrechte Scroll bar der Trefferliste. Der
+       Button Go to überlappte mit der Spalte Model. Der Tooltip einer Fundstelle
+       zeigte bei langen Zeilen, etwa in Reports, die ganze Zeile. Unten
+       angedockt, also breit und niedrig, war das Tool Window kaum brauchbar.],
+      [Behoben. Ein neuer Schalter stellt Trefferliste und Details nebeneinander.
+       Nachprüfung in D3.],
+
+      [Anpassungen der Bedienung],
+      [Die Spalten der Trefferliste sollen sich per Klick sortieren lassen. Nach
+       dem Verschieben im Suchmodus Label id soll die Trefferliste das neue Label
+       zeigen.],
+      [Umgesetzt, Nachprüfung in D3.],
+
+      [Anpassungen der Inline-Anzeige],
+      [Die Inline-Anzeige soll Sprachen in konfigurierbarer Reihenfolge anzeigen
+       und die Anzahl der gepflegten Übersetzungen weglassen können.],
+      [Umgesetzt mit zwei neuen Optionen, Nachprüfung in D3.],
+
+      [Klassische VM],
+      [Die Extension fand das Standardverzeichnis auf K: selbst und lud 391'535
+       Labels aus 905 Label-Dateien in 30,4 s. Tooltip und Inline-Anzeige
+       verhielten sich wie auf der Unified Developer Experience. Ein Klick auf
+       eine Fundstelle im Code öffnete den X++-Editor an der richtigen Stelle.],
+      [Keine.],
     ),
-    caption: [Testergebnis TC01 (eigene Darstellung)]
-  ) <tc_01>
+    caption: [Ergebnisse von D2 (eigene Darstellung)]
+  ) <d2_ergebnisse>
 ]
 
-#[
-  #show figure: set align(left)
-  #figure(
-    table(
-      columns: (auto, 1fr),
-      [*ID*], [TC02],
-      [*Beschreibung*], [],
-      [*Vorgehen*], [],
-      [*Erwartetes Ergebnis*], [],
-      [*Tatsächliches Ergebnis*], [],
-      [*Status*], [],
-      [*Referenz*], [],
-    ),
-    caption: [Testergebnis TC02 (eigene Darstellung)]
-  ) <tc_02>
-]
+=== Testergebnisse
 
 == Zielerreichung
 

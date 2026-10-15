@@ -138,8 +138,13 @@ Unterschrift:
       [Analysieren und Überarbeiten der Kapiteltexte nach meinen inhaltlichen
        Vorgaben, Erstellen der Diagramme als PlantUML-Quelltext, Recherche zu den
        Schnittstellen von Visual Studio und Dynamics 365.],
-      [@initialisierung, @konzept, Abkürzungsverzeichnis, Glossar, sämtliche
-       Abbildungen ausser den Screenshots],
+      [@initialisierung, @konzept, @realisierung, Abkürzungsverzeichnis, Glossar,
+       sämtliche Abbildungen ausser den Screenshots],
+      [Claude Code (Anthropic)],
+      [Generieren des Quellcodes der Extension und der Unit Tests nach dem Konzept
+       in einer eigenen Session, mit Rückfragen und Befunden an mich. Die
+       Durchgänge auf der Testumgebung habe ich selbst ausgeführt.],
+      [Quellcode im Repository, @realisierung],
       [Claude Code (Anthropic)],
       [Durchführung der Machbarkeitsstudie zum Extension-Modell in einer eigenen
        Session, Bau der fünf Prototypen und Erstellen des Befundprotokolls.],
@@ -236,8 +241,8 @@ Unterschrift:
       [Datenbank von Dynamics 365, die beim Build gefüllt wird und festhält, wo ein
        Element verwendet wird. Visual Studio nutzt sie für die Referenzsuche.],
       [Designer],
-      [Fenster der Developer Tools, das ein Element als Baum seiner Knoten zeigt,
-       etwa die Felder einer Table. Die Eigenschaften des gewählten Knotens stehen
+      [Fenster der Developer Tools, das ein Element als Baum seiner Nodes zeigt,
+       etwa die Felder einer Table. Die Eigenschaften der gewählten Node stehen
        im Properties Window.],
       [Developer Tools],
       [Erweiterung von Microsoft, die Visual Studio für die Entwicklung mit
@@ -323,7 +328,7 @@ Unterschrift:
        Elements anzeigen, etwa nach View code auf einer Klasse, Table oder Form.
        Es arbeitet auf einer `.xpp`-Datei im Ordner XppSource und bringt die
        Einfärbung und den Tooltip der Developer Tools mit. Nicht dazu gehören der
-       Designer mit den Knoten eines Elements und die `.xpp`-Textdateien, die auf
+       Designer mit den Nodes eines Elements und die `.xpp`-Textdateien, die auf
        dem privaten Gerät den X++-Editor im Debug-Build ersetzen.],
     ),
     caption: [Glossar (eigene Darstellung)]
