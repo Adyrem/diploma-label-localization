@@ -33,6 +33,7 @@
   <ItemGroup>
     <!-- Not referenced automatically in SDK-style .NET Framework projects, needed for MEF. -->
     <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.Net.Http" />
     <!-- ProtectedData, the Data Protection API for the API key (NFA06). -->
     <Reference Include="System.Security" />
     <!-- Property grid of the options page. -->

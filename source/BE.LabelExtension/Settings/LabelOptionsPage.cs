@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using BE.LabelExtension.Core.Models;
 using BE.LabelExtension.Core.Store;
+using BE.LabelExtension.TranslationServices;
 using Microsoft.VisualStudio.Shell;
 
 namespace BE.LabelExtension.Settings
@@ -175,7 +176,7 @@ namespace BE.LabelExtension.Settings
 
             public override bool GetStandardValuesExclusive(ITypeDescriptorContext? context) => true;
 
-            public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext? context) => new(new[] { "DeepL" });
+            public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext? context) => new(TranslationServiceCatalog.Names.ToArray());
         }
     }
 }

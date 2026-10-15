@@ -2,6 +2,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.Threading;
 using BE.LabelExtension.Core.Store;
+using BE.LabelExtension.Elements;
 using BE.LabelExtension.Settings;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
@@ -11,13 +12,14 @@ using Task = System.Threading.Tasks.Task;
 namespace BE.LabelExtension
 {
     /// <summary>
-    /// The classic part of the extension (F5): the options page (FA11) and the question about
-    /// unsaved labels when Visual Studio closes (fachliche Regel Speichern). Everything else
-    /// runs in the new model, see <see cref="LabelExtension"/>.
+    /// The classic part of the extension (F5): the options page (FA11), the question about
+    /// unsaved labels when Visual Studio closes (fachliche Regel Speichern) and following the
+    /// selection of the designer (FA09). Everything else runs in the new model, see
+    /// <see cref="LabelExtension"/>.
     /// </summary>
     /// <remarks>
     /// The package loads in the background once the shell is ready, so that it can answer
-    /// QueryClose. It does no work of its own while loading.
+    /// QueryClose. While loading it only registers for the selection events.
     /// </remarks>
     [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
     [Guid(PackageGuidString)]
@@ -36,6 +38,25 @@ namespace BE.LabelExtension
         protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
             await base.InitializeAsync(cancellationToken, progress);
+
+            // The designer selection is followed from the start, so the extraction knows the
+            // node selected before the tool window opened (FA09).
+            await DesignerSelection.StartAsync(this, cancellationToken);
+        }
+
+        /// <inheritdoc />
+        protected override void Dispose(bool disposing)
+        {
+            // Visual Studio disposes the package on the main thread when it closes; elsewhere
+            // the registration simply ends with the process.
+            if (disposing && ThreadHelper.CheckAccess())
+            {
+#pragma warning disable VSTHRD010 // Checked with CheckAccess just above.
+                DesignerSelection.Stop();
+#pragma warning restore VSTHRD010
+            }
+
+            base.Dispose(disposing);
         }
 
         /// <summary>

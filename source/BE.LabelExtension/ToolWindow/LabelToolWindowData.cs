@@ -114,6 +114,14 @@ namespace BE.LabelExtension.ToolWindow
         [DataMember]
         public AsyncCommand FindReferencesCommand { get; set; } = null!;
 
+        /// <summary>Turns the string at the cursor or a property of the node selected in the designer into a new label (FA09).</summary>
+        [DataMember]
+        public AsyncCommand ExtractCommand { get; set; } = null!;
+
+        /// <summary>Asks the translation service again for the languages of the new label (FA10).</summary>
+        [DataMember]
+        public AsyncCommand TranslateCommand { get; set; } = null!;
+
         /// <summary>Sorts the hit list by the column whose key is the parameter.</summary>
         [DataMember]
         public AsyncCommand SortCommand { get; set; } = null!;

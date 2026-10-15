@@ -56,6 +56,7 @@ Ohne `/updateconfiguration` registriert Visual Studio die Menüs, Commands und d
 | New Label | Ctrl+Shift+Alt+N |
 | Search Label (Kontextmenü einer `.xpp`-Datei) | Ctrl+Shift+Alt+L |
 | Open in Label Window (Kontextmenü einer `.xpp`-Datei) | Ctrl+Shift+Alt+E |
+| Extract to Label (Kontextmenü einer `.xpp`-Datei; im Designer der Knopf Extract im Tool Window) | Ctrl+Shift+Alt+X |
 
 Umbelegen lassen sie sich unter *Tools > Options > Environment > Keyboard*, die Commands heissen dort `BE.LabelExtension.Commands.*`.
 

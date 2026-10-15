@@ -177,6 +177,9 @@
                     Style="{DynamicResource {x:Static styles:VsResourceKeys.ButtonStyleKey}}" />
             <Button Content="Cancel" Command="{Binding CancelNewCommand}" Margin="0,0,4,2" MinWidth="60" Padding="8,2"
                     Style="{DynamicResource {x:Static styles:VsResourceKeys.ButtonStyleKey}}" />
+            <Button Content="Translate" Command="{Binding TranslateCommand}" Margin="0,0,4,2" MinWidth="60" Padding="8,2"
+                    ToolTip="Replaces the other languages with suggestions of the translation service for the text in the source language"
+                    Style="{DynamicResource {x:Static styles:VsResourceKeys.ButtonStyleKey}}" />
           </WrapPanel>
           <Grid DockPanel.Dock="Top" Margin="0,0,0,2">
             <Grid.ColumnDefinitions>
@@ -365,7 +368,10 @@
       <ComboBox MinWidth="120" Margin="0,0,4,2" ItemsSource="{Binding LabelFiles}" SelectedIndex="{Binding SelectedLabelFileIndex, Mode=TwoWay}"
                 AutomationProperties.Name="Label file"
                 Style="{DynamicResource {x:Static styles:VsResourceKeys.ComboBoxStyleKey}}" />
-      <Button Content="New" Command="{Binding NewCommand}" Margin="0,0,10,2" MinWidth="60" Padding="8,2"
+      <Button Content="New" Command="{Binding NewCommand}" Margin="0,0,4,2" MinWidth="60" Padding="8,2"
+              Style="{DynamicResource {x:Static styles:VsResourceKeys.ButtonStyleKey}}" />
+      <Button Content="Extract" Command="{Binding ExtractCommand}" Margin="0,0,10,2" MinWidth="60" Padding="8,2"
+              ToolTip="New label from the string at the cursor in the X++ editor, or from a property of the node selected in the designer"
               Style="{DynamicResource {x:Static styles:VsResourceKeys.ButtonStyleKey}}" />
       <Button Content="Settings" Command="{Binding SettingsCommand}" Margin="0,0,10,2" MinWidth="60" Padding="8,2"
               Style="{DynamicResource {x:Static styles:VsResourceKeys.ButtonStyleKey}}" />

@@ -7,6 +7,7 @@ using BE.LabelExtension.Diagnostics;
 using BE.LabelExtension.Labels;
 using BE.LabelExtension.Threading;
 using BE.LabelExtension.ToolWindow;
+using BE.LabelExtension.TranslationServices;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.Extensibility;
 using Microsoft.VisualStudio.Extensibility.Commands;
@@ -72,6 +73,7 @@ namespace BE.LabelExtension
                 provider.GetRequiredService<LabelStore>(),
                 provider.GetRequiredService<IMessageSink>()));
             serviceCollection.AddSingleton<LabelOperations>();
+            serviceCollection.AddSingleton<TranslationServiceCatalog>();
 
             // One controller for the tool window and the shortcuts.
             serviceCollection.AddSingleton<LabelWindowController>();

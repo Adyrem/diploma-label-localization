@@ -7,6 +7,7 @@
   "BE.LabelExtension.NewLabelCommand.DisplayName": "New Label",
   "BE.LabelExtension.SearchLabelCommand.DisplayName": "Search Label",
   "BE.LabelExtension.OpenInLabelWindowCommand.DisplayName": "Open in Label Window",
+  "BE.LabelExtension.ExtractToLabelCommand.DisplayName": "Extract to Label",
   "BE.LabelExtension.ProbeOpenElementCommand.DisplayName": "Probe: Open element at a location",
   "BE.LabelExtension.ProbeUnsavedDocumentsCommand.DisplayName": "Probe: List unsaved documents",
   "BE.LabelExtension.ProbeDesignerSelectionCommand.DisplayName": "Probe: Find selected designer node in XML",

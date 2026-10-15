@@ -12,10 +12,10 @@ using Microsoft.VisualStudio.Extensibility.Shell;
 namespace BE.LabelExtension.Commands
 {
     // The commands in the context menu of the X++ editor (concept, GUI design): Search label
-    // (FA07) and Open in label window (FA08); Extract to label follows in AP3.8. They stand in
-    // the group of Go To Definition and show only for .xpp files, which the X++ editor shows.
-    // Their shortcuts, Ctrl+Shift+Alt with L and E, are free in Visual Studio 2026 like the
-    // others of the extension. The configurations are evaluated when building and may call no
+    // (FA07), Open in label window (FA08) and Extract to label (FA09). They stand in the group
+    // of Go To Definition and show only for .xpp files, which the X++ editor shows. Their
+    // shortcuts, Ctrl+Shift+Alt with L, E and X, are free in Visual Studio 2026 like the others
+    // of the extension (D2). The configurations are evaluated when building and may call no
     // own methods, so the placement stands in each: guidSHLMainMenu and
     // IDG_VS_CODEWIN_NAVIGATETOLOCATION (0x02B1) of vsshlids.h.
 
@@ -37,7 +37,10 @@ namespace BE.LabelExtension.Commands
         /// <returns>The text.</returns>
         public static string Selected(ITextViewSnapshot view) => view.Selection.IsEmpty ? string.Empty : Text(view.Selection.Extent);
 
-        private static string Text(TextRange range)
+        /// <summary>The text of a range of a document.</summary>
+        /// <param name="range">The range.</param>
+        /// <returns>The text.</returns>
+        public static string Text(TextRange range)
         {
             var characters = new char[range.Length];
             for (int i = 0; i < characters.Length; i++)
@@ -171,5 +174,36 @@ namespace BE.LabelExtension.Commands
                     }
                 },
                 cancellationToken);
+    }
+
+    /// <summary>
+    /// Turns the string literal at the cursor into a new label (FA09). In the designer, the
+    /// button Extract of the tool window does the same for a label property of the selected
+    /// node.
+    /// </summary>
+    [VisualStudioContribution]
+    internal sealed class ExtractToLabelCommand : Command
+    {
+        private readonly LabelWindowController controller;
+
+        /// <summary>Creates the command.</summary>
+        /// <param name="controller">Shows the new label and replaces the string once it is created.</param>
+        public ExtractToLabelCommand(LabelWindowController controller)
+        {
+            this.controller = controller;
+        }
+
+        /// <inheritdoc />
+        public override CommandConfiguration CommandConfiguration => new("%BE.LabelExtension.ExtractToLabelCommand.DisplayName%")
+        {
+            Placements = [CommandPlacement.VsctParent(new Guid("d309f791-903f-11d0-9efc-00a0c911004f"), 0x02B1, 0x0102)],
+            VisibleWhen = ActivationConstraint.ClientContext(ClientContextKey.Shell.ActiveEditorFileName, @"\.[xX][pP][pP]$"),
+            Icon = new(ImageMoniker.KnownValues.ExtractMethod, IconSettings.IconAndText),
+            Shortcuts = [new CommandShortcutConfiguration(ModifierKey.ControlShiftLeftAlt, Key.X)],
+        };
+
+        /// <inheritdoc />
+        public override Task ExecuteCommandAsync(IClientContext context, CancellationToken cancellationToken)
+            => this.controller.ExtractAsync(context, cancellationToken);
     }
 }

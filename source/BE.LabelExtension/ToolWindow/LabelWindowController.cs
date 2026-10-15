@@ -17,6 +17,7 @@ using BE.LabelExtension.Elements;
 using BE.LabelExtension.Labels;
 using BE.LabelExtension.Settings;
 using BE.LabelExtension.Threading;
+using BE.LabelExtension.TranslationServices;
 using Microsoft.VisualStudio.Extensibility;
 using Microsoft.VisualStudio.Extensibility.Editor;
 using Microsoft.VisualStudio.Extensibility.Shell;
@@ -28,6 +29,8 @@ namespace BE.LabelExtension.ToolWindow
     /// Behaviour of the tool window (FA01 to FA03, FA13, FA14): searches while the user types,
     /// shows the selected label with its translations, applies changes to the label store and
     /// saves them, creates, deletes, copies, moves and replaces labels and inserts their ID.
+    /// The extraction and the suggested translations (FA09, FA10) are in the second part of the
+    /// class.
     /// </summary>
     /// <remarks>
     /// <para>One instance serves the tool window and the shortcuts, so both act on the label
@@ -36,7 +39,7 @@ namespace BE.LabelExtension.ToolWindow
     /// row, and a term of one letter finds hundreds of thousands; the status line names the
     /// total.</para>
     /// </remarks>
-    internal sealed class LabelWindowController : IDisposable
+    internal sealed partial class LabelWindowController : IDisposable
     {
         /// <summary>The most hits the list shows.</summary>
         public const int MaxRows = 1000;
@@ -82,6 +85,7 @@ namespace BE.LabelExtension.ToolWindow
         private readonly ErrorBoundary errorBoundary;
         private readonly IMessageSink messages;
         private readonly ExtensionTasks tasks;
+        private readonly TranslationServiceCatalog translators;
         private readonly object gate = new();
         private CancellationTokenSource? searchCancellation;
         private CancellationTokenSource? referenceSearch;
@@ -106,7 +110,8 @@ namespace BE.LabelExtension.ToolWindow
         /// <param name="errorBoundary">Reports errors of the actions.</param>
         /// <param name="messages">Receives problems with single inputs.</param>
         /// <param name="tasks">Runs the work nobody waits for.</param>
-        public LabelWindowController(VisualStudioExtensibility extensibility, LabelStore store, LabelLoader loader, LabelChanges changes, LabelOperations operations, ErrorBoundary errorBoundary, IMessageSink messages, ExtensionTasks tasks)
+        /// <param name="translators">The translation services to suggest translations with.</param>
+        public LabelWindowController(VisualStudioExtensibility extensibility, LabelStore store, LabelLoader loader, LabelChanges changes, LabelOperations operations, ErrorBoundary errorBoundary, IMessageSink messages, ExtensionTasks tasks, TranslationServiceCatalog translators)
         {
             this.extensibility = extensibility;
             this.store = store;
@@ -116,6 +121,8 @@ namespace BE.LabelExtension.ToolWindow
             this.errorBoundary = errorBoundary;
             this.messages = messages;
             this.tasks = tasks;
+            this.translators = translators;
+            DesignerSelection.ReportError = exception => errorBoundary.Report("Follow the designer selection", exception);
 
             this.Data = new LabelToolWindowData(Modes.Select(m => m.Name).ToList(), DefaultMode)
             {
@@ -133,6 +140,8 @@ namespace BE.LabelExtension.ToolWindow
                 ReplaceCommand = new AsyncCommand((_, cancellationToken) => this.ReplaceAsync(cancellationToken)),
                 FindReferencesCommand = new AsyncCommand((_, _) => this.FindReferencesOfDetailAsync()),
                 SortCommand = new AsyncCommand((parameter, _) => this.SortAsync(parameter as string)),
+                ExtractCommand = new AsyncCommand((_, context, cancellationToken) => this.ExtractAsync(context, cancellationToken)),
+                TranslateCommand = new AsyncCommand((_, _) => this.TranslateAsync()),
             };
             this.UpdateCommands();
             this.Data.PropertyChanged += this.OnDataChanged;
@@ -184,7 +193,9 @@ namespace BE.LabelExtension.ToolWindow
                 save ? "Save and insert label ID" : "Insert label ID",
                 async token =>
                 {
-                    if (save && this.isDraft && !await this.CreateDraftAsync(token))
+                    // An extracted text gets the ID where it stood, not at the cursor.
+                    bool extracting = this.extraction != null;
+                    if (save && this.isDraft && (!await this.CreateDraftAsync(token) || extracting))
                     {
                         return;
                     }
@@ -234,7 +245,9 @@ namespace BE.LabelExtension.ToolWindow
                 return Task.CompletedTask;
             }
 
+            this.extraction = null;
             this.ShowDraft(file, this.Data.SearchText.Trim(), null);
+            this.SuggestTranslations();
             return Task.CompletedTask;
         }
 
@@ -610,13 +623,15 @@ namespace BE.LabelExtension.ToolWindow
             string info = $"Label file {file.Name}, model {file.Model.Name}"
                 + (label.IsDeleted ? ", deleted; it leaves the label files when you save" : file.IsReadOnly ? $", {ReadOnlyReason(file)}" : string.Empty);
             this.isDraft = false;
+            this.extraction = null;
             this.detailLabel = label;
             this.Data.Detail = new LabelDetailData(label.Id.FullId, info, rows, isDraft: false);
             this.UpdateCommands();
         }
 
         // A new label: every language to create, those the label file lacks disabled. Texts
-        // already entered stay when the developer picks another label file.
+        // already entered, and whether they are suggestions, stay when the developer picks
+        // another label file.
         private void ShowDraft(LabelFile file, string text, IReadOnlyList<TranslationRow>? entered)
         {
             var rows = new List<TranslationRow>();
@@ -624,18 +639,27 @@ namespace BE.LabelExtension.ToolWindow
             {
                 TranslationRow? before = entered?.FirstOrDefault(r => string.Equals(r.Language, language, StringComparison.OrdinalIgnoreCase));
                 bool hasFile = file.GetPath(language) != null;
-                rows.Add(new TranslationRow(
+                bool suggested = hasFile && before != null && before.IsSuggested;
+                var row = new TranslationRow(
                     language,
                     before?.Text ?? text,
                     before?.Comment ?? string.Empty,
                     isReadOnly: !hasFile,
                     hasFile,
-                    hasFile ? string.Empty : "the label file does not exist in this language; the label is created without it"));
+                    suggested ? before!.Hint : hasFile ? string.Empty : "the label file does not exist in this language; the label is created without it")
+                {
+                    IsSuggested = suggested,
+                };
+                row.PropertyChanged += (_, e) => this.OnDraftEdited(row, e.PropertyName);
+                rows.Add(row);
             }
 
+            string info = $"New label in label file {file.Name}, model {file.Model.Name}. It gets its ID when you create it."
+                + (this.extraction == null ? string.Empty : " " + this.extraction.Description);
             this.isDraft = true;
             this.detailLabel = null;
-            this.Data.Detail = new LabelDetailData(string.Empty, $"New label in label file {file.Name}, model {file.Model.Name}. It gets its ID when you create it.", rows, isDraft: true);
+            this.draftGeneration++;
+            this.Data.Detail = new LabelDetailData(string.Empty, info, rows, isDraft: true);
             this.UpdateCommands();
         }
 
@@ -702,6 +726,8 @@ namespace BE.LabelExtension.ToolWindow
                 return false;
             }
 
+            PendingExtraction? pending = this.extraction;
+
             var texts = this.Data.Detail.Translations.Select(r => new LabelText(r.Language, r.Text, r.Comment)).ToList();
             Label? label;
             try
@@ -720,6 +746,11 @@ namespace BE.LabelExtension.ToolWindow
             }
 
             this.ShowDetail(label);
+            if (pending != null)
+            {
+                await this.CompleteExtractionAsync(pending, label, cancellationToken);
+            }
+
             return true;
         }
 
@@ -728,6 +759,7 @@ namespace BE.LabelExtension.ToolWindow
             if (this.isDraft)
             {
                 this.isDraft = false;
+                this.extraction = null;
                 this.Data.Detail = LabelDetailData.Empty;
                 this.UpdateCommands();
             }
@@ -997,6 +1029,8 @@ namespace BE.LabelExtension.ToolWindow
             this.Data.SaveAndInsertCommand.CanExecute = idle && (usable || this.isDraft);
             this.Data.InsertCommand.CanExecute = idle && usable;
             this.Data.NewCommand.CanExecute = idle && target != null;
+            this.Data.ExtractCommand.CanExecute = idle;
+            this.Data.TranslateCommand.CanExecute = idle && this.isDraft;
             this.Data.CreateCommand.CanExecute = idle && this.isDraft && target != null;
             this.Data.CancelNewCommand.CanExecute = idle && this.isDraft;
             this.Data.DeleteCommand.CanExecute = idle && usable && !label!.LabelFile.IsReadOnly;

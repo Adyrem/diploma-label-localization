@@ -53,6 +53,7 @@ namespace BE.LabelExtension.ToolWindow
     {
         private string text;
         private string comment;
+        private string hint;
 
         /// <summary>Creates a row.</summary>
         /// <param name="language">The language.</param>
@@ -68,7 +69,7 @@ namespace BE.LabelExtension.ToolWindow
             this.comment = comment;
             this.IsReadOnly = isReadOnly;
             this.HasFile = hasFile;
-            this.Hint = hint;
+            this.hint = hint;
         }
 
         /// <summary>The language.</summary>
@@ -105,8 +106,21 @@ namespace BE.LabelExtension.ToolWindow
         [DataMember]
         public bool HasFile { get; }
 
-        /// <summary>Why the translation cannot be changed, or that it is missing; empty otherwise.</summary>
+        /// <summary>
+        /// Why the translation cannot be changed, that it is missing, or that the text is a
+        /// suggestion of the translation service; empty otherwise.
+        /// </summary>
         [DataMember]
-        public string Hint { get; }
+        public string Hint
+        {
+            get => this.hint;
+            set => this.SetProperty(ref this.hint, value ?? string.Empty);
+        }
+
+        /// <summary>
+        /// Whether the text of a new label is a suggestion of the translation service, until the
+        /// developer changes it or creates the label (FA10).
+        /// </summary>
+        public bool IsSuggested { get; set; }
     }
 }
