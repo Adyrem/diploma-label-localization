@@ -62,6 +62,13 @@ namespace BE.LabelExtension.Editor
 #endif
         }
 
+#if DEBUG
+        /// <summary>Whether a buffer is a .xpp file opened as plain text, the stand-in for the X++ editor.</summary>
+        /// <param name="buffer">The text buffer.</param>
+        /// <returns>Whether it is the stand-in, never for X++ itself.</returns>
+        public static bool IsStandIn(ITextBuffer buffer) => !buffer.ContentType.IsOfType(XppContentType) && AppliesTo(buffer);
+#endif
+
         /// <summary>Creates the recognition for a text view.</summary>
         /// <param name="view">The view.</param>
         /// <param name="classifiers">Gives the classification of the view.</param>

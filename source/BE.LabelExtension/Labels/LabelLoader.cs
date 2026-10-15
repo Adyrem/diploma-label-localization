@@ -178,6 +178,7 @@ namespace BE.LabelExtension.Labels
                 ("Languages to load", settings.LoadLanguages),
                 ("Languages to create", settings.CreateLanguages),
                 ("Source language", string.IsNullOrEmpty(settings.SourceLanguage) ? Array.Empty<string?>() : new[] { settings.SourceLanguage }),
+                ("Inline display languages", settings.InlineLanguages),
             };
             foreach ((string field, IEnumerable<string?> codes) in fields)
             {
@@ -185,6 +186,12 @@ namespace BE.LabelExtension.Labels
                 {
                     this.messages.Report(MessageSeverity.Warning, $"{field}: \"{code}\" is not a language Windows knows, such as de or de-CH. The setting is kept as entered.");
                 }
+            }
+
+            // The inline display can only show what is loaded.
+            foreach (string code in settings.InlineLanguages.Where(l => LanguageCodes.IsPredefined(l) && !settings.LoadLanguages.Contains(l, StringComparer.OrdinalIgnoreCase)))
+            {
+                this.messages.Report(MessageSeverity.Warning, $"Inline display languages: \"{code}\" is not among the languages to load, so the inline display shows it as missing.");
             }
         }
 

@@ -38,6 +38,18 @@ namespace BE.LabelExtension.ToolWindow
             Placement = ToolWindowPlacement.DockedTo(SolutionExplorer),
         };
 
+        /// <summary>
+        /// Offers to save labels not yet saved, without holding up the window: it closes, the
+        /// question follows. Visual Studio calls this only when the developer closes the window.
+        /// </summary>
+        /// <param name="cancellationToken">Cancels hiding.</param>
+        /// <returns>A task that completes when the window may hide.</returns>
+        public override Task OnHideAsync(CancellationToken cancellationToken)
+        {
+            this.controller.OfferSaveOnClose();
+            return base.OnHideAsync(cancellationToken);
+        }
+
         /// <inheritdoc />
         public override Task<IRemoteUserControl> GetContentAsync(CancellationToken cancellationToken)
         {

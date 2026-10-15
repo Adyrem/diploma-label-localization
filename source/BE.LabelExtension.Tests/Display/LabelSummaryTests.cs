@@ -93,6 +93,15 @@ namespace BE.LabelExtension.Tests.Display
             Assert.Equal("Delivery address", summary.Lines.Single(l => l.Language == "en-US").Text);
         }
 
+        /// <summary>Wish from D2: the count can be left out, the translations stay.</summary>
+        [Fact]
+        public async Task InlineText_WithoutCount_StartsWithTheFirstLanguage()
+        {
+            await this.LoadAsync();
+
+            Assert.Equal("de: Lieferadresse des Kunden | en-US: Delivery address of the customer | it-CH missing", LabelSummary.InlineText(new[] { this.Summary("@BDM1:BDM110000016") }, showCount: false));
+        }
+
         /// <summary>Several labels in one line: each part starts with its ID.</summary>
         [Fact]
         public async Task InlineText_SeveralLabels_NamesEachId()

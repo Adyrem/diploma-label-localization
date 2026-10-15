@@ -33,6 +33,9 @@ namespace BE.LabelExtension.Core.Usages
         private const string LabelFileFolder = "AxLabelFile";
         private const string ReportFollowers = "&, +.)<";
 
+        // Characters of a long line shown before and after the ID.
+        internal const int ExcerptRadius = 60;
+
         /// <summary>The XML files of the elements of a model.</summary>
         /// <param name="model">The model.</param>
         /// <returns>The files; empty if the model folder cannot be read.</returns>
@@ -114,7 +117,7 @@ namespace BE.LabelExtension.Core.Usages
                 }
 
                 int lineEnd = text.IndexOf('\n', position);
-                string lineText = text.Substring(lineStart, (lineEnd < 0 ? text.Length : lineEnd) - lineStart).Trim();
+                string lineText = Excerpt(text.Substring(lineStart, (lineEnd < 0 ? text.Length : lineEnd) - lineStart), position - lineStart, labelId.Length);
                 bool inCode = code.Any(r => position >= r.Start && position < r.End);
                 usages.Add(new LabelUsage(model, path, line, position - lineStart + 1, lineText, inCode ? ++codeOccurrence : 0));
             }
@@ -203,6 +206,19 @@ namespace BE.LabelExtension.Core.Usages
 
             result.Append(text, copied, text.Length - copied);
             return result.ToString();
+        }
+
+        /// <summary>
+        /// The part of a line around a use, without leading and trailing spaces. A long line, as
+        /// in the design of a report, is cut to <see cref="ExcerptRadius"/> characters before and
+        /// after the ID, marked with an ellipsis (wish from D2).
+        /// </summary>
+        internal static string Excerpt(string line, int at, int length)
+        {
+            int start = Math.Max(0, at - ExcerptRadius);
+            int end = Math.Min(line.Length, at + length + ExcerptRadius);
+            string part = line.Substring(start, end - start).Trim();
+            return (start > 0 ? "\u2026" : string.Empty) + part + (end < line.Length ? "\u2026" : string.Empty);
         }
 
         /// <summary>

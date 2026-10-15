@@ -41,6 +41,18 @@ namespace BE.LabelExtension.Core.Store
         public bool InlineDisplay { get; set; } = true;
 
         /// <summary>
+        /// The languages the inline display shows, in this order; empty for the languages to load
+        /// (wish from D2). A language that is not loaded shows as missing.
+        /// </summary>
+        public IList<string> InlineLanguages { get; } = new List<string>();
+
+        /// <summary>Whether the inline display starts with the count, such as "4 of 5 translations" (wish from D2).</summary>
+        public bool InlineCount { get; set; } = true;
+
+        /// <summary>Whether the tool window shows the hit list beside the details instead of above them, for docking at the bottom (wish from D2).</summary>
+        public bool SideBySide { get; set; }
+
+        /// <summary>
         /// Splits a list of languages as entered, for example "de, en-US", into its languages,
         /// each once, ignoring case.
         /// </summary>
@@ -77,10 +89,13 @@ namespace BE.LabelExtension.Core.Store
                 TranslationService = this.TranslationService,
                 ProtectedApiKey = this.ProtectedApiKey,
                 InlineDisplay = this.InlineDisplay,
+                InlineCount = this.InlineCount,
+                SideBySide = this.SideBySide,
             };
             Copy(this.PackageDirectories, copy.PackageDirectories);
             Copy(this.LoadLanguages, copy.LoadLanguages);
             Copy(this.CreateLanguages, copy.CreateLanguages);
+            Copy(this.InlineLanguages, copy.InlineLanguages);
             return copy;
         }
 

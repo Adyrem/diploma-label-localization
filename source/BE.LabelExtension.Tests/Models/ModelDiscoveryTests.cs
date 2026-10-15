@@ -29,7 +29,8 @@ namespace BE.LabelExtension.Tests.Models
 
             MetadataConfiguration configuration = discovery.ReadConfiguration("Demo-10.0.2527.197");
             Assert.Equal(store, configuration.ModelStoreFolder);
-            Assert.Equal(Path.Combine(store, "XppSource"), configuration.DebugSourceFolder);
+            // As on the test environment, D2: the DebugSourceFolder is the model store itself.
+            Assert.Equal(store, configuration.DebugSourceFolder);
             Assert.Equal(framework, configuration.FrameworkDirectory);
             Assert.Equal(new[] { framework, reference }, configuration.ReferencePackagesPaths);
 

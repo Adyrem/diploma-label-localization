@@ -49,7 +49,7 @@ namespace BE.LabelExtension.Tests
 
             string json = "{\r\n"
                 + $"  \"ModelStoreFolder\": {Json(modelStoreFolder)},\r\n"
-                + $"  \"DebugSourceFolder\": {Json(modelStoreFolder == null ? null : Path.Combine(modelStoreFolder, "XppSource"))},\r\n"
+                + $"  \"DebugSourceFolder\": {Json(modelStoreFolder)},\r\n"
                 + $"  \"FrameworkDirectory\": {Json(frameworkDirectory)},\r\n"
                 + $"  \"ReferencePackagesPaths\": [ {string.Join(", ", references)} ],\r\n"
                 + "  \"SomeOtherSetting\": true\r\n"

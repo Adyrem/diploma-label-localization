@@ -149,6 +149,22 @@ namespace BE.LabelExtension.Tests.Usages
             Assert.Equal(new[] { "a", "c" }, ranges.Select(r => Xml.Substring(r.Start, r.End - r.Start)));
         }
 
+        /// <summary>Wish from D2: a long line shows only the part around the ID.</summary>
+        [Fact]
+        public void Excerpt_LongLine_CutsAroundTheId()
+        {
+            string line = new string('a', 200) + "=Labels!@BDM1:BDM110000003 & " + new string('b', 200);
+            int at = line.IndexOf("@BDM1", StringComparison.Ordinal);
+
+            string excerpt = LabelReferences.Excerpt(line, at, "@BDM1:BDM110000003".Length);
+
+            Assert.StartsWith("\u2026", excerpt);
+            Assert.EndsWith("\u2026", excerpt);
+            Assert.Contains("=Labels!@BDM1:BDM110000003 &", excerpt);
+            Assert.Equal(2 + (2 * LabelReferences.ExcerptRadius) + "@BDM1:BDM110000003".Length, excerpt.Length);
+            Assert.Equal("<Label>@SYS12345</Label>", LabelReferences.Excerpt("\t\t<Label>@SYS12345</Label>", 9, 9));
+        }
+
         public void Dispose() => this.packages.Dispose();
     }
 }

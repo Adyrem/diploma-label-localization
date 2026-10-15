@@ -34,7 +34,7 @@ namespace BE.LabelExtension.Core.Usages
         /// <summary>The column of the ID, starting at 1.</summary>
         public int Column { get; }
 
-        /// <summary>The line, without leading and trailing spaces.</summary>
+        /// <summary>The line, without leading and trailing spaces; a long line only around the ID.</summary>
         public string LineText { get; }
 
         /// <summary>

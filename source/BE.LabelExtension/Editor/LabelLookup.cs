@@ -39,6 +39,9 @@ namespace BE.LabelExtension.Editor
         /// <summary>Whether the inline display is switched on in the settings (FA06).</summary>
         public bool InlineDisplay => this.loader?.Settings.InlineDisplay ?? false;
 
+        /// <summary>Whether the inline display starts with the count of translations.</summary>
+        public bool InlineCount => this.loader?.Settings.InlineCount ?? true;
+
         /// <summary>Starts loading the labels unless it has started already.</summary>
         public void EnsureLoaded() => this.loader?.EnsureLoaded();
 
@@ -80,24 +83,23 @@ namespace BE.LabelExtension.Editor
             return LabelSummary.Create(id, current.Store.Find(id), current.Settings.LoadLanguages.ToList());
         }
 
-        /// <summary>Summarizes several label IDs, see <see cref="Summarize(LabelId)"/>.</summary>
+        /// <summary>
+        /// Summarizes the label IDs of a line for the inline display, in its own languages and
+        /// order if the settings name them, otherwise in the languages to load.
+        /// </summary>
         /// <param name="ids">The IDs in the code.</param>
         /// <returns>The summaries, or <c>null</c> while the labels are not loaded.</returns>
-        public IReadOnlyList<LabelSummary>? Summarize(IReadOnlyList<LabelId> ids)
+        public IReadOnlyList<LabelSummary>? SummarizeForInline(IReadOnlyList<LabelId> ids)
         {
-            var summaries = new List<LabelSummary>(ids.Count);
-            foreach (LabelId id in ids)
+            LabelLoader? current = this.loader;
+            if (current == null || !current.Store.IsLoaded)
             {
-                LabelSummary? summary = this.Summarize(id);
-                if (summary == null)
-                {
-                    return null;
-                }
-
-                summaries.Add(summary);
+                return null;
             }
 
-            return summaries;
+            LabelSettings settings = current.Settings;
+            IReadOnlyList<string> languages = (settings.InlineLanguages.Count > 0 ? settings.InlineLanguages : settings.LoadLanguages).ToList();
+            return ids.Select(id => LabelSummary.Create(id, current.Store.Find(id), languages)).ToList();
         }
 
         // Each service is connected once, when it has entered itself.

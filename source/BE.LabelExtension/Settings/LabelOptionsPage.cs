@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
@@ -83,6 +84,18 @@ namespace BE.LabelExtension.Settings
         [Description("Shows the translations above every line of X++ code with a label ID.")]
         public bool InlineDisplay { get; set; } = true;
 
+        /// <summary>The languages of the inline display in their order; empty for the languages to load.</summary>
+        [Category(EditorCategory)]
+        [DisplayName("Inline display languages")]
+        [Description("Languages the inline display shows, in this order, separated by commas, for example de-CH, en-US. Empty shows the languages to load. A language that is not loaded shows as missing.")]
+        public string InlineLanguages { get; set; } = string.Empty;
+
+        /// <summary>Whether the inline display starts with the count of translations.</summary>
+        [Category(EditorCategory)]
+        [DisplayName("Inline display count")]
+        [Description("Starts the inline display with the count, such as \"4 of 5 translations\".")]
+        public bool InlineCount { get; set; } = true;
+
         /// <inheritdoc />
         public override void LoadSettingsFromStorage()
         {
@@ -104,36 +117,45 @@ namespace BE.LabelExtension.Settings
             this.TranslationService = settings.TranslationService;
             this.ApiKey = ApiKeyProtection.Unprotect(settings.ProtectedApiKey) ?? string.Empty;
             this.InlineDisplay = settings.InlineDisplay;
+            this.InlineLanguages = string.Join(", ", settings.InlineLanguages);
+            this.InlineCount = settings.InlineCount;
         }
 
         /// <inheritdoc />
         public override void SaveSettingsToStorage()
         {
-            var settings = new LabelSettings
+            // Settings the page does not show, such as the layout of the tool window, stay as saved.
+            LabelSettings settings;
+            try
             {
-                MetadataConfiguration = string.IsNullOrWhiteSpace(this.MetadataConfiguration) || this.MetadataConfiguration == Newest ? null : this.MetadataConfiguration.Trim(),
-                SourceLanguage = string.IsNullOrWhiteSpace(this.SourceLanguage) ? null : this.SourceLanguage.Trim(),
-                TranslationService = string.IsNullOrWhiteSpace(this.TranslationService) ? "DeepL" : this.TranslationService.Trim(),
-                ProtectedApiKey = ApiKeyProtection.Protect(this.ApiKey),
-                InlineDisplay = this.InlineDisplay,
-            };
-
-            foreach (string directory in (this.PackageDirectories ?? Array.Empty<string>()).Where(d => !string.IsNullOrWhiteSpace(d)))
+                settings = LabelSettingsFile.Load(LabelSettingsFile.DefaultPath) ?? new LabelSettings();
+            }
+            catch (Exception exception) when (exception is IOException || exception is UnauthorizedAccessException || exception is SerializationException)
             {
-                settings.PackageDirectories.Add(directory.Trim());
+                settings = new LabelSettings();
             }
 
-            foreach (string language in LabelSettings.ParseLanguages(this.LoadLanguages))
-            {
-                settings.LoadLanguages.Add(language);
-            }
-
-            foreach (string language in LabelSettings.ParseLanguages(this.CreateLanguages))
-            {
-                settings.CreateLanguages.Add(language);
-            }
+            settings.MetadataConfiguration = string.IsNullOrWhiteSpace(this.MetadataConfiguration) || this.MetadataConfiguration == Newest ? null : this.MetadataConfiguration.Trim();
+            settings.SourceLanguage = string.IsNullOrWhiteSpace(this.SourceLanguage) ? null : this.SourceLanguage.Trim();
+            settings.TranslationService = string.IsNullOrWhiteSpace(this.TranslationService) ? "DeepL" : this.TranslationService.Trim();
+            settings.ProtectedApiKey = ApiKeyProtection.Protect(this.ApiKey);
+            settings.InlineDisplay = this.InlineDisplay;
+            settings.InlineCount = this.InlineCount;
+            Replace(settings.PackageDirectories, (this.PackageDirectories ?? Array.Empty<string>()).Where(d => !string.IsNullOrWhiteSpace(d)).Select(d => d.Trim()));
+            Replace(settings.LoadLanguages, LabelSettings.ParseLanguages(this.LoadLanguages));
+            Replace(settings.CreateLanguages, LabelSettings.ParseLanguages(this.CreateLanguages));
+            Replace(settings.InlineLanguages, LabelSettings.ParseLanguages(this.InlineLanguages));
 
             LabelSettingsFile.Save(LabelSettingsFile.DefaultPath, settings);
+        }
+
+        private static void Replace(IList<string> target, IEnumerable<string> values)
+        {
+            target.Clear();
+            foreach (string value in values)
+            {
+                target.Add(value);
+            }
         }
 
         // The configurations in the folder of the Developer Tools, to choose from.

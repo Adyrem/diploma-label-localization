@@ -67,8 +67,9 @@ namespace BE.LabelExtension.Core.Display
         /// with several labels each part starts with its ID.
         /// </summary>
         /// <param name="summaries">The labels of the line, in their order.</param>
+        /// <param name="showCount">Whether each label starts with the count, such as "4 of 5 translations".</param>
         /// <returns>The parts, empty if the line has no label.</returns>
-        public static IReadOnlyList<InlinePart> Inline(IReadOnlyList<LabelSummary> summaries)
+        public static IReadOnlyList<InlinePart> Inline(IReadOnlyList<LabelSummary> summaries, bool showCount = true)
         {
             var parts = new List<InlinePart>();
             for (int i = 0; i < summaries.Count; i++)
@@ -84,7 +85,7 @@ namespace BE.LabelExtension.Core.Display
                     parts.Add(new InlinePart(summary.Id.FullId + ": ", false));
                 }
 
-                summary.AddInline(parts);
+                summary.AddInline(parts, showCount);
             }
 
             return parts;
@@ -92,10 +93,11 @@ namespace BE.LabelExtension.Core.Display
 
         /// <summary>The inline display as plain text, see <see cref="Inline"/>.</summary>
         /// <param name="summaries">The labels of the line, in their order.</param>
+        /// <param name="showCount">Whether each label starts with the count.</param>
         /// <returns>The text.</returns>
-        public static string InlineText(IReadOnlyList<LabelSummary> summaries) => string.Concat(Inline(summaries).Select(p => p.Text));
+        public static string InlineText(IReadOnlyList<LabelSummary> summaries, bool showCount = true) => string.Concat(Inline(summaries, showCount).Select(p => p.Text));
 
-        private void AddInline(List<InlinePart> parts)
+        private void AddInline(List<InlinePart> parts, bool showCount)
         {
             if (!this.IsKnown)
             {
@@ -105,10 +107,20 @@ namespace BE.LabelExtension.Core.Display
 
             int count = this.Lines.Count;
             int missing = this.MissingCount;
-            parts.Add(new InlinePart(missing == 0 ? (count == 1 ? "1 translation" : $"{count} translations") : $"{count - missing} of {count} translations", false));
+            if (showCount)
+            {
+                parts.Add(new InlinePart(missing == 0 ? (count == 1 ? "1 translation" : $"{count} translations") : $"{count - missing} of {count} translations", false));
+            }
+
+            bool first = !showCount;
             foreach (LabelSummaryLine line in this.Lines)
             {
-                parts.Add(new InlinePart(" | ", false));
+                if (!first)
+                {
+                    parts.Add(new InlinePart(" | ", false));
+                }
+
+                first = false;
                 parts.Add(line.IsMissing ? new InlinePart($"{line.Language} missing", true) : new InlinePart($"{line.Language}: {line.Text}", false));
             }
         }

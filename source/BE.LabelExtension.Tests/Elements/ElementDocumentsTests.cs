@@ -44,6 +44,9 @@ namespace BE.LabelExtension.Tests.Elements
         {
             ModelInfo model = this.writable.Single(m => m.Name == "BEDemo1");
 
+            // D2: the DebugSourceFolder is the Metadata folder, the .xpp files lie in its XppSource.
+            Assert.Equal(@"C:\Store\Metadata\XppSource", ElementDocuments.XppSourceFolder(model, @"C:\Store\Metadata"));
+            Assert.Equal(@"C:\Store\Metadata\XppSource", ElementDocuments.XppSourceFolder(model, @"C:\Store\Metadata\"));
             Assert.Equal(@"C:\Store\XppSource", ElementDocuments.XppSourceFolder(model, @"C:\Store\XppSource"));
             Assert.Equal(Path.Combine(this.packages.PackagesDirectory, "bin", "XppSource"), ElementDocuments.XppSourceFolder(model, null));
         }

@@ -18,21 +18,18 @@ namespace BE.LabelExtension.Editor
     /// Tooltip of a label ID in the X++ editor with the text in every loaded language (FA05).
     /// Its entry stands in the same tooltip as that of the Developer Tools, after it.
     /// </summary>
-    [Export(typeof(IAsyncQuickInfoSourceProvider))]
-    [Name("BE-LabelExtension QuickInfo Source")]
-    [Order(After = "X++ QuickInfo Source")]
-    [ContentType(LabelRecognizer.XppContentType)]
-#if DEBUG
-    [ContentType("text")]
-#endif
-    internal sealed class LabelQuickInfoSourceProvider : IAsyncQuickInfoSourceProvider
+    /// <remarks>
+    /// One provider per content type. A provider registered for X++ and text alike was asked
+    /// twice for an X++ buffer, because X++ derives from text, and the entry stood twice in
+    /// the tooltip (D2).
+    /// </remarks>
+    internal abstract class LabelQuickInfoSourceProviderBase : IAsyncQuickInfoSourceProvider
     {
         private readonly IViewClassifierAggregatorService classifiers;
         private readonly IClassificationTypeRegistryService registry;
         private readonly LabelLookup lookup;
 
-        [ImportingConstructor]
-        public LabelQuickInfoSourceProvider(IViewClassifierAggregatorService classifiers, IClassificationTypeRegistryService registry, LabelLookup lookup)
+        protected LabelQuickInfoSourceProviderBase(IViewClassifierAggregatorService classifiers, IClassificationTypeRegistryService registry, LabelLookup lookup)
         {
             this.classifiers = classifiers;
             this.registry = registry;
@@ -41,10 +38,48 @@ namespace BE.LabelExtension.Editor
 
         /// <inheritdoc />
         public IAsyncQuickInfoSource? TryCreateQuickInfoSource(ITextBuffer textBuffer)
-            => LabelRecognizer.AppliesTo(textBuffer)
+            => this.Serves(textBuffer)
                 ? textBuffer.Properties.GetOrCreateSingletonProperty(() => new LabelQuickInfoSource(textBuffer, this.classifiers, this.registry, this.lookup))
                 : null;
+
+        /// <summary>Whether this provider answers for the buffer.</summary>
+        protected abstract bool Serves(ITextBuffer buffer);
     }
+
+    /// <summary>The tooltip in the X++ editor.</summary>
+    [Export(typeof(IAsyncQuickInfoSourceProvider))]
+    [Name("BE-LabelExtension QuickInfo Source")]
+    [Order(After = "X++ QuickInfo Source")]
+    [ContentType(LabelRecognizer.XppContentType)]
+    internal sealed class LabelQuickInfoSourceProvider : LabelQuickInfoSourceProviderBase
+    {
+        [ImportingConstructor]
+        public LabelQuickInfoSourceProvider(IViewClassifierAggregatorService classifiers, IClassificationTypeRegistryService registry, LabelLookup lookup)
+            : base(classifiers, registry, lookup)
+        {
+        }
+
+        /// <inheritdoc />
+        protected override bool Serves(ITextBuffer buffer) => buffer.ContentType.IsOfType(LabelRecognizer.XppContentType);
+    }
+
+#if DEBUG
+    /// <summary>The tooltip in .xpp files opened as plain text, the stand-in for the X++ editor.</summary>
+    [Export(typeof(IAsyncQuickInfoSourceProvider))]
+    [Name("BE-LabelExtension QuickInfo Source for .xpp text")]
+    [ContentType("text")]
+    internal sealed class StandInQuickInfoSourceProvider : LabelQuickInfoSourceProviderBase
+    {
+        [ImportingConstructor]
+        public StandInQuickInfoSourceProvider(IViewClassifierAggregatorService classifiers, IClassificationTypeRegistryService registry, LabelLookup lookup)
+            : base(classifiers, registry, lookup)
+        {
+        }
+
+        /// <inheritdoc />
+        protected override bool Serves(ITextBuffer buffer) => LabelRecognizer.IsStandIn(buffer);
+    }
+#endif
 
     /// <summary>The tooltip entry for the label ID under the mouse.</summary>
     internal sealed class LabelQuickInfoSource : IAsyncQuickInfoSource
@@ -105,14 +140,17 @@ namespace BE.LabelExtension.Editor
         {
         }
 
-        // ID and state in the first row, then one row per language as in the demonstration.
+        // The ID in the first row, then one row per language. The count of translations of the
+        // demonstration was left out after D2; an unknown ID still says so.
         private static ContainerElement Content(LabelSummary summary)
         {
             var rows = new List<object>
             {
-                new ClassifiedTextElement(
-                    new ClassifiedTextRun(PredefinedClassificationTypeNames.Keyword, summary.Id.FullId),
-                    new ClassifiedTextRun(PredefinedClassificationTypeNames.NaturalLanguage, "  " + summary.Status)),
+                summary.IsKnown
+                    ? new ClassifiedTextElement(new ClassifiedTextRun(PredefinedClassificationTypeNames.Keyword, summary.Id.FullId))
+                    : new ClassifiedTextElement(
+                        new ClassifiedTextRun(PredefinedClassificationTypeNames.Keyword, summary.Id.FullId),
+                        new ClassifiedTextRun(PredefinedClassificationTypeNames.NaturalLanguage, "  " + summary.Status)),
             };
 
             foreach (LabelSummaryLine line in summary.Lines)

@@ -337,7 +337,7 @@ namespace BE.LabelExtension.Core.Store
             List<LabelText> present = translations.Where(t => labelFile.GetPath(t.Language) != null).ToList();
             foreach (LabelText missing in translations.Where(t => labelFile.GetPath(t.Language) == null))
             {
-                this.messages.Report(MessageSeverity.Warning, $"{labelFile.Name} does not exist in {missing.Language}; {id.FullId} is {verb} without this language.");
+                this.messages.Report(MessageSeverity.Warning, $"{missing.Language} does not exist in label file {labelFile.Name}; {id.FullId} is {verb} without this language.");
             }
 
             if (present.Count == 0)

@@ -4,8 +4,10 @@
               xmlns:styles="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.15.0">
   <!--
     Search, hit list, details and status stacked, so the window works narrow at the side
-    (concept, GUI design). Columns have fixed widths, the same in header and rows, because
-    their number follows the loaded languages.
+    (concept, GUI design). Side by side puts the hit list left of the details and the
+    references, for a window docked wide and low at the bottom. The areas are templates, so
+    both layouts show the same. The columns share the width of the window, the same in header
+    and rows; their number follows the loaded languages.
   -->
   <Grid Background="{DynamicResource {x:Static styles:VsBrushes.ToolWindowBackgroundKey}}"
         TextElement.Foreground="{DynamicResource {x:Static styles:VsBrushes.ToolWindowTextKey}}">
@@ -15,15 +17,337 @@
         <Setter Property="Foreground" Value="{DynamicResource {x:Static styles:VsBrushes.ToolWindowTextKey}}" />
         <Setter Property="VerticalAlignment" Value="Center" />
       </Style>
+
+      <!-- A column header that sorts the hit list when clicked, looking like a header. -->
+      <ControlTemplate x:Key="HeaderButton" TargetType="Button">
+        <Border Background="Transparent" Padding="0,0,8,0">
+          <TextBlock Text="{Binding Content, RelativeSource={RelativeSource TemplatedParent}}" FontWeight="Bold" TextTrimming="CharacterEllipsis"
+                     Foreground="{DynamicResource {x:Static styles:VsBrushes.ToolWindowTextKey}}" />
+        </Border>
+      </ControlTemplate>
+
+      <!-- Hit list: lock, label ID and one column per loaded language. -->
+      <DataTemplate x:Key="HitsPanel">
+        <DockPanel Margin="6,0,6,0">
+          <!-- The right margin leaves room for the scroll bar of the list. -->
+          <Grid DockPanel.Dock="Top" Margin="3,0,18,2">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="20" />
+              <ColumnDefinition Width="2*" MinWidth="80" />
+              <ColumnDefinition Width="5*" />
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="1" Content="{Binding IdHeader}" Command="{Binding SortCommand}" CommandParameter="label id"
+                    Template="{DynamicResource HeaderButton}" Cursor="Hand" HorizontalAlignment="Stretch"
+                    ToolTip="Sort by label ID; click again for descending, a third time for relevance" AutomationProperties.Name="Sort by label ID" />
+            <ItemsControl Grid.Column="2" ItemsSource="{Binding Columns}">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                  <UniformGrid Rows="1" />
+                </ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <Button Content="{Binding Text}" CommandParameter="{Binding Key}"
+                          Command="{Binding DataContext.SortCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                          Template="{DynamicResource HeaderButton}" Cursor="Hand" HorizontalAlignment="Stretch"
+                          ToolTip="Sort by this language; click again for descending, a third time for relevance" AutomationProperties.Name="{Binding Text}" />
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </Grid>
+          <ListBox ItemsSource="{Binding Hits}" SelectedIndex="{Binding SelectedHitIndex, Mode=TwoWay}"
+                   AutomationProperties.Name="Hits"
+                   Background="Transparent" BorderThickness="0" HorizontalContentAlignment="Stretch"
+                   ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto"
+                   VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling">
+            <ListBox.ItemTemplate>
+              <DataTemplate>
+                <Grid>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="20" />
+                    <ColumnDefinition Width="2*" MinWidth="80" />
+                    <ColumnDefinition Width="5*" />
+                  </Grid.ColumnDefinitions>
+                  <TextBlock Grid.Column="0" Text="&#xE72E;" FontFamily="Segoe MDL2 Assets" ToolTip="Read-only">
+                    <TextBlock.Style>
+                      <Style TargetType="TextBlock">
+                        <Setter Property="Foreground" Value="{DynamicResource {x:Static styles:VsBrushes.ToolWindowTextKey}}" />
+                        <Setter Property="Visibility" Value="Hidden" />
+                        <Style.Triggers>
+                          <DataTrigger Binding="{Binding IsReadOnly}" Value="True">
+                            <Setter Property="Visibility" Value="Visible" />
+                          </DataTrigger>
+                        </Style.Triggers>
+                      </Style>
+                    </TextBlock.Style>
+                  </TextBlock>
+                  <TextBlock Grid.Column="1" Text="{Binding Id}" TextTrimming="CharacterEllipsis" Padding="0,0,8,0">
+                    <TextBlock.Style>
+                      <Style TargetType="TextBlock">
+                        <Setter Property="Foreground" Value="{DynamicResource {x:Static styles:VsBrushes.ToolWindowTextKey}}" />
+                        <Setter Property="ToolTip" Value="{Binding Id}" />
+                        <Style.Triggers>
+                          <DataTrigger Binding="{Binding IsModified}" Value="True">
+                            <Setter Property="FontWeight" Value="Bold" />
+                            <Setter Property="ToolTip" Value="Not saved" />
+                          </DataTrigger>
+                          <DataTrigger Binding="{Binding IsDeleted}" Value="True">
+                            <Setter Property="TextDecorations" Value="Strikethrough" />
+                            <Setter Property="ToolTip" Value="Deleted, not saved" />
+                          </DataTrigger>
+                        </Style.Triggers>
+                      </Style>
+                    </TextBlock.Style>
+                  </TextBlock>
+                  <ItemsControl Grid.Column="2" ItemsSource="{Binding Cells}">
+                    <ItemsControl.ItemsPanel>
+                      <ItemsPanelTemplate>
+                        <UniformGrid Rows="1" />
+                      </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate>
+                        <TextBlock Text="{Binding Text}" ToolTip="{Binding Text}" TextTrimming="CharacterEllipsis" Padding="0,0,8,0">
+                          <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                              <Setter Property="Foreground" Value="{DynamicResource {x:Static styles:VsBrushes.ToolWindowTextKey}}" />
+                              <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsMissing}" Value="True">
+                                  <Setter Property="FontStyle" Value="Italic" />
+                                  <Setter Property="Opacity" Value="0.6" />
+                                </DataTrigger>
+                              </Style.Triggers>
+                            </Style>
+                          </TextBlock.Style>
+                        </TextBlock>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </Grid>
+              </DataTemplate>
+            </ListBox.ItemTemplate>
+          </ListBox>
+        </DockPanel>
+      </DataTemplate>
+
+      <!--
+        Details of the selected label, or of a new label until it is created. The actions on a
+        label and those on a new label replace each other.
+      -->
+      <DataTemplate x:Key="DetailPanel">
+        <DockPanel Margin="6,2,6,2">
+          <DockPanel DockPanel.Dock="Top" Margin="0,0,0,4">
+            <TextBlock DockPanel.Dock="Left" Text="{Binding Detail.Id}" FontWeight="Bold" Margin="0,0,8,0" />
+            <TextBlock Text="{Binding Detail.Info}" TextWrapping="Wrap" />
+          </DockPanel>
+          <WrapPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,4">
+            <WrapPanel.Style>
+              <Style TargetType="WrapPanel">
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding Detail.IsDraft}" Value="True">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </WrapPanel.Style>
+            <Button Content="Find references" Command="{Binding FindReferencesCommand}" Margin="0,0,4,2" MinWidth="60" Padding="8,2"
+                    Style="{DynamicResource {x:Static styles:VsResourceKeys.ButtonStyleKey}}" />
+            <Button Content="Delete" Command="{Binding DeleteCommand}" Margin="0,0,4,2" MinWidth="60" Padding="8,2"
+                    Style="{DynamicResource {x:Static styles:VsResourceKeys.ButtonStyleKey}}" />
+            <Button Content="{Binding CopyText}" Command="{Binding CopyCommand}" Margin="0,0,4,2" MinWidth="60" Padding="8,2"
+                    Style="{DynamicResource {x:Static styles:VsResourceKeys.ButtonStyleKey}}" />
+            <Button Content="{Binding MoveText}" Command="{Binding MoveCommand}" Margin="0,0,4,2" MinWidth="60" Padding="8,2"
+                    Style="{DynamicResource {x:Static styles:VsResourceKeys.ButtonStyleKey}}" />
+            <Button Content="Replace" Command="{Binding ReplaceCommand}" Margin="0,0,4,2" MinWidth="60" Padding="8,2"
+                    Style="{DynamicResource {x:Static styles:VsResourceKeys.ButtonStyleKey}}" />
+          </WrapPanel>
+          <WrapPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,4">
+            <WrapPanel.Style>
+              <Style TargetType="WrapPanel">
+                <!-- In the style, not on the element, so the trigger can override it. -->
+                <Setter Property="Visibility" Value="Collapsed" />
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding Detail.IsDraft}" Value="True">
+                    <Setter Property="Visibility" Value="Visible" />
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </WrapPanel.Style>
+            <Button Content="Create" Command="{Binding CreateCommand}" Margin="0,0,4,2" MinWidth="60" Padding="8,2"
+                    Style="{DynamicResource {x:Static styles:VsResourceKeys.ButtonStyleKey}}" />
+            <Button Content="Cancel" Command="{Binding CancelNewCommand}" Margin="0,0,4,2" MinWidth="60" Padding="8,2"
+                    Style="{DynamicResource {x:Static styles:VsResourceKeys.ButtonStyleKey}}" />
+          </WrapPanel>
+          <Grid DockPanel.Dock="Top" Margin="0,0,0,2">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="60" />
+              <ColumnDefinition Width="2*" />
+              <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="Language" FontWeight="Bold" />
+            <TextBlock Grid.Column="1" Text="Text" FontWeight="Bold" />
+            <TextBlock Grid.Column="2" Text="Comment" FontWeight="Bold" Margin="4,0,0,0" />
+          </Grid>
+          <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <ItemsControl ItemsSource="{Binding Detail.Translations}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <Grid Margin="0,1,0,1">
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="60" />
+                      <ColumnDefinition Width="2*" />
+                      <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                      <RowDefinition Height="Auto" />
+                      <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Column="0" Text="{Binding Language}" VerticalAlignment="Center" />
+                    <!--
+                      Read-only: the text can be selected and copied, the fields are dimmed.
+                      No file in this language: the fields are disabled, there is nothing to enter.
+                    -->
+                    <Grid Grid.Column="1" Grid.ColumnSpan="2">
+                      <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*" />
+                        <ColumnDefinition Width="*" />
+                      </Grid.ColumnDefinitions>
+                      <Grid.Style>
+                        <Style TargetType="Grid">
+                          <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsReadOnly}" Value="True">
+                              <Setter Property="Opacity" Value="0.7" />
+                            </DataTrigger>
+                          </Style.Triggers>
+                        </Style>
+                      </Grid.Style>
+                      <TextBox Grid.Column="0" Text="{Binding Text, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                               IsReadOnly="{Binding IsReadOnly}" IsEnabled="{Binding HasFile}" AutomationProperties.Name="Text"
+                               Style="{DynamicResource {x:Static styles:VsResourceKeys.TextBoxStyleKey}}" />
+                      <TextBox Grid.Column="1" Margin="4,0,0,0" Text="{Binding Comment, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                               IsReadOnly="{Binding IsReadOnly}" IsEnabled="{Binding HasFile}" AutomationProperties.Name="Comment"
+                               Style="{DynamicResource {x:Static styles:VsResourceKeys.TextBoxStyleKey}}" />
+                    </Grid>
+                    <TextBlock Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding Hint}" FontStyle="Italic" Opacity="0.7">
+                      <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                          <Setter Property="Foreground" Value="{DynamicResource {x:Static styles:VsBrushes.ToolWindowTextKey}}" />
+                          <Style.Triggers>
+                            <DataTrigger Binding="{Binding Hint}" Value="">
+                              <Setter Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                          </Style.Triggers>
+                        </Style>
+                      </TextBlock.Style>
+                    </TextBlock>
+                  </Grid>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </ScrollViewer>
+        </DockPanel>
+      </DataTemplate>
+
+      <!--
+        Uses of the label (FA04): the own models first, then the others as they are found. The
+        symbol of a row opens the element at the use; the line itself shows as tooltip.
+      -->
+      <DataTemplate x:Key="ReferencesPanel">
+        <DockPanel Margin="6,2,6,2">
+          <WrapPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,4">
+            <TextBlock Text="{Binding ReferencesTitle}" FontWeight="Bold" Margin="0,0,8,0" />
+            <TextBlock Text="{Binding ReferencesStatus}" />
+          </WrapPanel>
+          <!-- The right margin leaves room for the scroll bar of the list. -->
+          <Grid DockPanel.Dock="Top" Margin="3,0,18,2">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="34" />
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="3*" />
+              <ColumnDefinition Width="50" />
+              <ColumnDefinition Width="56" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="Go to" FontWeight="Bold" TextTrimming="CharacterEllipsis" />
+            <TextBlock Grid.Column="1" Text="Model" FontWeight="Bold" TextTrimming="CharacterEllipsis" />
+            <TextBlock Grid.Column="2" Text="File" FontWeight="Bold" TextTrimming="CharacterEllipsis" />
+            <TextBlock Grid.Column="3" Text="Line" FontWeight="Bold" />
+            <TextBlock Grid.Column="4" Text="Column" FontWeight="Bold" />
+          </Grid>
+          <ListBox ItemsSource="{Binding References}" AutomationProperties.Name="References"
+                   Background="Transparent" BorderThickness="0" HorizontalContentAlignment="Stretch"
+                   ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto"
+                   VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling">
+            <ListBox.ItemTemplate>
+              <DataTemplate>
+                <!-- Implicit styles do not reach into the template, the foreground is set here. -->
+                <Grid ToolTip="{Binding LineText}"
+                      TextElement.Foreground="{DynamicResource {x:Static styles:VsBrushes.ToolWindowTextKey}}">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="34" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="3*" />
+                    <ColumnDefinition Width="50" />
+                    <ColumnDefinition Width="56" />
+                  </Grid.ColumnDefinitions>
+                  <!-- The button style of Visual Studio has a minimum width wider than the column. -->
+                  <Button Grid.Column="0" Width="26" MinWidth="0" MinHeight="0" Padding="0" HorizontalAlignment="Left"
+                          Command="{Binding GoCommand}" Content="&#xE8A7;" FontFamily="Segoe MDL2 Assets"
+                          ToolTip="Open the element at this use" AutomationProperties.Name="Go to"
+                          Style="{DynamicResource {x:Static styles:VsResourceKeys.ButtonStyleKey}}" />
+                  <TextBlock Grid.Column="1" Text="{Binding Model}" TextTrimming="CharacterEllipsis" Padding="0,0,8,0" VerticalAlignment="Center" />
+                  <TextBlock Grid.Column="2" Text="{Binding File}" TextTrimming="CharacterEllipsis" Padding="0,0,8,0" VerticalAlignment="Center" />
+                  <TextBlock Grid.Column="3" Text="{Binding Line}" VerticalAlignment="Center" />
+                  <TextBlock Grid.Column="4" Text="{Binding Column}" VerticalAlignment="Center" />
+                </Grid>
+              </DataTemplate>
+            </ListBox.ItemTemplate>
+          </ListBox>
+        </DockPanel>
+      </DataTemplate>
+
+      <!-- One above the other, for a window docked narrow at the side. -->
+      <DataTemplate x:Key="Stacked">
+        <Grid>
+          <Grid.RowDefinitions>
+            <RowDefinition Height="2*" MinHeight="80" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" MinHeight="90" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" MinHeight="60" />
+          </Grid.RowDefinitions>
+          <ContentControl Grid.Row="0" Content="{Binding}" ContentTemplate="{DynamicResource HitsPanel}" Focusable="False" />
+          <GridSplitter Grid.Row="1" Height="5" HorizontalAlignment="Stretch" ResizeDirection="Rows" Background="Transparent" />
+          <ContentControl Grid.Row="2" Content="{Binding}" ContentTemplate="{DynamicResource DetailPanel}" Focusable="False" />
+          <GridSplitter Grid.Row="3" Height="5" HorizontalAlignment="Stretch" ResizeDirection="Rows" Background="Transparent" />
+          <ContentControl Grid.Row="4" Content="{Binding}" ContentTemplate="{DynamicResource ReferencesPanel}" Focusable="False" />
+        </Grid>
+      </DataTemplate>
+
+      <!-- The hit list left, details and references right, for a window docked wide and low. -->
+      <DataTemplate x:Key="SideBySide">
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" MinWidth="120" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" MinWidth="120" />
+          </Grid.ColumnDefinitions>
+          <Grid.RowDefinitions>
+            <RowDefinition Height="*" MinHeight="60" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" MinHeight="40" />
+          </Grid.RowDefinitions>
+          <ContentControl Grid.Column="0" Grid.RowSpan="3" Content="{Binding}" ContentTemplate="{DynamicResource HitsPanel}" Focusable="False" />
+          <GridSplitter Grid.Column="1" Grid.RowSpan="3" Width="5" VerticalAlignment="Stretch" ResizeDirection="Columns" Background="Transparent" />
+          <ContentControl Grid.Column="2" Grid.Row="0" Content="{Binding}" ContentTemplate="{DynamicResource DetailPanel}" Focusable="False" />
+          <GridSplitter Grid.Column="2" Grid.Row="1" Height="5" HorizontalAlignment="Stretch" ResizeDirection="Rows" Background="Transparent" />
+          <ContentControl Grid.Column="2" Grid.Row="2" Content="{Binding}" ContentTemplate="{DynamicResource ReferencesPanel}" Focusable="False" />
+        </Grid>
+      </DataTemplate>
     </Grid.Resources>
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
       <RowDefinition Height="Auto" />
-      <RowDefinition Height="2*" MinHeight="80" />
-      <RowDefinition Height="Auto" />
-      <RowDefinition Height="*" MinHeight="90" />
-      <RowDefinition Height="Auto" />
-      <RowDefinition Height="*" MinHeight="60" />
+      <RowDefinition Height="*" />
       <RowDefinition Height="Auto" />
     </Grid.RowDefinitions>
 
@@ -45,6 +369,9 @@
               Style="{DynamicResource {x:Static styles:VsResourceKeys.ButtonStyleKey}}" />
       <Button Content="Settings" Command="{Binding SettingsCommand}" Margin="0,0,10,2" MinWidth="60" Padding="8,2"
               Style="{DynamicResource {x:Static styles:VsResourceKeys.ButtonStyleKey}}" />
+      <CheckBox Content="Side by side" IsChecked="{Binding SideBySide, Mode=TwoWay}" Margin="0,0,10,2" VerticalAlignment="Center"
+                ToolTip="Hit list left of the details, for the window docked wide and low"
+                Style="{DynamicResource {x:Static styles:VsResourceKeys.CheckBoxStyleKey}}" />
       <TextBlock Text="{Binding PendingText}" Margin="0,0,0,2" />
     </WrapPanel>
 
@@ -67,252 +394,21 @@
       </TextBox>
     </Grid>
 
-    <!-- Hit list: lock, label ID and one column per loaded language -->
-    <ScrollViewer Grid.Row="2" Margin="6,0,6,0" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
-      <DockPanel>
-        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="4,0,0,2">
-          <TextBlock Width="20" />
-          <TextBlock Width="240" Text="Label ID" FontWeight="Bold" />
-          <ItemsControl ItemsSource="{Binding Columns}">
-            <ItemsControl.ItemsPanel>
-              <ItemsPanelTemplate>
-                <StackPanel Orientation="Horizontal" />
-              </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-            <ItemsControl.ItemTemplate>
-              <DataTemplate>
-                <TextBlock Width="200" Text="{Binding}" FontWeight="Bold" />
-              </DataTemplate>
-            </ItemsControl.ItemTemplate>
-          </ItemsControl>
-        </StackPanel>
-        <ListBox ItemsSource="{Binding Hits}" SelectedIndex="{Binding SelectedHitIndex, Mode=TwoWay}"
-                 AutomationProperties.Name="Hits"
-                 Background="Transparent" BorderThickness="0"
-                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                 VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling">
-          <ListBox.ItemTemplate>
-            <DataTemplate>
-              <StackPanel Orientation="Horizontal">
-                <TextBlock Width="20" Text="&#xE72E;" FontFamily="Segoe MDL2 Assets" ToolTip="Read-only">
-                  <TextBlock.Style>
-                    <Style TargetType="TextBlock">
-                      <Setter Property="Foreground" Value="{DynamicResource {x:Static styles:VsBrushes.ToolWindowTextKey}}" />
-                      <Setter Property="Visibility" Value="Hidden" />
-                      <Style.Triggers>
-                        <DataTrigger Binding="{Binding IsReadOnly}" Value="True">
-                          <Setter Property="Visibility" Value="Visible" />
-                        </DataTrigger>
-                      </Style.Triggers>
-                    </Style>
-                  </TextBlock.Style>
-                </TextBlock>
-                <TextBlock Width="240" Text="{Binding Id}" TextTrimming="CharacterEllipsis">
-                  <TextBlock.Style>
-                    <Style TargetType="TextBlock">
-                      <Setter Property="Foreground" Value="{DynamicResource {x:Static styles:VsBrushes.ToolWindowTextKey}}" />
-                      <Style.Triggers>
-                        <DataTrigger Binding="{Binding IsModified}" Value="True">
-                          <Setter Property="FontWeight" Value="Bold" />
-                          <Setter Property="ToolTip" Value="Not saved" />
-                        </DataTrigger>
-                        <DataTrigger Binding="{Binding IsDeleted}" Value="True">
-                          <Setter Property="TextDecorations" Value="Strikethrough" />
-                          <Setter Property="ToolTip" Value="Deleted, not saved" />
-                        </DataTrigger>
-                      </Style.Triggers>
-                    </Style>
-                  </TextBlock.Style>
-                </TextBlock>
-                <ItemsControl ItemsSource="{Binding Cells}">
-                  <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                      <StackPanel Orientation="Horizontal" />
-                    </ItemsPanelTemplate>
-                  </ItemsControl.ItemsPanel>
-                  <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                      <TextBlock Width="200" Text="{Binding Text}" TextTrimming="CharacterEllipsis" Padding="0,0,8,0">
-                        <TextBlock.Style>
-                          <Style TargetType="TextBlock">
-                            <Setter Property="Foreground" Value="{DynamicResource {x:Static styles:VsBrushes.ToolWindowTextKey}}" />
-                            <Style.Triggers>
-                              <DataTrigger Binding="{Binding IsMissing}" Value="True">
-                                <Setter Property="FontStyle" Value="Italic" />
-                                <Setter Property="Opacity" Value="0.6" />
-                              </DataTrigger>
-                            </Style.Triggers>
-                          </Style>
-                        </TextBlock.Style>
-                      </TextBlock>
-                    </DataTemplate>
-                  </ItemsControl.ItemTemplate>
-                </ItemsControl>
-              </StackPanel>
-            </DataTemplate>
-          </ListBox.ItemTemplate>
-        </ListBox>
-      </DockPanel>
-    </ScrollViewer>
-
-    <GridSplitter Grid.Row="3" Height="5" HorizontalAlignment="Stretch" ResizeDirection="Rows" Background="Transparent" />
-
-    <!--
-      Details of the selected label, or of a new label until it is created. The actions on a
-      label and those on a new label replace each other.
-    -->
-    <DockPanel Grid.Row="4" Margin="6,2,6,2">
-      <DockPanel DockPanel.Dock="Top" Margin="0,0,0,4">
-        <TextBlock DockPanel.Dock="Left" Text="{Binding Detail.Id}" FontWeight="Bold" Margin="0,0,8,0" />
-        <TextBlock Text="{Binding Detail.Info}" TextWrapping="Wrap" />
-      </DockPanel>
-      <WrapPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,4">
-        <WrapPanel.Style>
-          <Style TargetType="WrapPanel">
-            <Style.Triggers>
-              <DataTrigger Binding="{Binding Detail.IsDraft}" Value="True">
-                <Setter Property="Visibility" Value="Collapsed" />
-              </DataTrigger>
-            </Style.Triggers>
-          </Style>
-        </WrapPanel.Style>
-        <Button Content="Find references" Command="{Binding FindReferencesCommand}" Margin="0,0,4,2" MinWidth="60" Padding="8,2"
-                Style="{DynamicResource {x:Static styles:VsResourceKeys.ButtonStyleKey}}" />
-        <Button Content="Delete" Command="{Binding DeleteCommand}" Margin="0,0,4,2" MinWidth="60" Padding="8,2"
-                Style="{DynamicResource {x:Static styles:VsResourceKeys.ButtonStyleKey}}" />
-        <Button Content="{Binding CopyText}" Command="{Binding CopyCommand}" Margin="0,0,4,2" MinWidth="60" Padding="8,2"
-                Style="{DynamicResource {x:Static styles:VsResourceKeys.ButtonStyleKey}}" />
-        <Button Content="{Binding MoveText}" Command="{Binding MoveCommand}" Margin="0,0,4,2" MinWidth="60" Padding="8,2"
-                Style="{DynamicResource {x:Static styles:VsResourceKeys.ButtonStyleKey}}" />
-        <Button Content="Replace" Command="{Binding ReplaceCommand}" Margin="0,0,4,2" MinWidth="60" Padding="8,2"
-                Style="{DynamicResource {x:Static styles:VsResourceKeys.ButtonStyleKey}}" />
-      </WrapPanel>
-      <WrapPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,4">
-        <WrapPanel.Style>
-          <Style TargetType="WrapPanel">
-            <!-- In the style, not on the element, so the trigger can override it. -->
-            <Setter Property="Visibility" Value="Collapsed" />
-            <Style.Triggers>
-              <DataTrigger Binding="{Binding Detail.IsDraft}" Value="True">
-                <Setter Property="Visibility" Value="Visible" />
-              </DataTrigger>
-            </Style.Triggers>
-          </Style>
-        </WrapPanel.Style>
-        <Button Content="Create" Command="{Binding CreateCommand}" Margin="0,0,4,2" MinWidth="60" Padding="8,2"
-                Style="{DynamicResource {x:Static styles:VsResourceKeys.ButtonStyleKey}}" />
-        <Button Content="Cancel" Command="{Binding CancelNewCommand}" Margin="0,0,4,2" MinWidth="60" Padding="8,2"
-                Style="{DynamicResource {x:Static styles:VsResourceKeys.ButtonStyleKey}}" />
-      </WrapPanel>
-      <Grid DockPanel.Dock="Top" Margin="0,0,0,2">
-        <Grid.ColumnDefinitions>
-          <ColumnDefinition Width="60" />
-          <ColumnDefinition Width="2*" />
-          <ColumnDefinition Width="*" />
-        </Grid.ColumnDefinitions>
-        <TextBlock Grid.Column="0" Text="Language" FontWeight="Bold" />
-        <TextBlock Grid.Column="1" Text="Text" FontWeight="Bold" />
-        <TextBlock Grid.Column="2" Text="Comment" FontWeight="Bold" Margin="4,0,0,0" />
-      </Grid>
-      <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-        <ItemsControl ItemsSource="{Binding Detail.Translations}">
-          <ItemsControl.ItemTemplate>
-            <DataTemplate>
-              <Grid Margin="0,1,0,1">
-                <Grid.ColumnDefinitions>
-                  <ColumnDefinition Width="60" />
-                  <ColumnDefinition Width="2*" />
-                  <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                  <RowDefinition Height="Auto" />
-                  <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
-                <TextBlock Grid.Column="0" Text="{Binding Language}" />
-                <!--
-                  Read-only: the text can be selected and copied, the fields are dimmed.
-                  No file in this language: the fields are disabled, there is nothing to enter.
-                -->
-                <Grid Grid.Column="1" Grid.ColumnSpan="2">
-                  <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="2*" />
-                    <ColumnDefinition Width="*" />
-                  </Grid.ColumnDefinitions>
-                  <Grid.Style>
-                    <Style TargetType="Grid">
-                      <Style.Triggers>
-                        <DataTrigger Binding="{Binding IsReadOnly}" Value="True">
-                          <Setter Property="Opacity" Value="0.7" />
-                        </DataTrigger>
-                      </Style.Triggers>
-                    </Style>
-                  </Grid.Style>
-                  <TextBox Grid.Column="0" Text="{Binding Text, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                           IsReadOnly="{Binding IsReadOnly}" IsEnabled="{Binding HasFile}" AutomationProperties.Name="Text"
-                           Style="{DynamicResource {x:Static styles:VsResourceKeys.TextBoxStyleKey}}" />
-                  <TextBox Grid.Column="1" Margin="4,0,0,0" Text="{Binding Comment, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                           IsReadOnly="{Binding IsReadOnly}" IsEnabled="{Binding HasFile}" AutomationProperties.Name="Comment"
-                           Style="{DynamicResource {x:Static styles:VsResourceKeys.TextBoxStyleKey}}" />
-                </Grid>
-                <TextBlock Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding Hint}" FontStyle="Italic" Opacity="0.7">
-                  <TextBlock.Style>
-                    <Style TargetType="TextBlock">
-                      <Setter Property="Foreground" Value="{DynamicResource {x:Static styles:VsBrushes.ToolWindowTextKey}}" />
-                      <Style.Triggers>
-                        <DataTrigger Binding="{Binding Hint}" Value="">
-                          <Setter Property="Visibility" Value="Collapsed" />
-                        </DataTrigger>
-                      </Style.Triggers>
-                    </Style>
-                  </TextBlock.Style>
-                </TextBlock>
-              </Grid>
-            </DataTemplate>
-          </ItemsControl.ItemTemplate>
-        </ItemsControl>
-      </ScrollViewer>
-    </DockPanel>
-
-    <GridSplitter Grid.Row="5" Height="5" HorizontalAlignment="Stretch" ResizeDirection="Rows" Background="Transparent" />
-
-    <!--
-      Uses of the label (FA04): the own models first, then the others as they are found. The
-      symbol of a row opens the element at the use; the line itself shows as tooltip.
-    -->
-    <DockPanel Grid.Row="6" Margin="6,2,6,2">
-      <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,4">
-        <TextBlock Text="{Binding ReferencesTitle}" FontWeight="Bold" Margin="0,0,8,0" />
-        <TextBlock Text="{Binding ReferencesStatus}" />
-      </StackPanel>
-      <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="4,0,0,2">
-        <TextBlock Width="44" Text="Go to" FontWeight="Bold" />
-        <TextBlock Width="120" Text="Model" FontWeight="Bold" />
-        <TextBlock Width="280" Text="File" FontWeight="Bold" />
-        <TextBlock Width="50" Text="Line" FontWeight="Bold" />
-        <TextBlock Width="60" Text="Column" FontWeight="Bold" />
-      </StackPanel>
-      <ListBox ItemsSource="{Binding References}" AutomationProperties.Name="References"
-               Background="Transparent" BorderThickness="0"
-               VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling">
-        <ListBox.ItemTemplate>
-          <DataTemplate>
-            <!-- Implicit styles do not reach into the template, the foreground is set here. -->
-            <StackPanel Orientation="Horizontal" ToolTip="{Binding LineText}"
-                        TextElement.Foreground="{DynamicResource {x:Static styles:VsBrushes.ToolWindowTextKey}}">
-              <Button Width="30" Margin="0,0,14,0" Padding="0" MinHeight="0" Command="{Binding GoCommand}" Content="&#xE8A7;" FontFamily="Segoe MDL2 Assets"
-                      ToolTip="Open the element at this use" AutomationProperties.Name="Go to"
-                      Style="{DynamicResource {x:Static styles:VsResourceKeys.ButtonStyleKey}}" />
-              <TextBlock Width="120" Text="{Binding Model}" TextTrimming="CharacterEllipsis" />
-              <TextBlock Width="280" Text="{Binding File}" TextTrimming="CharacterEllipsis" />
-              <TextBlock Width="50" Text="{Binding Line}" />
-              <TextBlock Width="60" Text="{Binding Column}" />
-            </StackPanel>
-          </DataTemplate>
-        </ListBox.ItemTemplate>
-      </ListBox>
-    </DockPanel>
+    <!-- The areas in the layout chosen. -->
+    <ContentControl Grid.Row="2" Content="{Binding}" Focusable="False">
+      <ContentControl.Style>
+        <Style TargetType="ContentControl">
+          <Setter Property="ContentTemplate" Value="{DynamicResource Stacked}" />
+          <Style.Triggers>
+            <DataTrigger Binding="{Binding SideBySide}" Value="True">
+              <Setter Property="ContentTemplate" Value="{DynamicResource SideBySide}" />
+            </DataTrigger>
+          </Style.Triggers>
+        </Style>
+      </ContentControl.Style>
+    </ContentControl>
 
     <!-- Status -->
-    <TextBlock Grid.Row="7" Margin="6,2,6,6" Text="{Binding StatusText}" TextWrapping="Wrap" />
+    <TextBlock Grid.Row="3" Margin="6,2,6,6" Text="{Binding StatusText}" TextWrapping="Wrap" />
   </Grid>
 </DataTemplate>

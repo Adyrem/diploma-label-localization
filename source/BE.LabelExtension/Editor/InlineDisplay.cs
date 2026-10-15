@@ -109,8 +109,8 @@ namespace BE.LabelExtension.Editor
                 return null;
             }
 
-            IReadOnlyList<LabelSummary>? summaries = this.lookup.Summarize(labels.Select(l => l.Id).ToList());
-            return summaries == null ? null : LabelSummary.Inline(summaries);
+            IReadOnlyList<LabelSummary>? summaries = this.lookup.SummarizeForInline(labels.Select(l => l.Id).ToList());
+            return summaries == null ? null : LabelSummary.Inline(summaries, this.lookup.InlineCount);
         }
 
         private void OnLayoutChanged(object? sender, TextViewLayoutChangedEventArgs e)
@@ -245,12 +245,12 @@ namespace BE.LabelExtension.Editor
         }
     }
 
-    /// <summary>Gives the editor the space above lines with labels.</summary>
+    /// <summary>
+    /// Gives the editor the space above lines with labels. One provider per content type, as for
+    /// the tooltip: X++ derives from text, and one provider for both would be asked twice (D2).
+    /// </summary>
     [Export(typeof(IViewTaggerProvider))]
     [ContentType(LabelRecognizer.XppContentType)]
-#if DEBUG
-    [ContentType("text")]
-#endif
     [TagType(typeof(SpaceNegotiatingAdornmentTag))]
     [TextViewRole(PredefinedTextViewRoles.Document)]
     internal sealed class InlineDisplayTaggerProvider : IViewTaggerProvider
@@ -266,15 +266,14 @@ namespace BE.LabelExtension.Editor
         /// <inheritdoc />
         public ITagger<T>? CreateTagger<T>(ITextView textView, ITextBuffer buffer)
             where T : ITag
-            => textView is IWpfTextView view && buffer == view.TextBuffer ? this.factory.GetOrCreate(view) as ITagger<T> : null;
+            => textView is IWpfTextView view && buffer == view.TextBuffer && buffer.ContentType.IsOfType(LabelRecognizer.XppContentType)
+                ? this.factory.GetOrCreate(view) as ITagger<T>
+                : null;
     }
 
     /// <summary>Attaches the inline display to every view of X++ code, and defines its layer.</summary>
     [Export(typeof(IWpfTextViewCreationListener))]
     [ContentType(LabelRecognizer.XppContentType)]
-#if DEBUG
-    [ContentType("text")]
-#endif
     [TextViewRole(PredefinedTextViewRoles.Document)]
     internal sealed class InlineDisplayViewListener : IWpfTextViewCreationListener
     {
@@ -296,4 +295,53 @@ namespace BE.LabelExtension.Editor
         /// <inheritdoc />
         public void TextViewCreated(IWpfTextView textView) => this.factory.GetOrCreate(textView);
     }
+
+#if DEBUG
+    /// <summary>The space above lines in .xpp files opened as plain text, the stand-in for the X++ editor.</summary>
+    [Export(typeof(IViewTaggerProvider))]
+    [ContentType("text")]
+    [TagType(typeof(SpaceNegotiatingAdornmentTag))]
+    [TextViewRole(PredefinedTextViewRoles.Document)]
+    internal sealed class StandInInlineDisplayTaggerProvider : IViewTaggerProvider
+    {
+        private readonly InlineDisplayFactory factory;
+
+        [ImportingConstructor]
+        public StandInInlineDisplayTaggerProvider(InlineDisplayFactory factory)
+        {
+            this.factory = factory;
+        }
+
+        /// <inheritdoc />
+        public ITagger<T>? CreateTagger<T>(ITextView textView, ITextBuffer buffer)
+            where T : ITag
+            => textView is IWpfTextView view && buffer == view.TextBuffer && LabelRecognizer.IsStandIn(buffer)
+                ? this.factory.GetOrCreate(view) as ITagger<T>
+                : null;
+    }
+
+    /// <summary>Attaches the inline display to .xpp files opened as plain text.</summary>
+    [Export(typeof(IWpfTextViewCreationListener))]
+    [ContentType("text")]
+    [TextViewRole(PredefinedTextViewRoles.Document)]
+    internal sealed class StandInInlineDisplayViewListener : IWpfTextViewCreationListener
+    {
+        private readonly InlineDisplayFactory factory;
+
+        [ImportingConstructor]
+        public StandInInlineDisplayViewListener(InlineDisplayFactory factory)
+        {
+            this.factory = factory;
+        }
+
+        /// <inheritdoc />
+        public void TextViewCreated(IWpfTextView textView)
+        {
+            if (LabelRecognizer.IsStandIn(textView.TextBuffer))
+            {
+                this.factory.GetOrCreate(textView);
+            }
+        }
+    }
+#endif
 }

@@ -23,11 +23,13 @@ namespace BE.LabelExtension.Tests.Store
         [Fact]
         public void SaveAndLoad_AllSettings_ComeBack()
         {
-            var settings = new LabelSettings { MetadataConfiguration = "Demo-10.0.2527.197", SourceLanguage = "de", ProtectedApiKey = "AQAAANCMnd8B", InlineDisplay = false };
+            var settings = new LabelSettings { MetadataConfiguration = "Demo-10.0.2527.197", SourceLanguage = "de", ProtectedApiKey = "AQAAANCMnd8B", InlineDisplay = false, InlineCount = false, SideBySide = true };
             settings.PackageDirectories.Add(@"J:\AosService\PackagesLocalDirectory");
             settings.LoadLanguages.Add("de");
             settings.LoadLanguages.Add("en-US");
             settings.CreateLanguages.Add("de-CH");
+            settings.InlineLanguages.Add("en-US");
+            settings.InlineLanguages.Add("de");
 
             LabelSettingsFile.Save(this.File, settings);
             LabelSettings loaded = LabelSettingsFile.Load(this.File)!;
@@ -40,7 +42,38 @@ namespace BE.LabelExtension.Tests.Store
             Assert.Equal("DeepL", loaded.TranslationService);
             Assert.Equal("AQAAANCMnd8B", loaded.ProtectedApiKey);
             Assert.False(loaded.InlineDisplay);
+            Assert.Equal(new[] { "en-US", "de" }, loaded.InlineLanguages);
+            Assert.False(loaded.InlineCount);
+            Assert.True(loaded.SideBySide);
             Assert.Equal(new[] { this.File }, Directory.GetFiles(this.folder));
+        }
+
+        /// <summary>The layout of the tool window is saved without making the extension apply the settings again.</summary>
+        [Theory]
+        [InlineData(true, 1)]
+        [InlineData(false, 0)]
+        public void Save_RaisesSavedOnlyWhenAskedTo(bool notify, int expected)
+        {
+            int raised = 0;
+            EventHandler<string> handler = (_, path) =>
+            {
+                if (path == this.File)
+                {
+                    raised++;
+                }
+            };
+            LabelSettingsFile.Saved += handler;
+            try
+            {
+                LabelSettingsFile.Save(this.File, new LabelSettings { SideBySide = true }, notify);
+            }
+            finally
+            {
+                LabelSettingsFile.Saved -= handler;
+            }
+
+            Assert.Equal(expected, raised);
+            Assert.True(LabelSettingsFile.Load(this.File)!.SideBySide);
         }
 
         [Fact]
@@ -60,6 +93,9 @@ namespace BE.LabelExtension.Tests.Store
             Assert.Equal(new[] { "de" }, loaded.LoadLanguages);
             Assert.Null(loaded.MetadataConfiguration);
             Assert.True(loaded.InlineDisplay);
+            Assert.Empty(loaded.InlineLanguages);
+            Assert.True(loaded.InlineCount);
+            Assert.False(loaded.SideBySide);
             Assert.Equal("DeepL", loaded.TranslationService);
         }
 
@@ -88,8 +124,13 @@ namespace BE.LabelExtension.Tests.Store
             configuration.MetadataConfiguration = "B";
             LabelSettings directories = before.Clone();
             directories.PackageDirectories.Add(@"K:\AOSService\PackagesLocalDirectory");
+            LabelSettings display = before.Clone();
+            display.InlineLanguages.Add("de");
+            display.InlineCount = false;
+            display.SideBySide = true;
 
             Assert.False(before.RequiresReload(sourceLanguage));
+            Assert.False(before.RequiresReload(display));
             Assert.True(before.RequiresReload(languages));
             Assert.True(before.RequiresReload(configuration));
             Assert.True(before.RequiresReload(directories));

@@ -44,11 +44,18 @@ namespace BE.LabelExtension.ToolWindow
         /// <summary>The most uses the area References shows, like the hit list.</summary>
         public const int MaxReferences = 1000;
 
+        // How long the hit list in Visual Studio gets to show sorted rows before the selection follows.
+        private static readonly TimeSpan ReselectDelay = TimeSpan.FromMilliseconds(150);
+
         // Uses found in parallel go into the list in batches, not one message to Visual Studio each.
         private static readonly TimeSpan ReferenceBatch = TimeSpan.FromMilliseconds(250);
 
         // Index of the search mode Label id in Modes.
         private const int LabelIdMode = 6;
+
+        // Key of the column Label ID for sorting; a language column has its language as key, and
+        // no language code contains a space (id alone is Indonesian).
+        private const string IdColumn = "label id";
 
         private static readonly TimeSpan TypingDelay = TimeSpan.FromMilliseconds(250);
 
@@ -78,6 +85,10 @@ namespace BE.LabelExtension.ToolWindow
         private readonly object gate = new();
         private CancellationTokenSource? searchCancellation;
         private CancellationTokenSource? referenceSearch;
+        private IReadOnlyList<Label> relevance = Array.Empty<Label>();
+        private string? sortKey;
+        private bool sortDescending;
+        private bool applyingSettings;
         private IReadOnlyList<Label> shown = Array.Empty<Label>();
         private IReadOnlyList<string> languages = Array.Empty<string>();
         private IReadOnlyList<LabelFile> labelFiles = Array.Empty<LabelFile>();
@@ -121,6 +132,7 @@ namespace BE.LabelExtension.ToolWindow
                 MoveCommand = new AsyncCommand((_, cancellationToken) => this.RelocateAsync(move: true, cancellationToken)),
                 ReplaceCommand = new AsyncCommand((_, cancellationToken) => this.ReplaceAsync(cancellationToken)),
                 FindReferencesCommand = new AsyncCommand((_, _) => this.FindReferencesOfDetailAsync()),
+                SortCommand = new AsyncCommand((parameter, _) => this.SortAsync(parameter as string)),
             };
             this.UpdateCommands();
             this.Data.PropertyChanged += this.OnDataChanged;
@@ -147,6 +159,9 @@ namespace BE.LabelExtension.ToolWindow
             this.UpdateLabelFiles();
             this.UpdateStatus();
             this.OnChangesChanged(this, EventArgs.Empty);
+            this.applyingSettings = true;
+            this.Data.SideBySide = this.loader.Settings.SideBySide;
+            this.applyingSettings = false;
         }
 
         /// <summary>Writes all changes into the label files (FA03).</summary>
@@ -223,10 +238,19 @@ namespace BE.LabelExtension.ToolWindow
             return Task.CompletedTask;
         }
 
-        /// <summary>Searches for a text, for the search from the editor (FA07). The search mode stays.</summary>
+        /// <summary>
+        /// Searches for a text, for the search from the editor (FA07). The search mode stays,
+        /// except Label id for a text that is no label ID: Open in Label Window leaves that mode
+        /// behind, and the search would find nothing (D2).
+        /// </summary>
         /// <param name="text">The text.</param>
         public void SearchFor(string text)
         {
+            if (this.Data.SelectedModeIndex == LabelIdMode && !LabelId.TryParse(text, out _))
+            {
+                this.Data.SelectedModeIndex = DefaultMode;
+            }
+
             this.Data.SearchText = text;
             this.ScheduleSearch(TimeSpan.Zero);
         }
@@ -253,6 +277,20 @@ namespace BE.LabelExtension.ToolWindow
             this.Data.SearchText = id.FullId;
             this.ShowDetail(label);
             return null;
+        }
+
+        /// <summary>
+        /// Offers to save labels with changes not yet saved when the developer closes the tool
+        /// window (wish from D2). The window closes either way; labels kept unsaved stay changed,
+        /// and closing Visual Studio asks again. Visual Studio does not hide the window when it
+        /// shuts down, when another tab of its group is selected or when it slides away.
+        /// </summary>
+        public void OfferSaveOnClose()
+        {
+            if (this.changes.Count > 0)
+            {
+                _ = this.tasks.Factory.RunAsync(() => this.RunAsync("Offer saving", this.OfferSaveAsync, this.tasks.ShutdownToken));
+            }
         }
 
         /// <summary>
@@ -381,7 +419,29 @@ namespace BE.LabelExtension.ToolWindow
                 case nameof(LabelToolWindowData.SelectedLabelFileIndex):
                     this.OnLabelFileChanged();
                     break;
+                case nameof(LabelToolWindowData.SideBySide):
+                    this.SaveLayout();
+                    break;
             }
+        }
+
+        // The layout stays for the next start of Visual Studio. Saving it is no change of the
+        // options the extension has to apply.
+        private void SaveLayout()
+        {
+            if (this.applyingSettings)
+            {
+                return;
+            }
+
+            bool sideBySide = this.Data.SideBySide;
+            this.loader.Settings.SideBySide = sideBySide;
+            this.errorBoundary.Run("Save layout", () =>
+            {
+                LabelSettings settings = LabelSettingsFile.Load(LabelSettingsFile.DefaultPath) ?? new LabelSettings();
+                settings.SideBySide = sideBySide;
+                LabelSettingsFile.Save(LabelSettingsFile.DefaultPath, settings, notify: false);
+            });
         }
 
         // A reload replaces the labels: search again and show the selected label anew.
@@ -476,9 +536,9 @@ namespace BE.LabelExtension.ToolWindow
             this.Show(hits.Take(MaxRows).Select(h => h.Label).ToList(), status, cancellationToken);
         }
 
+        // The hits keep the order of the column sorted by, like a list in Explorer.
         private void Show(IReadOnlyList<Label> labels, string? status, CancellationToken cancellationToken)
         {
-            var rows = new ObservableList<HitRow>(labels.Select(this.CreateRow));
             lock (this.gate)
             {
                 if (cancellationToken.IsCancellationRequested)
@@ -487,8 +547,9 @@ namespace BE.LabelExtension.ToolWindow
                 }
 
                 this.searched = status != null;
-                this.shown = labels;
-                this.Data.Hits = rows;
+                this.relevance = labels;
+                this.shown = Sorted(labels, this.sortKey, this.sortDescending);
+                this.Data.Hits = new ObservableList<HitRow>(this.shown.Select(this.CreateRow));
             }
 
             if (status == null)
@@ -729,6 +790,12 @@ namespace BE.LabelExtension.ToolWindow
                     if (copy != null)
                     {
                         this.ShowDetail(copy);
+
+                        // With the search mode Label id, the hit list follows to the new ID (D2).
+                        if (this.Data.SelectedModeIndex == LabelIdMode)
+                        {
+                            this.Data.SearchText = copy.Id.FullId;
+                        }
                     }
                 },
                 cancellationToken);
@@ -834,6 +901,33 @@ namespace BE.LabelExtension.ToolWindow
             return true;
         }
 
+        private async Task OfferSaveAsync(CancellationToken cancellationToken)
+        {
+            int count = this.changes.Count;
+            if (count == 0)
+            {
+                return;
+            }
+
+            var choices = new ChoiceResultCollection<bool>(new[]
+            {
+                new KeyValuePair<ChoiceDescription, bool>("Save", true),
+                new KeyValuePair<ChoiceDescription, bool>("Keep unsaved", false),
+            });
+            string question = (count == 1 ? "1 label has" : $"{count} labels have")
+                + " changes that are not saved. Save them now? Kept unsaved, they stay changed until you save them; closing Visual Studio asks again.";
+            if (!await this.extensibility.Shell().ShowPromptAsync(question, new PromptOptions<bool>(choices, 0, false), cancellationToken))
+            {
+                return;
+            }
+
+            await this.SaveChangesAsync(cancellationToken);
+            if (this.changes.Count > 0)
+            {
+                await this.ShowMessageAsync("Some labels could not be saved. The Output Window, pane BE-LabelExtension, names the files.", cancellationToken);
+            }
+        }
+
         // One action at a time; the buttons are disabled meanwhile.
         private async Task RunAsync(string entryPoint, Func<CancellationToken, Task> action, CancellationToken cancellationToken)
         {
@@ -928,7 +1022,92 @@ namespace BE.LabelExtension.ToolWindow
         private void UpdateLanguages()
         {
             this.languages = this.loader.Settings.LoadLanguages.ToList();
-            this.Data.Columns = this.languages.Select(language => $"Text {language}").ToList();
+
+            // A language no longer loaded has no column to sort by.
+            lock (this.gate)
+            {
+                if (this.sortKey != null && this.sortKey != IdColumn && !this.languages.Contains(this.sortKey, StringComparer.OrdinalIgnoreCase))
+                {
+                    this.sortKey = null;
+                }
+            }
+
+            this.UpdateHeaders();
+        }
+
+        // Sorts the hits by a column (wish from D2): ascending, descending, then back to the
+        // order of relevance. The order stays for the next searches until it is changed here.
+        private async Task SortAsync(string? key)
+        {
+            if (string.IsNullOrEmpty(key))
+            {
+                return;
+            }
+
+            IReadOnlyList<Label> sorted;
+            lock (this.gate)
+            {
+                if (!string.Equals(key, this.sortKey, StringComparison.OrdinalIgnoreCase))
+                {
+                    this.sortKey = key;
+                    this.sortDescending = false;
+                }
+                else if (!this.sortDescending)
+                {
+                    this.sortDescending = true;
+                }
+                else
+                {
+                    this.sortKey = null;
+                }
+
+                sorted = Sorted(this.relevance, this.sortKey, this.sortDescending);
+                this.shown = sorted;
+                this.Data.SelectedHitIndex = -1;
+                this.Data.Hits = new ObservableList<HitRow>(sorted.Select(this.CreateRow));
+            }
+
+            this.UpdateHeaders();
+
+            // The list in Visual Studio drops its selection with the new rows; the label of the
+            // detail view is selected again once they have arrived.
+            Label? label = this.detailLabel;
+            if (label == null)
+            {
+                return;
+            }
+
+            await Task.Delay(ReselectDelay);
+            lock (this.gate)
+            {
+                if (ReferenceEquals(this.shown, sorted) && ReferenceEquals(this.detailLabel, label))
+                {
+                    this.Data.SelectedHitIndex = IndexOf(sorted, label);
+                }
+            }
+        }
+
+        // The label ID ordinal, the texts ignoring case, missing translations last.
+        private static IReadOnlyList<Label> Sorted(IReadOnlyList<Label> labels, string? key, bool descending)
+        {
+            if (key == null)
+            {
+                return labels;
+            }
+
+            Func<Label, string?> value = key == IdColumn ? l => l.Id.FullId : l => l.GetText(key);
+            StringComparer comparer = key == IdColumn ? StringComparer.Ordinal : StringComparer.CurrentCultureIgnoreCase;
+            IOrderedEnumerable<Label> ordered = labels.OrderBy(l => value(l) == null);
+            ordered = descending ? ordered.ThenByDescending(value, comparer) : ordered.ThenBy(value, comparer);
+            return ordered.ToList();
+        }
+
+        // The headers mark the column sorted by with an arrow in front, so a narrow column still shows it.
+        private void UpdateHeaders()
+        {
+            string Arrow(string key) => !string.Equals(key, this.sortKey, StringComparison.OrdinalIgnoreCase) ? string.Empty : this.sortDescending ? "\u25BC " : "\u25B2 ";
+            this.Data.IdHeader = Arrow(IdColumn) + "Label ID";
+            this.Data.Columns = this.languages.Select(language => new ColumnHeader($"{Arrow(language)}Text {language}", language)).ToList();
         }
 
         private void UpdateStatus()

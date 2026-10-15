@@ -17,6 +17,8 @@ namespace BE.LabelExtension.Core.Elements
     /// </remarks>
     public static class ElementDocuments
     {
+        private const string XppSourceName = "XppSource";
+
         /// <summary>The XML file of the element a document belongs to.</summary>
         /// <param name="documentPath">Path of the open document.</param>
         /// <param name="models">The models to consider, usually the writable ones.</param>
@@ -58,17 +60,25 @@ namespace BE.LabelExtension.Core.Elements
         }
 
         /// <summary>
-        /// The folder XppSource the X++ editor works in: on the Unified Developer Experience the
-        /// DebugSourceFolder of the metadata configuration, on a classic VM
+        /// The folder XppSource the X++ editor works in. On the Unified Developer Experience it
+        /// lies in the DebugSourceFolder of the metadata configuration, which on the test
+        /// environment is the Metadata folder itself (D2); a DebugSourceFolder that already ends
+        /// in XppSource is taken as it is. On a classic VM it is
         /// <c>PackagesLocalDirectory\bin\XppSource</c> beside the packages (D1).
         /// </summary>
         /// <param name="model">The model of the element.</param>
         /// <param name="debugSourceFolder">The DebugSourceFolder of the metadata configuration, if one is used.</param>
         /// <returns>The folder.</returns>
         public static string XppSourceFolder(ModelInfo model, string? debugSourceFolder)
-            => !string.IsNullOrWhiteSpace(debugSourceFolder)
-                ? debugSourceFolder!
-                : Path.Combine(Path.GetDirectoryName(model.PackageDirectory) ?? model.PackageDirectory, "bin", "XppSource");
+        {
+            if (string.IsNullOrWhiteSpace(debugSourceFolder))
+            {
+                return Path.Combine(Path.GetDirectoryName(model.PackageDirectory) ?? model.PackageDirectory, "bin", XppSourceName);
+            }
+
+            string folder = debugSourceFolder!.TrimEnd('\\', '/');
+            return string.Equals(Path.GetFileName(folder), XppSourceName, StringComparison.OrdinalIgnoreCase) ? folder : Path.Combine(folder, XppSourceName);
+        }
 
         /// <summary>
         /// The <c>.xpp</c> file the X++ editor shows for an element:

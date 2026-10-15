@@ -45,17 +45,24 @@ namespace BE.LabelExtension.Core.Store
                 TranslationService = string.IsNullOrWhiteSpace(file.TranslationService) ? "DeepL" : file.TranslationService!,
                 ProtectedApiKey = string.IsNullOrEmpty(file.ProtectedApiKey) ? null : file.ProtectedApiKey,
                 InlineDisplay = file.InlineDisplay ?? true,
+                InlineCount = file.InlineCount ?? true,
+                SideBySide = file.SideBySide ?? false,
             };
             AddAll(file.PackageDirectories, settings.PackageDirectories);
             AddAll(file.LoadLanguages, settings.LoadLanguages);
             AddAll(file.CreateLanguages, settings.CreateLanguages);
+            AddAll(file.InlineLanguages, settings.InlineLanguages);
             return settings;
         }
 
         /// <summary>Writes the settings, through a temporary file.</summary>
         /// <param name="path">The file, usually <see cref="DefaultPath"/>.</param>
         /// <param name="settings">The settings.</param>
-        public static void Save(string path, LabelSettings settings)
+        /// <param name="notify">
+        /// Whether to raise <see cref="Saved"/>; <c>false</c> for the layout of the tool window,
+        /// which changes nothing the extension has to apply.
+        /// </param>
+        public static void Save(string path, LabelSettings settings, bool notify = true)
         {
             var file = new SettingsData
             {
@@ -67,6 +74,9 @@ namespace BE.LabelExtension.Core.Store
                 TranslationService = settings.TranslationService,
                 ProtectedApiKey = settings.ProtectedApiKey,
                 InlineDisplay = settings.InlineDisplay,
+                InlineLanguages = new List<string>(settings.InlineLanguages),
+                InlineCount = settings.InlineCount,
+                SideBySide = settings.SideBySide,
             };
 
             Directory.CreateDirectory(Path.GetDirectoryName(path)!);
@@ -96,7 +106,10 @@ namespace BE.LabelExtension.Core.Store
                 }
             }
 
-            Saved?.Invoke(null, path);
+            if (notify)
+            {
+                Saved?.Invoke(null, path);
+            }
         }
 
         private static void AddAll(IEnumerable<string>? values, IList<string> target)
@@ -136,6 +149,15 @@ namespace BE.LabelExtension.Core.Store
 
             [DataMember(Order = 8)]
             public bool? InlineDisplay { get; set; }
+
+            [DataMember(Order = 9)]
+            public List<string>? InlineLanguages { get; set; }
+
+            [DataMember(Order = 10)]
+            public bool? InlineCount { get; set; }
+
+            [DataMember(Order = 11)]
+            public bool? SideBySide { get; set; }
         }
     }
 }

@@ -18,7 +18,8 @@ namespace BE.LabelExtension.ToolWindow
         private string statusText = "Labels are not loaded yet.";
         private string searchText = string.Empty;
         private int selectedModeIndex;
-        private IReadOnlyList<string> columns = new List<string>();
+        private string idHeader = "Label ID";
+        private IReadOnlyList<ColumnHeader> columns = new List<ColumnHeader>();
         private ObservableList<HitRow> hits = new();
         private int selectedHitIndex = -1;
         private LabelDetailData detail = LabelDetailData.Empty;
@@ -30,6 +31,7 @@ namespace BE.LabelExtension.ToolWindow
         private string referencesTitle = "References";
         private string referencesStatus = string.Empty;
         private ObservableList<ReferenceRow> references = new();
+        private bool sideBySide;
 
         /// <summary>Creates the data context.</summary>
         /// <param name="searchModes">Names of the search modes, as in the existing tool.</param>
@@ -112,6 +114,21 @@ namespace BE.LabelExtension.ToolWindow
         [DataMember]
         public AsyncCommand FindReferencesCommand { get; set; } = null!;
 
+        /// <summary>Sorts the hit list by the column whose key is the parameter.</summary>
+        [DataMember]
+        public AsyncCommand SortCommand { get; set; } = null!;
+
+        /// <summary>
+        /// Whether the hit list stands left of the detail view and the references, for a window
+        /// docked wide and low; otherwise the areas stand one above the other. Set by the user.
+        /// </summary>
+        [DataMember]
+        public bool SideBySide
+        {
+            get => this.sideBySide;
+            set => this.SetProperty(ref this.sideBySide, value);
+        }
+
         /// <summary>Head of the area References, with the label searched for.</summary>
         [DataMember]
         public string ReferencesTitle
@@ -176,15 +193,23 @@ namespace BE.LabelExtension.ToolWindow
             set => this.SetProperty(ref this.moveText, value);
         }
 
+        /// <summary>Header of the column Label ID, with an arrow in front while the list is sorted by it.</summary>
+        [DataMember]
+        public string IdHeader
+        {
+            get => this.idHeader;
+            set => this.SetProperty(ref this.idHeader, value);
+        }
+
         /// <summary>Headers of the language columns of the hit list, one per loaded language.</summary>
         [DataMember]
-        public IReadOnlyList<string> Columns
+        public IReadOnlyList<ColumnHeader> Columns
         {
             get => this.columns;
             set => this.SetProperty(ref this.columns, value);
         }
 
-        /// <summary>The hits of the last search, the most relevant first.</summary>
+        /// <summary>The hits of the last search, the most relevant first unless sorted by a column.</summary>
         [DataMember]
         public ObservableList<HitRow> Hits
         {
@@ -215,6 +240,28 @@ namespace BE.LabelExtension.ToolWindow
             get => this.statusText;
             set => this.SetProperty(ref this.statusText, value);
         }
+    }
+
+    /// <summary>The header of a language column of the hit list.</summary>
+    [DataContract]
+    internal sealed class ColumnHeader
+    {
+        /// <summary>Creates a header.</summary>
+        /// <param name="text">The caption, with an arrow in front while the list is sorted by the column.</param>
+        /// <param name="key">The key the list is sorted by, the language.</param>
+        public ColumnHeader(string text, string key)
+        {
+            this.Text = text;
+            this.Key = key;
+        }
+
+        /// <summary>The caption, with an arrow in front while the list is sorted by the column.</summary>
+        [DataMember]
+        public string Text { get; }
+
+        /// <summary>The key the list is sorted by, the language.</summary>
+        [DataMember]
+        public string Key { get; }
     }
 
     /// <summary>A use of a label in the area References (FA04).</summary>

@@ -297,13 +297,13 @@ namespace BE.LabelExtension.Core.Store
 
                 if (invalid > 0)
                 {
-                    messages.Report(MessageSeverity.Warning, $"{invalid} labels with an invalid ID are skipped, for example '{invalidExample}': {document.Path}");
+                    messages.Report(MessageSeverity.Warning, (invalid == 1 ? "1 label with an invalid ID is" : $"{invalid} labels with an invalid ID are") + $" skipped, for example '{invalidExample}': {document.Path}");
                 }
             }
 
             if (duplicates > 0)
             {
-                messages.Report(MessageSeverity.Warning, $"{duplicates} translations exist in more than one label file; the first one found is used, for example {duplicateExample}.");
+                messages.Report(MessageSeverity.Warning, (duplicates == 1 ? "1 translation exists" : $"{duplicates} translations exist") + $" in more than one label file; the first one found is used, for example {duplicateExample}.");
             }
 
             List<string> watched = documents
