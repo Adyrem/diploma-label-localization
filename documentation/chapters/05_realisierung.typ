@@ -306,6 +306,96 @@ Ende wieder gelöscht.
   ) <d2_ergebnisse>
 ]
 
+#heading(outlined: false, level: 4)[D3]
+
+D3 lief am 16.10.2026 auf beiden Systemen der Testumgebung, mit dem Debug-Build
+auf dem Stand von AP3.8. Vor jeder Messung des Ladens war Visual Studio ruhig und
+hatte keine Dokumente offen. Die Testobjekte wurden wie in D2 angelegt und am Ende
+wieder gelöscht.
+
+#[
+  #show figure: set align(left)
+  #set text(size: 9.5pt)
+  #figure(
+    table(
+      align: left,
+      columns: (0.8fr, 1.7fr, 1fr),
+      table.header(
+        [*Prüfpunkt*], [*Ergebnis*], [*Folge*],
+      ),
+      [Laden],
+      [Zwei Messungen ergaben 9,1 s und 8,6 s, davon rund 90~% für das Lesen der
+       Dateien. Die 16,2 s aus D2 erklären sich damit, dass Visual Studio kurz
+       nach dem Start noch beschäftigt war. Der Speicher stieg um 869 MB und
+       853 MB.],
+      [Keine.],
+
+      [Ungültige IDs],
+      [Die Extension verwirft beim Laden keine Labels mehr.],
+      [Keine.],
+
+      [Extraktion im Editor (TC31)],
+      [Der String wurde zum Label, und Undo stellte ihn wieder her, auch mit
+       Umlauten. Ohne String am Cursor kam ein Hinweis.],
+      [Keine.],
+
+      [Extraktion im Designer (TC32)],
+      [Label und Help Text standen zur Wahl, und der Designer lud das Element nach
+       dem Schreiben neu. Bei ungespeicherten Änderungen kam zuerst die
+       Rückfrage. Auch das Feld einer Table liess sich extrahieren.],
+      [Keine.],
+
+      [Übersetzungsdienst (TC33, TC23)],
+      [Ohne Key meldete die Extension, dass keine Vorschläge kommen. Mit
+       Key lieferte DeepL die Vorschläge. Der Key stand weder in den
+       Einstellungen noch im Output Window im Klartext.],
+      [Keine.],
+
+      [Kompilieren (TC34)],
+      [Nach dem Anlegen, Extrahieren und Ändern von Labels lief der Build des
+       Models ohne Fehler. Das Verschieben eines Labels wurde nicht geprüft.],
+      [Verschieben folgt in D4.],
+
+      [Verwendungssuche (TC29)],
+      [Der Sprung an eine Fundstelle im Code öffnet jetzt den X++-Editor, auch
+       wenn die Klasse schon offen ist.],
+      [Keine.],
+
+      [Korrekturen aus D2],
+      [Der Tooltip zeigt den Eintrag der Extension nur noch einmal. Die
+       Trefferliste hat eine Scroll bar und sortiert in etwa einer halben
+       Sekunde. Side by side, die Rückfrage beim Schliessen des Tool Window und
+       die Optionen der Inline-Anzeige funktionieren.],
+      [Keine.],
+
+      [Anpassungen der Bedienung],
+      [Search Label soll ohne Markierung das Wort am Cursor suchen, etwa in einem
+       Kommentar. Gelöschte Labels sollen sich vor dem Speichern wiederherstellen
+       lassen, und die Delete-Taste soll löschen.],
+      [Umgesetzt, Nachprüfung in D4.],
+
+      [Anpassungen der Anzeige],
+      [Die Hinweiszeile unter jedem Vorschlag von DeepL macht das neue Label
+       unübersichtlich, die Meldung im Output Window genügt. Die Meldung der
+       Extraktion im Designer soll klarer sagen, dass keine passende Eigenschaft
+       gefunden wurde.],
+      [Vorschläge stehen jetzt kursiv, die Meldung ist umformuliert. Nachprüfung
+       in D4.],
+
+      [Apply in den Einstellungen],
+      [Ein Button Apply wäre hilfreich. Der Dialog Options von Visual Studio sieht
+       ihn für eine einzelne Seite nicht vor.],
+      [Nicht umgesetzt, die Einstellungen wirken schon nach OK.],
+
+      [Klassische VM],
+      [Die Extension lud in 15,0 s statt 30,4 s wie in D2, der Speicher stieg um
+       691 MB. Die Extraktion lief wie auf der Unified Developer Experience.],
+      [Keine.],
+    ),
+    caption: [Ergebnisse von D3 (eigene Darstellung)]
+  ) <d3_ergebnisse>
+]
+
 === Testergebnisse
 
 == Zielerreichung

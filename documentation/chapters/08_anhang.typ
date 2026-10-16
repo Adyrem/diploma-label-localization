@@ -44,7 +44,7 @@ Der Soll-Aufwand beträgt pro Arbeitstag acht Stunden.
       [3.5], [17.10.], [Anlegen, Bearbeiten, Kopieren, Verschieben, Ersetzen, Label-ID einfügen, Einstellungen, Tastenkürzel (Stufe 1)], [8], [5], [Anlegen, Bearbeiten, Löschen, Kopieren und Verschieben mit Umstellen der Referenzen, Ersetzen, Label-ID einfügen, Optionsseite, Rückfrage beim Schliessen und Shortcuts. Auf den 10.10. vorgezogen], [Erledigt],
       [3.6], [19.10.], [QuickInfo, Inline-Anzeige, Inline-Suche (Stufe 2)], [8], [5], [Tooltip und Inline-Anzeige im X++-Editor über die Classifications der Developer Tools, Prüfung der Sprachcodes in den Einstellungen. Auf den 11.10. vorgezogen], [Erledigt],
       [3.7], [20.10.], [Öffnen im Panel, Verwendungssuche mit Navigation (Stufe 2)], [8], [5], [Verwendungssuche über alle Models mit Sprung an die Fundstelle, Suche und Öffnen im Tool Window aus dem Kontextmenü des X++-Editors. Auf den 11.10. vorgezogen. D2 am 15.10., Fehler und Wünsche daraus umgesetzt], [Erledigt],
-      [3.8], [21.10.], [Extraktion hardcodierter Texte, automatische Übersetzung (Stufe 3)], [8], [], [], [],
+      [3.8], [21.10.], [Extraktion hardcodierter Texte, automatische Übersetzung (Stufe 3)], [8], [10], [Extraktion im X++-Editor und im Designer, Übersetzungsvorschläge über DeepL mit verschlüsselt gespeichertem API-Schlüssel. Auf den 15.10. vorgezogen], [Erledigt],
       table.cell(colspan: 7)[*AP4 Tests und Abschluss Realisierung*],
       [4.1], [22.10.], [Restarbeiten und Bugfixing], [8], [], [], [],
       [4.2], [23.10.], [Unit- und Integration-Tests, Testprotokoll], [8], [], [], [],
