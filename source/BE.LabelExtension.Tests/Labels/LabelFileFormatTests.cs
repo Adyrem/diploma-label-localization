@@ -164,6 +164,37 @@ namespace BE.LabelExtension.Tests.Labels
             Assert.Equal(Encoding.UTF8.GetBytes("BDM1INDENT=Text\r\n"), RoundTrip(Encoding.UTF8.GetBytes(line)));
         }
 
+        /// <summary>
+        /// B47: a file of the platform starts with two byte order marks. The reader takes the
+        /// first one, the second counts as a space and leaves the file when it is written.
+        /// </summary>
+        [Fact]
+        public void Read_SecondByteOrderMark_IsNotPartOfTheFirstId()
+        {
+            byte[] original = Bom.Concat(Utf8WithBom("BDM1FIRST=Erster\r\nBDM1SECOND=Zweiter\r\n")).ToArray();
+
+            LabelFileContent content;
+            using (var input = new MemoryStream(original))
+            {
+                content = LabelFileFormat.Read(input);
+            }
+
+            Assert.Equal(new[] { "BDM1FIRST", "BDM1SECOND" }, content.Entries.Select(e => e.Key));
+            Assert.Empty(content.Issues);
+            Assert.Equal(Utf8WithBom("BDM1FIRST=Erster\r\nBDM1SECOND=Zweiter\r\n"), RoundTrip(original));
+        }
+
+        [Theory]
+        [InlineData("A=First\n\uFEFF;Kommentar\n", "Kommentar")]
+        [InlineData("A=First\n \uFEFF ;Kommentar\n", "Kommentar")]
+        public void Read_ByteOrderMarkBeforeAComment_IsAComment(string text, string comment)
+        {
+            LabelFileContent content = Read(text);
+
+            Assert.Equal(comment, content.Entries.Single().Comment);
+            Assert.Empty(content.Issues);
+        }
+
         [Fact]
         public void Read_OnlySpacesBeforeEqualsSign_MarksTheFileAsDamaged()
         {

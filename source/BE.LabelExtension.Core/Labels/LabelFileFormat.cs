@@ -14,7 +14,8 @@ namespace BE.LabelExtension.Core.Labels
     /// <remarks>
     /// <para>Reading follows the existing tool. A line <c>ID=Text</c> starts a label, the ID
     /// reaches up to the first equals sign, without spaces and tabs at its start and end; the
-    /// existing tool keeps those at the end. A line that starts with <c>;</c> or <c>#</c> after
+    /// existing tool keeps those at the end. A byte order mark at the start of a line counts as
+    /// a space (B47). A line that starts with <c>;</c> or <c>#</c> after
     /// spaces is a comment. Only the first comment line after a label counts, comment lines
     /// before the first label are ignored, and empty lines do not count. If an ID appears
     /// twice, the first one wins.</para>
@@ -26,6 +27,7 @@ namespace BE.LabelExtension.Core.Labels
     public static class LabelFileFormat
     {
         private const string LineBreak = "\r\n";
+        private const char ByteOrderMark = '\uFEFF';
 
         private static readonly Encoding WithoutByteOrderMark = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
 
@@ -79,7 +81,7 @@ namespace BE.LabelExtension.Core.Labels
             while ((line = reader.ReadLine()) != null)
             {
                 lineNumber++;
-                string trimmed = line.TrimStart();
+                string trimmed = TrimLineStart(line);
                 if (trimmed.Length == 0)
                 {
                     continue;
@@ -107,9 +109,11 @@ namespace BE.LabelExtension.Core.Labels
                 // Spaces and tabs around the ID are not part of it. Files of the platform
                 // contain lines such as "ID =Text"; the existing tool keeps the space at the end
                 // in the ID, so the ID used in code does not find such a label there. Like the
-                // existing tool, spaces and tabs at the start of the line are skipped.
+                // existing tool, spaces and tabs at the start of the line are skipped, and so is
+                // a byte order mark: a file of the platform has a second one before its first ID
+                // (B47), and no ID in code contains it.
                 int equals = line.IndexOf('=');
-                string id = equals > 0 ? line.Substring(0, equals).Trim(' ', '\t') : string.Empty;
+                string id = equals > 0 ? line.Substring(0, equals).TrimStart(' ', '\t', ByteOrderMark).TrimEnd(' ', '\t') : string.Empty;
                 if (id.Length == 0)
                 {
                     issues.Add(new LabelFileIssue(LabelFileIssueKind.InvalidLine, lineNumber, null));
@@ -227,6 +231,18 @@ namespace BE.LabelExtension.Core.Labels
         }
 
         private static bool HasLineBreak(string value) => value.IndexOf('\r') >= 0 || value.IndexOf('\n') >= 0;
+
+        // White space and byte order marks, which String.TrimStart keeps since .NET 4.
+        private static string TrimLineStart(string line)
+        {
+            int start = 0;
+            while (start < line.Length && (char.IsWhiteSpace(line[start]) || line[start] == ByteOrderMark))
+            {
+                start++;
+            }
+
+            return start == 0 ? line : line.Substring(start);
+        }
 
         // Looks at the first bytes and goes back, so that the reader sees them as well.
         private static bool StartsWithByteOrderMark(Stream stream)
