@@ -272,6 +272,23 @@ namespace BE.LabelExtension.Tests.Store
             Assert.Equal(0, this.changes.Count);
         }
 
+        /// <summary>KA08: a label of the same label file with the same text is offered instead of a new one.</summary>
+        [Fact]
+        public async Task FindSameText_SameLabelFileAndText_FindsTheLabel()
+        {
+            await this.LoadAsync("de", "en-US");
+            LabelFile bdm1 = this.store.LabelFiles.Single(f => f.Name == "BDM1");
+            LabelFile bdm2 = this.store.LabelFiles.Single(f => f.Name == "BDM2");
+
+            Assert.Equal(new[] { "@BDM1:BDM110000003" }, this.changes.FindSameText(bdm1, "de", " Lieferadresse ").Select(l => l.Id.FullId));
+            Assert.Empty(this.changes.FindSameText(bdm1, "de", "lieferadresse"));
+            Assert.Empty(this.changes.FindSameText(bdm2, "de", "Lieferadresse"));
+            Assert.Empty(this.changes.FindSameText(bdm1, "de", "  "));
+
+            Assert.True(this.changes.Delete(this.store.Find("@BDM1:BDM110000003")!));
+            Assert.Empty(this.changes.FindSameText(bdm1, "de", "Lieferadresse"));
+        }
+
         /// <summary>Wish from D3: a deletion not yet saved can be taken back, with the changes made before it.</summary>
         [Fact]
         public async Task Restore_DeletedLabel_ComesBackWithItsChanges()

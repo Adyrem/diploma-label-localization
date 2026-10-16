@@ -355,6 +355,7 @@
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
       <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
       <RowDefinition Height="*" />
       <RowDefinition Height="Auto" />
     </Grid.RowDefinitions>
@@ -377,6 +378,12 @@
               Style="{DynamicResource {x:Static styles:VsResourceKeys.ButtonStyleKey}}" />
       <Button Content="Extract" Command="{Binding ExtractCommand}" Margin="0,0,10,2" MinWidth="60" Padding="8,2"
               ToolTip="New label from the string at the cursor in the X++ editor, or from a property of the node selected in the designer"
+              Style="{DynamicResource {x:Static styles:VsResourceKeys.ButtonStyleKey}}" />
+      <Button Content="Element labels" Command="{Binding ElementLabelsCommand}" Margin="0,0,4,2" Padding="8,2"
+              ToolTip="Lists the labels used in the element open in the X++ editor or the designer"
+              Style="{DynamicResource {x:Static styles:VsResourceKeys.ButtonStyleKey}}" />
+      <Button Content="Unused labels" Command="{Binding UnusedLabelsCommand}" Margin="0,0,10,2" Padding="8,2"
+              ToolTip="Lists the labels of writable models that no element of a writable model uses"
               Style="{DynamicResource {x:Static styles:VsResourceKeys.ButtonStyleKey}}" />
       <Button Content="Settings" Command="{Binding SettingsCommand}" Margin="0,0,10,2" MinWidth="60" Padding="8,2"
               Style="{DynamicResource {x:Static styles:VsResourceKeys.ButtonStyleKey}}" />
@@ -405,8 +412,44 @@
       </TextBox>
     </Grid>
 
+    <!--
+      The label properties of the node selected in the designer with their translations (KA05),
+      only while a designer has a node selected. Open shows the label in the details, Extract
+      turns a hardcoded text into a label.
+    -->
+    <DockPanel Grid.Row="2" Margin="6,0,6,4">
+      <DockPanel.Style>
+        <Style TargetType="DockPanel">
+          <Style.Triggers>
+            <DataTrigger Binding="{Binding HasDesignerNode}" Value="False">
+              <Setter Property="Visibility" Value="Collapsed" />
+            </DataTrigger>
+          </Style.Triggers>
+        </Style>
+      </DockPanel.Style>
+      <TextBlock DockPanel.Dock="Top" Text="{Binding DesignerTitle}" FontWeight="Bold" TextWrapping="Wrap" Margin="0,0,0,2" />
+      <ItemsControl ItemsSource="{Binding DesignerRows}" AutomationProperties.Name="Designer properties">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate>
+            <Grid Margin="0,1,0,1" TextElement.Foreground="{DynamicResource {x:Static styles:VsBrushes.ToolWindowTextKey}}">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" MinWidth="80" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+              </Grid.ColumnDefinitions>
+              <TextBlock Grid.Column="0" Text="{Binding Property}" Margin="0,0,8,0" VerticalAlignment="Center" />
+              <TextBlock Grid.Column="1" Text="{Binding Text}" ToolTip="{Binding Text}" TextWrapping="Wrap" VerticalAlignment="Center" />
+              <Button Grid.Column="2" Content="{Binding ActionText}" Command="{Binding ActionCommand}" Margin="4,0,0,0" MinWidth="0" Padding="8,0"
+                      AutomationProperties.Name="{Binding ActionText}"
+                      Style="{DynamicResource {x:Static styles:VsResourceKeys.ButtonStyleKey}}" />
+            </Grid>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </DockPanel>
+
     <!-- The areas in the layout chosen. -->
-    <ContentControl Grid.Row="2" Content="{Binding}" Focusable="False">
+    <ContentControl Grid.Row="3" Content="{Binding}" Focusable="False">
       <ContentControl.Style>
         <Style TargetType="ContentControl">
           <Setter Property="ContentTemplate" Value="{DynamicResource Stacked}" />
@@ -420,6 +463,6 @@
     </ContentControl>
 
     <!-- Status -->
-    <TextBlock Grid.Row="3" Margin="6,2,6,6" Text="{Binding StatusText}" TextWrapping="Wrap" />
+    <TextBlock Grid.Row="4" Margin="6,2,6,6" Text="{Binding StatusText}" TextWrapping="Wrap" />
   </Grid>
 </DataTemplate>

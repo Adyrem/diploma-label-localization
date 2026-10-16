@@ -19,9 +19,11 @@ namespace BE.LabelExtension.Elements
     /// and Label (D1).
     /// </summary>
     /// <remarks>
-    /// The button Extract stands in the tool window, and clicking it may hand the selection to
-    /// the tool window. The last node a designer selected is therefore kept, by a weak
-    /// reference, and used when the current selection holds none.
+    /// <para>The button Extract stands in the tool window, and clicking it may hand the
+    /// selection to the tool window. The last node a designer selected is therefore kept, by a
+    /// weak reference, and used when the current selection holds none.</para>
+    /// <para>Every node a designer selects is also announced, so the tool window can show the
+    /// translations of its label properties (KA05).</para>
     /// </remarks>
     internal sealed class DesignerSelection : IVsSelectionEvents
     {
@@ -34,6 +36,7 @@ namespace BE.LabelExtension.Elements
         private uint cookie;
         private WeakReference<object>? lastNode;
         private string? lastDocument;
+        private bool announced;
 
         private DesignerSelection(IVsMonitorSelection monitor)
         {
@@ -42,6 +45,13 @@ namespace BE.LabelExtension.Elements
 
         /// <summary>Receives an error of the tracking, which runs outside every command.</summary>
         public static Action<Exception>? ReportError { get; set; }
+
+        /// <summary>
+        /// Raised on the main thread when a designer selects a node, with the node, and with
+        /// <c>null</c> when another document than a designer becomes active. Clicking into a
+        /// tool window raises nothing, so the node stays shown there.
+        /// </summary>
+        public static event EventHandler<DesignerNode?>? NodeChanged;
 
         /// <summary>The tracking, once started.</summary>
         public static DesignerSelection? Current => Volatile.Read(ref current);
@@ -117,12 +127,21 @@ namespace BE.LabelExtension.Elements
             ThreadHelper.ThrowIfNotOnUIThread();
             try
             {
-                object? node = SelectedNode(pSCNew);
-                string? document = node == null ? null : this.ActiveDocument();
-                if (node != null && document != null && document.EndsWith(".xml", StringComparison.OrdinalIgnoreCase))
+                string? document = this.ActiveDocument();
+                bool designer = document != null && document.EndsWith(".xml", StringComparison.OrdinalIgnoreCase);
+                object? node = designer ? SelectedNode(pSCNew) : null;
+                DesignerNode? described = node == null ? null : Describe(node, document!);
+                if (described != null)
                 {
-                    this.lastNode = new WeakReference<object>(node);
+                    this.lastNode = new WeakReference<object>(node!);
                     this.lastDocument = document;
+                    this.announced = true;
+                    NodeChanged?.Invoke(this, described);
+                }
+                else if (!designer && this.announced)
+                {
+                    this.announced = false;
+                    NodeChanged?.Invoke(this, null);
                 }
             }
             catch (Exception exception)

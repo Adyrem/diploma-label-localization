@@ -33,6 +33,9 @@ namespace BE.LabelExtension.ToolWindow
         private string referencesStatus = string.Empty;
         private ObservableList<ReferenceRow> references = new();
         private bool sideBySide;
+        private bool hasDesignerNode;
+        private string designerTitle = string.Empty;
+        private ObservableList<DesignerRow> designerRows = new();
 
         /// <summary>Creates the data context.</summary>
         /// <param name="searchModes">Names of the search modes, as in the existing tool.</param>
@@ -119,6 +122,14 @@ namespace BE.LabelExtension.ToolWindow
         [DataMember]
         public AsyncCommand ExtractCommand { get; set; } = null!;
 
+        /// <summary>Lists the labels of the element open in the X++ editor or the designer (KA04).</summary>
+        [DataMember]
+        public AsyncCommand ElementLabelsCommand { get; set; } = null!;
+
+        /// <summary>Lists the labels of writable models that no element of a writable model uses (KA09).</summary>
+        [DataMember]
+        public AsyncCommand UnusedLabelsCommand { get; set; } = null!;
+
         /// <summary>Asks the translation service again for the languages of the new label (FA10).</summary>
         [DataMember]
         public AsyncCommand TranslateCommand { get; set; } = null!;
@@ -136,6 +147,30 @@ namespace BE.LabelExtension.ToolWindow
         {
             get => this.sideBySide;
             set => this.SetProperty(ref this.sideBySide, value);
+        }
+
+        /// <summary>Whether a designer has a node selected, whose label properties the tool window shows (KA05).</summary>
+        [DataMember]
+        public bool HasDesignerNode
+        {
+            get => this.hasDesignerNode;
+            set => this.SetProperty(ref this.hasDesignerNode, value);
+        }
+
+        /// <summary>Head of the area of the designer node, with node and element.</summary>
+        [DataMember]
+        public string DesignerTitle
+        {
+            get => this.designerTitle;
+            set => this.SetProperty(ref this.designerTitle, value);
+        }
+
+        /// <summary>The label properties of the designer node with a text, one row each.</summary>
+        [DataMember]
+        public ObservableList<DesignerRow> DesignerRows
+        {
+            get => this.designerRows;
+            set => this.SetProperty(ref this.designerRows, value);
         }
 
         /// <summary>Head of the area References, with the label searched for.</summary>
@@ -257,6 +292,40 @@ namespace BE.LabelExtension.ToolWindow
             get => this.statusText;
             set => this.SetProperty(ref this.statusText, value);
         }
+    }
+
+    /// <summary>A label property of the node selected in the designer (KA05).</summary>
+    [DataContract]
+    internal sealed class DesignerRow
+    {
+        /// <summary>Creates a row.</summary>
+        /// <param name="property">The property, such as Label.</param>
+        /// <param name="text">The label ID with its translations, or the hardcoded text.</param>
+        /// <param name="actionText">Open for a label, Extract for a hardcoded text, empty for none.</param>
+        /// <param name="actionCommand">What the button does.</param>
+        public DesignerRow(string property, string text, string actionText, AsyncCommand actionCommand)
+        {
+            this.Property = property;
+            this.Text = text;
+            this.ActionText = actionText;
+            this.ActionCommand = actionCommand;
+        }
+
+        /// <summary>The property, such as Label.</summary>
+        [DataMember]
+        public string Property { get; }
+
+        /// <summary>The label ID with its translations, or the hardcoded text.</summary>
+        [DataMember]
+        public string Text { get; }
+
+        /// <summary>Caption of the button: Open for a label, Extract for a hardcoded text.</summary>
+        [DataMember]
+        public string ActionText { get; }
+
+        /// <summary>Opens the label in the details, or extracts the text into a new label.</summary>
+        [DataMember]
+        public AsyncCommand ActionCommand { get; }
     }
 
     /// <summary>The header of a language column of the hit list.</summary>

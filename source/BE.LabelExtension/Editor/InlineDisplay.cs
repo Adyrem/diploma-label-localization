@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media.TextFormatting;
 using BE.LabelExtension.Core.Display;
+using BE.LabelExtension.Core.Labels;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Editor;
@@ -110,7 +111,18 @@ namespace BE.LabelExtension.Editor
             }
 
             IReadOnlyList<LabelSummary>? summaries = this.lookup.SummarizeForInline(labels.Select(l => l.Id).ToList());
-            return summaries == null ? null : LabelSummary.Inline(summaries, this.lookup.InlineCount);
+            if (summaries == null)
+            {
+                return null;
+            }
+
+            // KA03: a label as the first argument of strFmt shows the other arguments in its
+            // placeholders.
+            string text = line.GetText();
+            var shown = summaries
+                .Select((summary, i) => FormatCall.ArgumentsFor(text, labels[i].Span.Start.Position - line.Start.Position) is IReadOnlyList<string> arguments ? summary.WithArguments(arguments) : summary)
+                .ToList();
+            return LabelSummary.Inline(shown, this.lookup.InlineCount);
         }
 
         private void OnLayoutChanged(object? sender, TextViewLayoutChangedEventArgs e)

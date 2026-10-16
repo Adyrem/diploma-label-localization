@@ -296,7 +296,8 @@ namespace BE.LabelExtension.Core.Usages
             }
         }
 
-        private static bool IsUse(string text, int position, int length, bool isReport)
+        /// <summary>Whether the ID at the position stands in one of the patterns of a use.</summary>
+        internal static bool IsUse(string text, int position, int length, bool isReport)
         {
             if (position == 0 || position + length >= text.Length)
             {
@@ -312,7 +313,8 @@ namespace BE.LabelExtension.Core.Usages
                 || (isReport && before == '!' && ReportFollowers.IndexOf(after) >= 0);
         }
 
-        private static bool IsReport(string path) => path.IndexOf(ReportFolder, StringComparison.OrdinalIgnoreCase) >= 0;
+        /// <summary>Whether the file is that of a report, where the patterns of reports count as well.</summary>
+        internal static bool IsReport(string path) => path.IndexOf(ReportFolder, StringComparison.OrdinalIgnoreCase) >= 0;
 
         private static void AddXmlFiles(string folder, List<string> files)
         {

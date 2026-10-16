@@ -142,11 +142,14 @@ namespace BE.LabelExtension.ToolWindow
                 SortCommand = new AsyncCommand((parameter, _) => this.SortAsync(parameter as string)),
                 ExtractCommand = new AsyncCommand((_, context, cancellationToken) => this.ExtractAsync(context, cancellationToken)),
                 TranslateCommand = new AsyncCommand((_, _) => this.TranslateAsync()),
+                ElementLabelsCommand = new AsyncCommand((_, context, cancellationToken) => this.ShowElementLabelsAsync(context, cancellationToken)),
+                UnusedLabelsCommand = new AsyncCommand((_, cancellationToken) => this.ShowUnusedLabelsAsync(cancellationToken)),
             };
             this.UpdateCommands();
             this.Data.PropertyChanged += this.OnDataChanged;
             this.store.Changed += this.OnStoreChanged;
             this.changes.Changed += this.OnChangesChanged;
+            DesignerSelection.NodeChanged += this.OnDesignerNodeChanged;
         }
 
         // What the developer chooses for the references when copying or moving.
@@ -334,6 +337,7 @@ namespace BE.LabelExtension.ToolWindow
             this.Data.PropertyChanged -= this.OnDataChanged;
             this.store.Changed -= this.OnStoreChanged;
             this.changes.Changed -= this.OnChangesChanged;
+            DesignerSelection.NodeChanged -= this.OnDesignerNodeChanged;
             Interlocked.Exchange(ref this.searchCancellation, null)?.Cancel();
             Interlocked.Exchange(ref this.referenceSearch, null)?.Cancel();
         }
@@ -462,6 +466,7 @@ namespace BE.LabelExtension.ToolWindow
         {
             this.UpdateLanguages();
             this.UpdateLabelFiles();
+            this.ShowDesignerNode();
             if (this.searched)
             {
                 this.ScheduleSearch(TimeSpan.Zero);
@@ -496,6 +501,7 @@ namespace BE.LabelExtension.ToolWindow
             int count = this.changes.Count;
             this.Data.PendingText = count == 0 ? string.Empty : count == 1 ? "1 label not saved" : $"{count} labels not saved";
             this.UpdateCommands();
+            this.ShowDesignerNode();
         }
 
         private Task SearchNowAsync()
@@ -728,6 +734,28 @@ namespace BE.LabelExtension.ToolWindow
 
             PendingExtraction? pending = this.extraction;
 
+            // KA08: a label with the same text in this label file can be used instead.
+            (bool proceed, Label? existing) = await this.OfferSameTextAsync(file, cancellationToken);
+            if (!proceed)
+            {
+                return false;
+            }
+
+            if (existing != null)
+            {
+                this.ShowDetail(existing);
+                if (pending != null)
+                {
+                    await this.CompleteExtractionAsync(pending, existing, created: false, cancellationToken);
+                }
+                else
+                {
+                    this.Data.StatusText = $"{existing.Id.FullId} is used, which has the same text; no new label was created.";
+                }
+
+                return true;
+            }
+
             var texts = this.Data.Detail.Translations.Select(r => new LabelText(r.Language, r.Text, r.Comment)).ToList();
             Label? label;
             try
@@ -748,10 +776,43 @@ namespace BE.LabelExtension.ToolWindow
             this.ShowDetail(label);
             if (pending != null)
             {
-                await this.CompleteExtractionAsync(pending, label, cancellationToken);
+                await this.CompleteExtractionAsync(pending, label, created: true, cancellationToken);
             }
 
             return true;
+        }
+
+        // Asks whether to use a label of the label file that already has the text of the new
+        // label in the source language, or another language with a file if the label file
+        // lacks it. Proceed is false for Cancel, which leaves the new label open as it is.
+        private async Task<(bool Proceed, Label? Existing)> OfferSameTextAsync(LabelFile file, CancellationToken cancellationToken)
+        {
+            IReadOnlyList<TranslationRow> rows = this.Data.Detail.Translations;
+            string source = this.loader.Settings.SourceLanguage ?? string.Empty;
+            TranslationRow? row = rows.FirstOrDefault(r => r.HasFile && string.Equals(r.Language, source, StringComparison.OrdinalIgnoreCase))
+                ?? rows.FirstOrDefault(r => r.HasFile && r.Text.Trim().Length > 0);
+            if (row == null)
+            {
+                return (true, null);
+            }
+
+            IReadOnlyList<Label> same = await Task.Run(() => this.changes.FindSameText(file, row.Language, row.Text), cancellationToken);
+            if (same.Count == 0)
+            {
+                return (true, null);
+            }
+
+            Label first = same[0];
+            string others = same.Count == 1 ? string.Empty : same.Count == 2 ? " and 1 other label" : $" and {same.Count - 1} other labels";
+            var choices = new ChoiceResultCollection<int>(new[]
+            {
+                new KeyValuePair<ChoiceDescription, int>($"Use {first.Id.FullId}", 1),
+                new KeyValuePair<ChoiceDescription, int>("Create a new label", 0),
+                new KeyValuePair<ChoiceDescription, int>("Cancel", -1),
+            });
+            string question = $"{first.Id.FullId}{others} in label file {file.Name} already {(same.Count == 1 ? "has" : "have")} the text \"{row.Text.Trim()}\" in {row.Language}. Use the existing label instead of a new one?";
+            int choice = await this.extensibility.Shell().ShowPromptAsync(question, new PromptOptions<int>(choices, 0, -1), cancellationToken);
+            return choice < 0 ? (false, null) : (true, choice == 1 ? first : null);
         }
 
         private Task CancelNewAsync()
@@ -1032,6 +1093,8 @@ namespace BE.LabelExtension.ToolWindow
             this.Data.InsertCommand.CanExecute = idle && usable;
             this.Data.NewCommand.CanExecute = idle && target != null;
             this.Data.ExtractCommand.CanExecute = idle;
+            this.Data.ElementLabelsCommand.CanExecute = idle;
+            this.Data.UnusedLabelsCommand.CanExecute = idle;
             this.Data.TranslateCommand.CanExecute = idle && this.isDraft;
             this.Data.CreateCommand.CanExecute = idle && this.isDraft && target != null;
             this.Data.CancelNewCommand.CanExecute = idle && this.isDraft;

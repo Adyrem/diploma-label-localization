@@ -62,6 +62,17 @@ namespace BE.LabelExtension.Core.Display
         }
 
         /// <summary>
+        /// The summary with the placeholders <c>%1</c>, <c>%2</c> of every text replaced by the
+        /// arguments of the <c>strFmt</c> call the ID stands in, in braces (KA03).
+        /// </summary>
+        /// <param name="arguments">The arguments after the label, see <see cref="FormatCall.ArgumentsFor"/>.</param>
+        /// <returns>The summary with the arguments, or this one if there are none.</returns>
+        public LabelSummary WithArguments(IReadOnlyList<string> arguments)
+            => arguments.Count == 0 || !this.IsKnown
+                ? this
+                : new LabelSummary(this.Id, this.IsKnown, this.Lines.Select(l => l.IsMissing ? l : new LabelSummaryLine(l.Language, FormatCall.ReplacePlaceholders(l.Text!, arguments))).ToList());
+
+        /// <summary>
         /// The inline display of one line of code, as parts so that missing translations can be
         /// set apart. A line with one label shows only its translations, as in the demonstration;
         /// with several labels each part starts with its ID.

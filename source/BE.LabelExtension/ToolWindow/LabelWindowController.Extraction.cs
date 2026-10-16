@@ -75,7 +75,7 @@ namespace BE.LabelExtension.ToolWindow
 
                     if (node != null)
                     {
-                        await this.ExtractFromDesignerAsync(node, token);
+                        await this.ExtractFromDesignerAsync(node, null, token);
                     }
                     else if (document != null && document.EndsWith(".xml", StringComparison.OrdinalIgnoreCase))
                     {
@@ -142,8 +142,9 @@ namespace BE.LabelExtension.ToolWindow
             await this.ShowExtractionAsync(new EditorExtraction(view.Document.Uri, Path.GetFileName(view.FilePath), range, token, literal), model, literal.Text!, cancellationToken);
         }
 
-        // UC08 1a with the designer: a label property of the selected node.
-        private async Task ExtractFromDesignerAsync(DesignerNode node, CancellationToken cancellationToken)
+        // UC08 1a with the designer: a label property of the selected node, chosen by the
+        // developer unless the area of the designer node already named it (KA05).
+        private async Task ExtractFromDesignerAsync(DesignerNode node, DesignerProperty? preselected, CancellationToken cancellationToken)
         {
             ModelInfo? model = ModelDiscovery.FindModelFor(node.DocumentPath, this.store.Models);
             if (model == null || model.IsReadOnly || ElementDocuments.ElementFile(node.DocumentPath, new[] { model }) == null)
@@ -162,20 +163,24 @@ namespace BE.LabelExtension.ToolWindow
                 return;
             }
 
-            // The prompt returns values, so it returns the position in the list, -1 for Cancel.
-            var choices = new ChoiceResultCollection<int>(texts
-                .Select((p, i) => new KeyValuePair<ChoiceDescription, int>(Shorten($"{p.Name}: {p.Value}", 70), i))
-                .Append(new KeyValuePair<ChoiceDescription, int>("Cancel", -1)));
-            int index = await this.extensibility.Shell().ShowPromptAsync(
-                $"Which property of {node.Name} becomes a new label?",
-                new PromptOptions<int>(choices, 0, -1),
-                cancellationToken);
-            if (index < 0 || index >= texts.Count)
+            DesignerProperty? chosen = preselected == null ? null : texts.FirstOrDefault(p => p.Name == preselected.Name && p.Value == preselected.Value);
+            if (chosen == null)
             {
-                return;
-            }
+                // The prompt returns values, so it returns the position in the list, -1 for Cancel.
+                var choices = new ChoiceResultCollection<int>(texts
+                    .Select((p, i) => new KeyValuePair<ChoiceDescription, int>(Shorten($"{p.Name}: {p.Value}", 70), i))
+                    .Append(new KeyValuePair<ChoiceDescription, int>("Cancel", -1)));
+                int index = await this.extensibility.Shell().ShowPromptAsync(
+                    $"Which property of {node.Name} becomes a new label?",
+                    new PromptOptions<int>(choices, 0, -1),
+                    cancellationToken);
+                if (index < 0 || index >= texts.Count)
+                {
+                    return;
+                }
 
-            DesignerProperty chosen = texts[index];
+                chosen = texts[index];
+            }
 
             // The designer may show a text not yet saved; the XML file must hold it (B25).
             if (!await this.EnsureElementSavedAsync(node.DocumentPath, model, cancellationToken))
@@ -225,13 +230,14 @@ namespace BE.LabelExtension.ToolWindow
             this.SuggestTranslations();
         }
 
-        // Step 5 of UC08, after the label is created.
-        private async Task CompleteExtractionAsync(PendingExtraction pending, Label label, CancellationToken cancellationToken)
+        // Step 5 of UC08, after the label is created, or with a label of the same text (KA08).
+        private async Task CompleteExtractionAsync(PendingExtraction pending, Label label, bool created, CancellationToken cancellationToken)
         {
+            string done = $"{label.Id.FullId} {(created ? "is created" : "has the same text and is used")}";
             string result = pending switch
             {
-                EditorExtraction editor => await this.ReplaceInEditorAsync(editor, label, cancellationToken),
-                DesignerExtraction designer => await this.ReplaceInElementAsync(designer, label, cancellationToken),
+                EditorExtraction editor => await this.ReplaceInEditorAsync(editor, label, done, cancellationToken),
+                DesignerExtraction designer => await this.ReplaceInElementAsync(designer, label, done, cancellationToken),
                 _ => string.Empty,
             };
 
@@ -239,49 +245,49 @@ namespace BE.LabelExtension.ToolWindow
             this.messages.Report(MessageSeverity.Message, result);
         }
 
-        private async Task<string> ReplaceInEditorAsync(EditorExtraction pending, Label label, CancellationToken cancellationToken)
+        private async Task<string> ReplaceInEditorAsync(EditorExtraction pending, Label label, string done, CancellationToken cancellationToken)
         {
             string id = label.Id.FullId;
             DocumentSnapshot? document = await this.extensibility.Documents().GetOpenDocumentAsync(pending.Document, cancellationToken);
             if (document == null)
             {
-                return $"{id} is created. {pending.FileName} is no longer open, so the string stays; insert the ID with Insert.";
+                return $"{done}. {pending.FileName} is no longer open, so the string stays; insert the ID with Insert.";
             }
 
             ITextDocumentSnapshot? text = await document.AsTextDocumentAsync(this.extensibility, cancellationToken);
             if (text == null)
             {
-                return $"{id} is created. {pending.FileName} is no longer open as text, so the string stays; insert the ID with Insert.";
+                return $"{done}. {pending.FileName} is no longer open as text, so the string stays; insert the ID with Insert.";
             }
 
             TextRange range = pending.Range.TranslateTo(text).Range;
             if (EditorText.Text(range) != pending.Token)
             {
-                return $"{id} is created. The string in {pending.FileName} changed meanwhile, so it stays; insert the ID with Insert.";
+                return $"{done}. The string in {pending.FileName} changed meanwhile, so it stays; insert the ID with Insert.";
             }
 
             await this.extensibility.Editor().EditAsync(batch => text.AsEditable(batch).Replace(range, pending.Literal.Replacement(id)), cancellationToken);
-            return $"{id} is created and stands in {pending.FileName} in place of the string. Undo in the editor brings the string back.";
+            return $"{done}. It stands in {pending.FileName} in place of the string. Undo in the editor brings the string back.";
         }
 
-        private async Task<string> ReplaceInElementAsync(DesignerExtraction pending, Label label, CancellationToken cancellationToken)
+        private async Task<string> ReplaceInElementAsync(DesignerExtraction pending, Label label, string done, CancellationToken cancellationToken)
         {
             string id = label.Id.FullId;
             string element = Path.GetFileNameWithoutExtension(pending.XmlPath);
             ModelInfo? model = ModelDiscovery.FindModelFor(pending.XmlPath, this.store.Models);
             if (model == null || !await this.EnsureElementSavedAsync(pending.XmlPath, model, cancellationToken))
             {
-                return $"{id} is created. {element} has unsaved changes, so {pending.Property} of {pending.Node} stays; set it to {id} in the Properties window.";
+                return $"{done}. {element} has unsaved changes, so {pending.Property} of {pending.Node} stays; set it to {id} in the Properties window.";
             }
 
             (string xml, Encoding encoding) = await Task.Run(() => TextFile.Read(pending.XmlPath), cancellationToken);
             if (!ElementPropertyEditor.TryReplaceValue(xml, pending.Node, pending.Property, pending.Value, id, out string changed, out string problem))
             {
-                return $"{id} is created, but {pending.Property} of {pending.Node} in {element} stays: {problem}.";
+                return $"{done}, but {pending.Property} of {pending.Node} in {element} stays: {problem}.";
             }
 
             await Task.Run(() => TextFile.Write(pending.XmlPath, changed, encoding), cancellationToken);
-            return $"{id} is created and is now {pending.Property} of {pending.Node} in {element}. The designer offers to reload the element.";
+            return $"{done}. It is now {pending.Property} of {pending.Node} in {element}. The designer offers to reload the element.";
         }
 
         // Saving only this element, if the developer agrees (UC08 1a, B25).

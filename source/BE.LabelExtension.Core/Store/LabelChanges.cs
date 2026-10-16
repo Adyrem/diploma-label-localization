@@ -126,6 +126,29 @@ namespace BE.LabelExtension.Core.Store
         }
 
         /// <summary>
+        /// The labels of a label file that already have a text in a language, to offer one of
+        /// them instead of a new label with the same text (KA08). Spaces at the start and end do
+        /// not count; case does. Deleted labels are left out.
+        /// </summary>
+        /// <param name="labelFile">The label file the new label would go into.</param>
+        /// <param name="language">The language of the text, usually the source language.</param>
+        /// <param name="text">The text of the new label.</param>
+        /// <returns>The labels with this text, sorted by complete ID.</returns>
+        public IReadOnlyList<Label> FindSameText(LabelFile labelFile, string language, string text)
+        {
+            string wanted = (text ?? string.Empty).Trim();
+            if (wanted.Length == 0)
+            {
+                return Array.Empty<Label>();
+            }
+
+            // The store holds its labels sorted by complete ID already.
+            return this.store.Labels
+                .Where(l => ReferenceEquals(l.LabelFile, labelFile) && !l.IsDeleted && string.Equals(l.GetText(language)?.Trim(), wanted, StringComparison.Ordinal))
+                .ToList();
+        }
+
+        /// <summary>
         /// Creates a new label in a label file and saves it at once (FA02). Its ID has the new
         /// form with a new label part. A language the label file does not exist in is left out
         /// and named in the Output Window.
