@@ -15,8 +15,8 @@ using Microsoft.VisualStudio.Extensibility.Shell;
 namespace BE.LabelExtension.Probes
 {
     /// <summary>
-    /// Probe for D1: measures one search per search mode over the loaded labels, three times
-    /// each, before the tool window has a search (NFA02). The modes carry the names of the
+    /// Probe for D1 and TC35 in D4: measures one search per search mode over the loaded
+    /// labels, ten times each (NFA02: each at most 500 ms). The modes carry the names of the
     /// existing tool, so the user can repeat the same searches there. Reports counts and
     /// times only, no label IDs or texts.
     /// </summary>
@@ -24,7 +24,7 @@ namespace BE.LabelExtension.Probes
     internal sealed class ProbeSearchTimesCommand : Command
     {
         private const string Title = "Probe: Measure search times";
-        private const int Runs = 3;
+        private const int Runs = 10;
         private const long MegaByte = 1024 * 1024;
 
         private readonly ErrorBoundary errorBoundary;
@@ -87,7 +87,7 @@ namespace BE.LabelExtension.Probes
             var search = new LabelSearch(this.store);
             var report = new ProbeReport(Title);
             report.Line($"{this.store.Count} labels in the languages {string.Join(", ", this.loader.Settings.LoadLanguages)}, from {this.store.LabelFiles.Count} label files; {Environment.ProcessorCount} logical processors");
-            report.Line($"Times in ms for run 1 / 2 / 3. The terms are not repeated here.");
+            report.Line($"Times in ms of {Runs} runs, with the longest and the median. The terms are not repeated here.");
 
             var queries = new List<(string Name, SearchQuery Query)>
             {
@@ -136,7 +136,9 @@ namespace BE.LabelExtension.Probes
                 times[run] = stopwatch.ElapsedMilliseconds;
             }
 
-            report.Line($"  {name,-42} {hits.Count,8} hits   {string.Join(" / ", times)} ms");
+            long[] sorted = (long[])times.Clone();
+            Array.Sort(sorted);
+            report.Line($"  {name,-42} {hits.Count,8} hits   max {sorted[Runs - 1]} ms, median {sorted[Runs / 2]} ms: {string.Join(" / ", times)}");
             return hits;
         }
     }

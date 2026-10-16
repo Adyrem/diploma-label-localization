@@ -54,6 +54,20 @@ namespace BE.LabelExtension.ToolWindow
             this.Data.HasDesignerNode = true;
         }
 
+        // After the extension wrote a property, the node shown holds the new value; the
+        // designer itself may only select the node again after reloading.
+        private void UpdateDesignerProperty(string documentPath, string node, string property, string value)
+        {
+            DesignerNode? shown = this.designerNode;
+            if (shown == null || shown.Name != node || !string.Equals(shown.DocumentPath, documentPath, System.StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            this.designerNode = new DesignerNode(shown.DocumentPath, shown.Name, shown.Properties.Select(p => p.Name == property ? new DesignerProperty(p.Name, value) : p).ToList());
+            this.ShowDesignerNode();
+        }
+
         // A label shows its ID and translations and opens in the details; a hardcoded text can
         // be extracted; an unknown ID can be searched.
         private DesignerRow CreateDesignerRow(DesignerNode node, DesignerProperty property)

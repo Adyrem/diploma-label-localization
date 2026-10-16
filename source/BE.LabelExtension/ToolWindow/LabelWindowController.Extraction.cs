@@ -287,6 +287,7 @@ namespace BE.LabelExtension.ToolWindow
             }
 
             await Task.Run(() => TextFile.Write(pending.XmlPath, changed, encoding), cancellationToken);
+            this.UpdateDesignerProperty(pending.XmlPath, pending.Node, pending.Property, id);
             return $"{done}. It is now {pending.Property} of {pending.Node} in {element}. The designer offers to reload the element.";
         }
 

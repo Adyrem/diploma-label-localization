@@ -112,6 +112,17 @@ namespace BE.LabelExtension.Settings
 
             this.MetadataConfiguration = settings.MetadataConfiguration ?? Newest;
             this.PackageDirectories = settings.PackageDirectories.ToArray();
+
+            // On a classic development VM, without a configuration and without directories, the
+            // page proposes the directory the extension found (concept, GUI design; TC37). OK
+            // takes it over into the settings.
+            if (settings.MetadataConfiguration == null
+                && this.PackageDirectories.Length == 0
+                && !Core.Models.MetadataConfiguration.List(Core.Models.MetadataConfiguration.DefaultFolder).Any()
+                && ModelDiscovery.FindClassicDirectory() is string classic)
+            {
+                this.PackageDirectories = new[] { classic };
+            }
             this.LoadLanguages = string.Join(", ", settings.LoadLanguages);
             this.CreateLanguages = string.Join(", ", settings.CreateLanguages);
             this.SourceLanguage = settings.SourceLanguage ?? string.Empty;
