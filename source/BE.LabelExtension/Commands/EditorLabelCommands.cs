@@ -54,7 +54,7 @@ namespace BE.LabelExtension.Commands
 
     /// <summary>
     /// Opens the tool window and searches the selected text, without a selection the content of
-    /// the string literal at the cursor (FA07).
+    /// the string literal at the cursor (FA07), outside a string the word at the cursor.
     /// </summary>
     [VisualStudioContribution]
     internal sealed class SearchLabelCommand : Command
@@ -97,13 +97,13 @@ namespace BE.LabelExtension.Commands
                         if (text.Length == 0)
                         {
                             (string line, int column) = EditorText.LineAtCursor(view);
-                            text = CodeLine.StringLiteralAt(line, column)?.Trim();
+                            text = CodeLine.StringLiteralAt(line, column)?.Trim() ?? CodeLine.WordAt(line, column);
                         }
                     }
 
                     if (string.IsNullOrEmpty(text) || text!.Length > MaxLength || text.IndexOf('\n') >= 0)
                     {
-                        await this.Extensibility.Shell().ShowPromptAsync("Select a text in the code or place the cursor in a string, then search again.", PromptOptions.OK, token);
+                        await this.Extensibility.Shell().ShowPromptAsync("Select a text in the code, or place the cursor in a string or on a word, then search again.", PromptOptions.OK, token);
                         return;
                     }
 

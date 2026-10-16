@@ -34,7 +34,8 @@ namespace BE.LabelExtension.ToolWindow
     /// literal in the X++ editor, as one edit the editor can undo, or the property in the XML
     /// file of the element, which the designer then offers to reload.</para>
     /// <para>Suggestions replace a text of the new label only while the developer has not
-    /// changed it, and stay marked until the developer changes them or creates the label.</para>
+    /// changed it, and stand in italics until the developer changes them or creates the label.
+    /// The Output Window names the languages; there is no hint per row and no prompt (D3).</para>
     /// </remarks>
     internal sealed partial class LabelWindowController
     {
@@ -157,7 +158,7 @@ namespace BE.LabelExtension.ToolWindow
                 .ToList();
             if (texts.Count == 0)
             {
-                await this.ShowMessageAsync($"{node.Name} has no label property with a hardcoded text, such as Label or Help Text.", cancellationToken);
+                await this.ShowMessageAsync($"No label property with a hardcoded text, such as Label or Help Text, was found on {node.Name}.", cancellationToken);
                 return;
             }
 
@@ -360,7 +361,7 @@ namespace BE.LabelExtension.ToolWindow
                         return;
                     }
 
-                    int applied = 0;
+                    var applied = new List<string>();
                     this.applyingSuggestion = true;
                     try
                     {
@@ -371,8 +372,7 @@ namespace BE.LabelExtension.ToolWindow
                             {
                                 target.Key.Text = suggestion;
                                 target.Key.IsSuggested = true;
-                                target.Key.Hint = $"suggested by {service.Name}; change it or create the label to confirm it";
-                                applied++;
+                                applied.Add(target.Key.Language);
                             }
                         }
                     }
@@ -381,9 +381,12 @@ namespace BE.LabelExtension.ToolWindow
                         this.applyingSuggestion = false;
                     }
 
-                    this.Data.StatusText = applied == 1
-                        ? $"{service.Name} suggested 1 translation. Check it, then create the label."
-                        : $"{service.Name} suggested {applied} translations. Check them, then create the label.";
+                    string suggested = applied.Count == 1 ? "1 translation" : $"{applied.Count} translations";
+                    this.Data.StatusText = $"{service.Name} suggested {suggested}, shown in italics. Check the texts, then create the label.";
+                    if (applied.Count > 0)
+                    {
+                        this.messages.Report(MessageSeverity.Message, $"{service.Name} suggested {suggested} for the new label: {string.Join(", ", applied)}.");
+                    }
                 },
                 this.tasks.ShutdownToken));
         }
@@ -401,7 +404,6 @@ namespace BE.LabelExtension.ToolWindow
             if (!this.applyingSuggestion && row.IsSuggested && propertyName == nameof(TranslationRow.Text))
             {
                 row.IsSuggested = false;
-                row.Hint = string.Empty;
             }
         }
 

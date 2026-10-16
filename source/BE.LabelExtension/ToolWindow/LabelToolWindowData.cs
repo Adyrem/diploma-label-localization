@@ -28,6 +28,7 @@ namespace BE.LabelExtension.ToolWindow
         private int selectedLabelFileIndex = -1;
         private string copyText = "Copy to";
         private string moveText = "Move to";
+        private string deleteText = "Delete";
         private string referencesTitle = "References";
         private string referencesStatus = string.Empty;
         private ObservableList<ReferenceRow> references = new();
@@ -94,7 +95,7 @@ namespace BE.LabelExtension.ToolWindow
         [DataMember]
         public AsyncCommand CancelNewCommand { get; set; } = null!;
 
-        /// <summary>Deletes the label once saved (FA03).</summary>
+        /// <summary>Deletes the label once saved (FA03), or restores a deleted one; the parameter "key" only deletes.</summary>
         [DataMember]
         public AsyncCommand DeleteCommand { get; set; } = null!;
 
@@ -191,6 +192,14 @@ namespace BE.LabelExtension.ToolWindow
         {
             get => this.copyText;
             set => this.SetProperty(ref this.copyText, value);
+        }
+
+        /// <summary>Caption of the button Delete, Restore for a label deleted but not yet saved.</summary>
+        [DataMember]
+        public string DeleteText
+        {
+            get => this.deleteText;
+            set => this.SetProperty(ref this.deleteText, value);
         }
 
         /// <summary>Caption of the button Move to, with the selected label file.</summary>

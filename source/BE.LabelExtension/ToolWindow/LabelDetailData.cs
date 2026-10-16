@@ -54,6 +54,8 @@ namespace BE.LabelExtension.ToolWindow
         private string text;
         private string comment;
         private string hint;
+        private bool isSuggested;
+        private string textStyle = "Normal";
 
         /// <summary>Creates a row.</summary>
         /// <param name="language">The language.</param>
@@ -106,10 +108,7 @@ namespace BE.LabelExtension.ToolWindow
         [DataMember]
         public bool HasFile { get; }
 
-        /// <summary>
-        /// Why the translation cannot be changed, that it is missing, or that the text is a
-        /// suggestion of the translation service; empty otherwise.
-        /// </summary>
+        /// <summary>Why the translation cannot be changed, or that it is missing; empty otherwise.</summary>
         [DataMember]
         public string Hint
         {
@@ -119,8 +118,25 @@ namespace BE.LabelExtension.ToolWindow
 
         /// <summary>
         /// Whether the text of a new label is a suggestion of the translation service, until the
-        /// developer changes it or creates the label (FA10).
+        /// developer changes it or creates the label (FA10). It shows in italics, without a line
+        /// of its own, which made the new label hard to read (D3).
         /// </summary>
-        public bool IsSuggested { get; set; }
+        public bool IsSuggested
+        {
+            get => this.isSuggested;
+            set
+            {
+                this.isSuggested = value;
+                this.TextStyle = value ? "Italic" : "Normal";
+            }
+        }
+
+        /// <summary>The font style of the text, italic for a suggestion.</summary>
+        [DataMember]
+        public string TextStyle
+        {
+            get => this.textStyle;
+            private set => this.SetProperty(ref this.textStyle, value);
+        }
     }
 }

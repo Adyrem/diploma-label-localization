@@ -23,6 +23,9 @@ namespace BE.LabelExtension.TranslationServices
         private static readonly (string Name, Func<Func<string?>, ITranslationService> Create)[] Entries =
         {
             (DeepLTranslationService.ServiceName, apiKey => new DeepLTranslationService(apiKey)),
+#if DEBUG
+            (SimulatedTranslationService.ServiceName, _ => new SimulatedTranslationService()),
+#endif
         };
 
         private readonly IReadOnlyList<ITranslationService> services;

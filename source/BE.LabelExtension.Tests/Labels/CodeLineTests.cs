@@ -74,6 +74,19 @@ namespace BE.LabelExtension.Tests.Labels
             Assert.Null(CodeLine.StringLiteralSpanAt(code, 6)!.Text);
         }
 
+        /// <summary>Wish from D3: outside a string, the search from the editor takes the word at the cursor.</summary>
+        [Theory]
+        [InlineData("    // BE D3 Kommentar", 16, "Kommentar")]
+        [InlineData("    // BE D3 Kommentar", 22, "Kommentar")]
+        [InlineData("    // BE D3 Kommentar", 12, "D3")]
+        [InlineData("    return Rückgängig_2;", 15, "Rückgängig_2")]
+        [InlineData("    // BE D3 Kommentar", 2, null)]
+        [InlineData("x", 5, null)]
+        public void WordAt_CursorInOrAfterAWord_GivesTheWord(string line, int column, string? expected)
+        {
+            Assert.Equal(expected, CodeLine.WordAt(line, column));
+        }
+
         [Fact]
         public void StringLiteralAt_EscapedQuoteAndComment()
         {

@@ -43,8 +43,9 @@ namespace BE.LabelExtension.Core.Labels
         public bool IsModified { get; set; }
 
         /// <summary>
-        /// Whether the label is deleted, but the deletion is not saved yet. The search skips
-        /// it; saving removes it from the label files and the label store.
+        /// Whether the label is deleted, but the deletion is not saved yet. The search still
+        /// finds it, so it can be restored; saving removes it from the label files and the
+        /// label store.
         /// </summary>
         public bool IsDeleted { get; internal set; }
 

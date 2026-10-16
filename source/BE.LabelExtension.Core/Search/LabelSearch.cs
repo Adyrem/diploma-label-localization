@@ -57,7 +57,7 @@ namespace BE.LabelExtension.Core.Search
             if (query.Mode == SearchMode.Id)
             {
                 Label? label = this.store.Find(query.Term);
-                return label == null || label.IsDeleted ? Array.Empty<SearchHit>() : new[] { new SearchHit(label, 1) };
+                return label == null ? Array.Empty<SearchHit>() : new[] { new SearchHit(label, 1) };
             }
 
             return SearchSorted(this.store.SortedLabels, query, cancellationToken);
@@ -105,12 +105,8 @@ namespace BE.LabelExtension.Core.Search
                     {
                         for (int i = range.Item1; i < range.Item2; i++)
                         {
-                            // A deleted label stays in the store until the deletion is saved.
-                            if (labels[i].IsDeleted)
-                            {
-                                continue;
-                            }
-
+                            // A deleted label is found until the deletion is saved, so the
+                            // list can show it struck through and the developer can restore it.
                             int value = score(labels[i]);
                             if (value > 0)
                             {

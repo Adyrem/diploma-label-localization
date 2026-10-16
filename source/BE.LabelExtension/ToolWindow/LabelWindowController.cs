@@ -134,7 +134,7 @@ namespace BE.LabelExtension.ToolWindow
                 SettingsCommand = new AsyncCommand((_, cancellationToken) => this.errorBoundary.RunAsync("Open settings", OptionsPage.ShowAsync, cancellationToken)),
                 CreateCommand = new AsyncCommand((_, cancellationToken) => this.CreateAsync(cancellationToken)),
                 CancelNewCommand = new AsyncCommand((_, _) => this.CancelNewAsync()),
-                DeleteCommand = new AsyncCommand((_, _) => this.DeleteAsync()),
+                DeleteCommand = new AsyncCommand((parameter, _) => this.DeleteAsync(fromKey: parameter as string == "key")),
                 CopyCommand = new AsyncCommand((_, cancellationToken) => this.RelocateAsync(move: false, cancellationToken)),
                 MoveCommand = new AsyncCommand((_, cancellationToken) => this.RelocateAsync(move: true, cancellationToken)),
                 ReplaceCommand = new AsyncCommand((_, cancellationToken) => this.ReplaceAsync(cancellationToken)),
@@ -621,7 +621,7 @@ namespace BE.LabelExtension.ToolWindow
 
             LabelFile file = label.LabelFile;
             string info = $"Label file {file.Name}, model {file.Model.Name}"
-                + (label.IsDeleted ? ", deleted; it leaves the label files when you save" : file.IsReadOnly ? $", {ReadOnlyReason(file)}" : string.Empty);
+                + (label.IsDeleted ? ", deleted; it leaves the label files when you save, Restore brings it back" : file.IsReadOnly ? $", {ReadOnlyReason(file)}" : string.Empty);
             this.isDraft = false;
             this.extraction = null;
             this.detailLabel = label;
@@ -646,7 +646,7 @@ namespace BE.LabelExtension.ToolWindow
                     before?.Comment ?? string.Empty,
                     isReadOnly: !hasFile,
                     hasFile,
-                    suggested ? before!.Hint : hasFile ? string.Empty : "the label file does not exist in this language; the label is created without it")
+                    hasFile ? string.Empty : "the label file does not exist in this language; the label is created without it")
                 {
                     IsSuggested = suggested,
                 };
@@ -767,11 +767,13 @@ namespace BE.LabelExtension.ToolWindow
             return Task.CompletedTask;
         }
 
-        // Deleting waits for Save like a change of text (FA03); until then the label is struck through.
-        private Task DeleteAsync()
+        // Deleting waits for Save like a change of text (FA03); until then the label is struck
+        // through, and the same button restores it (wish from D3). The Delete key of the hit
+        // list only deletes.
+        private Task DeleteAsync(bool fromKey)
         {
             Label? label = this.detailLabel;
-            if (label != null && this.changes.Delete(label))
+            if (label != null && (label.IsDeleted ? !fromKey && this.changes.Restore(label) : this.changes.Delete(label)))
             {
                 this.UpdateHitStates();
                 this.ShowDetail(label);
@@ -1033,7 +1035,8 @@ namespace BE.LabelExtension.ToolWindow
             this.Data.TranslateCommand.CanExecute = idle && this.isDraft;
             this.Data.CreateCommand.CanExecute = idle && this.isDraft && target != null;
             this.Data.CancelNewCommand.CanExecute = idle && this.isDraft;
-            this.Data.DeleteCommand.CanExecute = idle && usable && !label!.LabelFile.IsReadOnly;
+            this.Data.DeleteCommand.CanExecute = idle && !this.isDraft && label != null && !label.LabelFile.IsReadOnly;
+            this.Data.DeleteText = label != null && label.IsDeleted && !this.isDraft ? "Restore" : "Delete";
             this.Data.CopyCommand.CanExecute = idle && canCopy;
             this.Data.MoveCommand.CanExecute = idle && canCopy && !label!.LabelFile.IsReadOnly;
             this.Data.ReplaceCommand.CanExecute = idle && usable;

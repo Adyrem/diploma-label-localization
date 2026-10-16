@@ -80,6 +80,36 @@ namespace BE.LabelExtension.Core.Labels
             return null;
         }
 
+        /// <summary>
+        /// The word the cursor stands in or directly after, of letters, digits and underscores,
+        /// for the search from the editor outside a string (wish from D3), such as a word in a
+        /// comment.
+        /// </summary>
+        /// <param name="line">The line.</param>
+        /// <param name="column">The position of the cursor in the line, starting at 0.</param>
+        /// <returns>The word, or <c>null</c> if the cursor stands on none.</returns>
+        public static string? WordAt(string line, int column)
+        {
+            if (column < 0 || column > line.Length)
+            {
+                return null;
+            }
+
+            int start = column;
+            while (start > 0 && IsWordCharacter(line[start - 1]))
+            {
+                start--;
+            }
+
+            int end = column;
+            while (end < line.Length && IsWordCharacter(line[end]))
+            {
+                end++;
+            }
+
+            return end > start ? line.Substring(start, end - start) : null;
+        }
+
         /// <summary>The label ID the cursor stands on, in either form.</summary>
         /// <param name="line">The line.</param>
         /// <param name="column">The position of the cursor in the line, starting at 0; directly after the ID still counts.</param>
@@ -97,6 +127,8 @@ namespace BE.LabelExtension.Core.Labels
 
             return null;
         }
+
+        private static bool IsWordCharacter(char c) => char.IsLetterOrDigit(c) || c == '_';
     }
 
     /// <summary>A string literal in a line of X++ code, see <see cref="CodeLine.StringLiteralSpanAt"/>.</summary>

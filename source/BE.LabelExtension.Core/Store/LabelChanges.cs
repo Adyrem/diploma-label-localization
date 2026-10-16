@@ -28,6 +28,9 @@ namespace BE.LabelExtension.Core.Store
         private readonly Dictionary<Label, HashSet<string>> edits = new();
         private readonly HashSet<Label> deletions = new();
 
+        // Changes of a deleted label, kept aside so that restoring it brings them back.
+        private readonly Dictionary<Label, HashSet<string>> editsOfDeleted = new();
+
         /// <summary>Creates the changes of a label store.</summary>
         /// <param name="store">The label store.</param>
         /// <param name="messages">Receives the result of saving and every file that could not be written.</param>
@@ -181,9 +184,10 @@ namespace BE.LabelExtension.Core.Store
 
         /// <summary>
         /// Deletes a label in all languages of its label file, in the label store only, until
-        /// the developer saves. The search no longer finds it. A translation in another
-        /// writable file, such as the <c>_Extension</c>, goes as well, so the label does not
-        /// come back with the next load.
+        /// the developer saves. Until then the search still finds it, marked as deleted, and
+        /// <see cref="Restore"/> brings it back. A translation in another writable file, such as
+        /// the <c>_Extension</c>, goes as well, so the label does not come back with the next
+        /// load.
         /// </summary>
         /// <param name="label">The label.</param>
         /// <returns>Whether the label can be deleted; not for read-only labels (TC07).</returns>
@@ -196,10 +200,44 @@ namespace BE.LabelExtension.Core.Store
 
             lock (this.edits)
             {
-                this.edits.Remove(label);
+                if (this.edits.TryGetValue(label, out HashSet<string>? languages))
+                {
+                    this.editsOfDeleted[label] = languages;
+                    this.edits.Remove(label);
+                }
+
                 this.deletions.Add(label);
                 label.IsDeleted = true;
                 label.IsModified = true;
+            }
+
+            this.Changed?.Invoke(this, EventArgs.Empty);
+            return true;
+        }
+
+        /// <summary>
+        /// Takes back a deletion not yet saved (wish from D3). Changes of the label made before
+        /// it was deleted come back with it.
+        /// </summary>
+        /// <param name="label">The deleted label.</param>
+        /// <returns>Whether the label was deleted and is back; not once the deletion is saved.</returns>
+        public bool Restore(Label label)
+        {
+            lock (this.edits)
+            {
+                if (!this.deletions.Remove(label))
+                {
+                    return false;
+                }
+
+                if (this.editsOfDeleted.TryGetValue(label, out HashSet<string>? languages))
+                {
+                    this.edits[label] = languages;
+                    this.editsOfDeleted.Remove(label);
+                }
+
+                label.IsDeleted = false;
+                label.IsModified = this.edits.ContainsKey(label);
             }
 
             this.Changed?.Invoke(this, EventArgs.Empty);
@@ -287,6 +325,7 @@ namespace BE.LabelExtension.Core.Store
                 foreach (var deletion in deletePaths.Where(d => d.Value.All(written.Contains)))
                 {
                     this.deletions.Remove(deletion.Key);
+                    this.editsOfDeleted.Remove(deletion.Key);
                     deletion.Key.IsModified = false;
                     removed.Add(deletion.Key);
                 }

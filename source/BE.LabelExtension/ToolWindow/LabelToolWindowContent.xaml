@@ -60,6 +60,10 @@
                    Background="Transparent" BorderThickness="0" HorizontalContentAlignment="Stretch"
                    ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto"
                    VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling">
+            <!-- The Delete key deletes the selected label, as the button does (wish from D3). -->
+            <ListBox.InputBindings>
+              <KeyBinding Key="Delete" Command="{Binding DeleteCommand}" CommandParameter="key" />
+            </ListBox.InputBindings>
             <ListBox.ItemTemplate>
               <DataTemplate>
                 <Grid>
@@ -152,7 +156,7 @@
             </WrapPanel.Style>
             <Button Content="Find references" Command="{Binding FindReferencesCommand}" Margin="0,0,4,2" MinWidth="60" Padding="8,2"
                     Style="{DynamicResource {x:Static styles:VsResourceKeys.ButtonStyleKey}}" />
-            <Button Content="Delete" Command="{Binding DeleteCommand}" Margin="0,0,4,2" MinWidth="60" Padding="8,2"
+            <Button Content="{Binding DeleteText}" Command="{Binding DeleteCommand}" Margin="0,0,4,2" MinWidth="60" Padding="8,2"
                     Style="{DynamicResource {x:Static styles:VsResourceKeys.ButtonStyleKey}}" />
             <Button Content="{Binding CopyText}" Command="{Binding CopyCommand}" Margin="0,0,4,2" MinWidth="60" Padding="8,2"
                     Style="{DynamicResource {x:Static styles:VsResourceKeys.ButtonStyleKey}}" />
@@ -224,7 +228,8 @@
                           </Style.Triggers>
                         </Style>
                       </Grid.Style>
-                      <TextBox Grid.Column="0" Text="{Binding Text, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                      <!-- A suggestion of the translation service stands in italics (FA10). -->
+                      <TextBox Grid.Column="0" Text="{Binding Text, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" FontStyle="{Binding TextStyle}"
                                IsReadOnly="{Binding IsReadOnly}" IsEnabled="{Binding HasFile}" AutomationProperties.Name="Text"
                                Style="{DynamicResource {x:Static styles:VsResourceKeys.TextBoxStyleKey}}" />
                       <TextBox Grid.Column="1" Margin="4,0,0,0" Text="{Binding Comment, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"

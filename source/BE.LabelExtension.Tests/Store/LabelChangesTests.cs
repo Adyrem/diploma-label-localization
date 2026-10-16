@@ -257,7 +257,7 @@ namespace BE.LabelExtension.Tests.Store
 
             Assert.True(this.changes.Delete(label));
             Assert.True(label.IsDeleted);
-            Assert.DoesNotContain(new LabelSearch(this.store).Search(new SearchQuery("Lieferadresse", SearchMode.ExactMatch, true)), h => h.Label == label);
+            Assert.Contains(new LabelSearch(this.store).Search(new SearchQuery("Lieferadresse", SearchMode.ExactMatch, true)), h => h.Label == label);
             Assert.Contains("BDM110000003=Lieferadresse", File.ReadAllLines(this.packages.LabelFilePath("BEDemo1", "BEDemo1", "BDM1", "de")));
 
             this.changes.Save();
@@ -269,6 +269,39 @@ namespace BE.LabelExtension.Tests.Store
             }
 
             Assert.DoesNotContain(File.ReadAllLines(this.packages.LabelFilePath("BEDemo2", "BEDemo2", "BDM1_Extension", "it-CH")), l => l.StartsWith("BDM110000003="));
+            Assert.Equal(0, this.changes.Count);
+        }
+
+        /// <summary>Wish from D3: a deletion not yet saved can be taken back, with the changes made before it.</summary>
+        [Fact]
+        public async Task Restore_DeletedLabel_ComesBackWithItsChanges()
+        {
+            await this.LoadAsync("de", "it-CH");
+            Label label = this.store.Find("@BDM1:BDM110000003")!;
+            Assert.True(this.changes.Edit(label, "de", "Lieferadresse neu", null));
+            Assert.True(this.changes.Delete(label));
+
+            Assert.True(this.changes.Restore(label));
+
+            Assert.False(label.IsDeleted);
+            Assert.True(label.IsModified);
+            Assert.Equal(1, this.changes.Count);
+            this.changes.Save();
+            Assert.Contains("BDM110000003=Lieferadresse neu", File.ReadAllLines(this.packages.LabelFilePath("BEDemo1", "BEDemo1", "BDM1", "de")));
+            Assert.Contains("BDM110000003=Delivery address", File.ReadAllLines(this.packages.LabelFilePath("BEDemo1", "BEDemo1", "BDM1", "en-US")));
+            Assert.False(this.changes.Restore(label));
+        }
+
+        [Fact]
+        public async Task Restore_UnchangedLabel_LeavesNothingToSave()
+        {
+            await this.LoadAsync("de");
+            Label label = this.store.Find("@BDM1:BDM110000003")!;
+            Assert.True(this.changes.Delete(label));
+
+            Assert.True(this.changes.Restore(label));
+
+            Assert.False(label.IsModified);
             Assert.Equal(0, this.changes.Count);
         }
 
