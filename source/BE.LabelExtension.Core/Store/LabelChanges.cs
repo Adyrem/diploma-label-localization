@@ -179,6 +179,10 @@ namespace BE.LabelExtension.Core.Store
         /// an ID in the new form, in every language both label files have, with text and comment
         /// of the original. Languages that are not loaded are read from the files of the
         /// original. Labels of read-only models and compiled labels can be copied (TC07).
+        /// A regional language the target lacks, such as <c>de-CH</c>, fills its base language,
+        /// such as <c>de</c>, if the target has it and the original has no text there (wish
+        /// from D4). The other way round it does not, because <c>de</c> may hold an ß that
+        /// <c>de-CH</c> does not use.
         /// </summary>
         /// <param name="original">The label to copy.</param>
         /// <param name="target">One of <see cref="CreatableLabelFiles"/>.</param>
@@ -188,8 +192,7 @@ namespace BE.LabelExtension.Core.Store
             var translations = new List<LabelText>();
             foreach (string language in target.Languages)
             {
-                Translation? loaded = original.GetTranslation(language);
-                LabelEntry? entry = loaded != null ? new LabelEntry(original.Id.Key, loaded.Text, loaded.Comment) : this.ReadFromFile(original, language);
+                LabelEntry? entry = this.EntryOf(original, language) ?? this.EntryOfRegionalLanguage(original, target, language);
                 if (entry != null)
                 {
                     translations.Add(new LabelText(language, entry.Text, entry.Comment));
@@ -462,6 +465,39 @@ namespace BE.LabelExtension.Core.Store
 
             languages.Add(language);
             label.IsModified = true;
+        }
+
+        // Text and comment of a label in a language, loaded or read from its file.
+        private LabelEntry? EntryOf(Label label, string language)
+        {
+            Translation? loaded = label.GetTranslation(language);
+            return loaded != null ? new LabelEntry(label.Id.Key, loaded.Text, loaded.Comment) : this.ReadFromFile(label, language);
+        }
+
+        // For a base language such as de: the text of a regional language of the original,
+        // such as de-CH, that the target does not exist in and would otherwise lose.
+        private LabelEntry? EntryOfRegionalLanguage(Label original, LabelFile target, string language)
+        {
+            if (language.IndexOf('-') >= 0)
+            {
+                return null;
+            }
+
+            IEnumerable<string> regional = original.Translations.Select(t => t.Language)
+                .Concat(original.LabelFile.Languages)
+                .Where(l => l.StartsWith(language + "-", StringComparison.OrdinalIgnoreCase) && target.GetPath(l) == null)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(l => l, StringComparer.OrdinalIgnoreCase);
+            foreach (string variant in regional)
+            {
+                if (this.EntryOf(original, variant) is LabelEntry entry)
+                {
+                    this.messages.Report(MessageSeverity.Message, $"{original.Id.FullId} has no text in {language}, and {target.Name} does not exist in {variant}: the new label takes the {variant} text in {language}.");
+                    return entry;
+                }
+            }
+
+            return null;
         }
 
         // Text and comment of a language that is not loaded, from the file of the label file.

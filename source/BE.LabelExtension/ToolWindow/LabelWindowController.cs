@@ -273,7 +273,9 @@ namespace BE.LabelExtension.ToolWindow
 
         /// <summary>
         /// Opens a label in the detail view, for the command on a label ID in the code (FA08).
-        /// The hit list shows it as well, with the search mode Label id.
+        /// The hit list shows it as well, with the search mode Label id. It searches at once,
+        /// also when the search field already holds the ID: a list such as Element labels may
+        /// have replaced its hits since (D4).
         /// </summary>
         /// <param name="id">The label ID.</param>
         /// <returns>Why the label cannot be shown, or <c>null</c> if it is.</returns>
@@ -291,6 +293,7 @@ namespace BE.LabelExtension.ToolWindow
 
             this.Data.SelectedModeIndex = LabelIdMode;
             this.Data.SearchText = id.FullId;
+            this.ScheduleSearch(TimeSpan.Zero);
             this.ShowDetail(label);
             return null;
         }
@@ -1009,8 +1012,7 @@ namespace BE.LabelExtension.ToolWindow
                 new KeyValuePair<ChoiceDescription, bool>("Save", true),
                 new KeyValuePair<ChoiceDescription, bool>("Keep unsaved", false),
             });
-            string question = (count == 1 ? "1 label has" : $"{count} labels have")
-                + " changes that are not saved. Save them now? Kept unsaved, they stay changed until you save them; closing Visual Studio asks again.";
+            string question = count == 1 ? "1 label is not saved. Save it now?" : $"{count} labels are not saved. Save them now?";
             if (!await this.extensibility.Shell().ShowPromptAsync(question, new PromptOptions<bool>(choices, 0, false), cancellationToken))
             {
                 return;

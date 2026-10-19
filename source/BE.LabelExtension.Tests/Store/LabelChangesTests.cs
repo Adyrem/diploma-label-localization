@@ -355,6 +355,40 @@ namespace BE.LabelExtension.Tests.Store
             Assert.Same(original, this.store.Find("@BDM1:BDM110000003"));
         }
 
+        /// <summary>
+        /// Wish from D4: the target has fr but not fr-CH, the original fr-CH but not fr. The
+        /// fr-CH text fills fr, also when fr-CH is not loaded.
+        /// </summary>
+        [Fact]
+        public async Task Copy_TargetWithTheBaseLanguageOnly_TakesTheRegionalText()
+        {
+            this.RenameLanguage("BEDemo2", "BDM2", "fr-CH", "fr");
+            await this.LoadAsync("de", "fr");
+            Label original = this.store.Find("@BDM1:BDM110000003")!;
+
+            Label copy = this.changes.Copy(original, this.store.LabelFiles.Single(f => f.Name == "BDM2"))!;
+
+            Assert.Equal("Adresse de livraison", copy.GetText("fr"));
+            Assert.Contains(copy.Id.Key + "=Adresse de livraison", File.ReadAllLines(this.packages.LabelFilePath("BEDemo2", "BEDemo2", "BDM2", "fr")));
+            Assert.Equal("Lieferadresse", copy.GetText("de"));
+            Assert.Contains(this.messages.Messages, m => m.Severity == MessageSeverity.Message && m.Message.Contains("takes the fr-CH text in fr"));
+        }
+
+        /// <summary>The other way round the base language does not fill a regional one: de may hold an ß that de-CH does not use.</summary>
+        [Fact]
+        public async Task Copy_TargetWithTheRegionalLanguageOnly_DoesNotTakeTheBaseText()
+        {
+            this.RenameLanguage("BEDemo2", "BDM2", "de", "de-CH");
+            await this.LoadAsync("de", "de-CH", "en-US");
+            Label original = this.store.Find("@BDM1:BDM110000003")!;
+
+            Label copy = this.changes.Copy(original, this.store.LabelFiles.Single(f => f.Name == "BDM2"))!;
+
+            Assert.Null(copy.GetTranslation("de-CH"));
+            Assert.Equal("Delivery address", copy.GetText("en-US"));
+            Assert.DoesNotContain(File.ReadAllLines(this.packages.LabelFilePath("BEDemo2", "BEDemo2", "BDM2", "de-CH")), l => l.StartsWith(copy.Id.Key + "="));
+        }
+
         /// <summary>TC07 in the core logic: labels of read-only models in the old form can be copied, and the copy has the new form.</summary>
         [Fact]
         public async Task Copy_ReadOnlyLabelInOldForm_GivesANewLabelInTheNewForm()
@@ -394,6 +428,15 @@ namespace BE.LabelExtension.Tests.Store
             }
 
             return this.store.LoadAsync(settings, CancellationToken.None);
+        }
+
+        // Turns the file of a label file in one language into one of another language.
+        private void RenameLanguage(string model, string labelFile, string from, string to)
+        {
+            string source = this.packages.LabelFilePath(model, model, labelFile, from);
+            string target = this.packages.LabelFilePath(model, model, labelFile, to);
+            Directory.CreateDirectory(Path.GetDirectoryName(target)!);
+            File.Move(source, target);
         }
     }
 }
