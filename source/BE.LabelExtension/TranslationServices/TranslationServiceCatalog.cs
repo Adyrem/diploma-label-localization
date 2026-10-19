@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.Serialization;
 using BE.LabelExtension.Core.Store;
 using BE.LabelExtension.Core.TranslationServices;
@@ -10,8 +11,10 @@ using BE.LabelExtension.Settings;
 namespace BE.LabelExtension.TranslationServices
 {
     /// <summary>
-    /// The translation services the settings can choose (FA10, FA11). A further service is a
-    /// class of its own and one entry in <see cref="Entries"/> (NFA03).
+    /// The translation services the settings can choose (FA10, FA11). They are found in the
+    /// core and in the extension, so a further service is a class of its own in one of the two
+    /// projects, and no existing class changes (NFA03, TC38). See
+    /// <see cref="TranslationServiceDiscovery"/> for what counts as a service.
     /// </summary>
     /// <remarks>
     /// The API key is read from the settings file and decrypted for every translation, so a key
@@ -19,25 +22,20 @@ namespace BE.LabelExtension.TranslationServices
     /// </remarks>
     internal sealed class TranslationServiceCatalog : IDisposable
     {
-        // Name and creation of each service. Each gets a function that reads its key.
-        private static readonly (string Name, Func<Func<string?>, ITranslationService> Create)[] Entries =
-        {
-            (DeepLTranslationService.ServiceName, apiKey => new DeepLTranslationService(apiKey)),
-#if DEBUG
-            (SimulatedTranslationService.ServiceName, _ => new SimulatedTranslationService()),
-#endif
-        };
+        private static readonly Assembly[] Assemblies = { typeof(ITranslationService).Assembly, typeof(TranslationServiceCatalog).Assembly };
+
+        private static readonly Lazy<IReadOnlyList<string>> ServiceNames = new(ReadNames);
 
         private readonly IReadOnlyList<ITranslationService> services;
 
         /// <summary>Creates the services.</summary>
         public TranslationServiceCatalog()
         {
-            this.services = Entries.Select(e => e.Create(ReadApiKey)).ToList();
+            this.services = TranslationServiceDiscovery.Create(Assemblies, ReadApiKey);
         }
 
         /// <summary>The names of the services, for the options page.</summary>
-        public static IReadOnlyList<string> Names { get; } = Entries.Select(e => e.Name).ToList();
+        public static IReadOnlyList<string> Names => ServiceNames.Value;
 
         /// <summary>The service with the given name.</summary>
         /// <param name="name">The name from the settings.</param>
@@ -48,7 +46,21 @@ namespace BE.LabelExtension.TranslationServices
         /// <inheritdoc />
         public void Dispose()
         {
-            foreach (IDisposable service in this.services.OfType<IDisposable>())
+            Release(this.services);
+        }
+
+        // The names are properties of the services; the instances made for them are released at once.
+        private static IReadOnlyList<string> ReadNames()
+        {
+            IReadOnlyList<ITranslationService> found = TranslationServiceDiscovery.Create(Assemblies, () => null);
+            List<string> names = found.Select(s => s.Name).ToList();
+            Release(found);
+            return names;
+        }
+
+        private static void Release(IEnumerable<ITranslationService> services)
+        {
+            foreach (IDisposable service in services.OfType<IDisposable>())
             {
                 service.Dispose();
             }

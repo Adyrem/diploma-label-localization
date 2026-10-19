@@ -12,9 +12,10 @@ namespace BE.LabelExtension.Threading
     /// after Visual Studio has released the extension.
     /// </summary>
     /// <remarks>
-    /// The extension has no AsyncPackage, whose factory would do this. The factory of
-    /// <see cref="Microsoft.VisualStudio.Shell.ThreadHelper"/> does not block shutdown
-    /// and is therefore unsuitable for fire and forget (analyzer rule VSSDK007).
+    /// The services of the new model do not belong to the AsyncPackage, whose factory would
+    /// do this; the package of the classic part loads on its own in the background. The
+    /// factory of <see cref="Microsoft.VisualStudio.Shell.ThreadHelper"/> does not block
+    /// shutdown and is therefore unsuitable for fire and forget (analyzer rule VSSDK007).
     /// </remarks>
     internal sealed class ExtensionTasks : IDisposable
     {

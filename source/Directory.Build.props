@@ -13,6 +13,6 @@
     <Product>BE-LabelExtension</Product>
     <Authors>Adrian Aeschlimann</Authors>
     <Copyright>Copyright 2026 Adrian Aeschlimann</Copyright>
-    <Version>0.1.0</Version>
+    <Version>1.0.0</Version>
   </PropertyGroup>
 </Project>

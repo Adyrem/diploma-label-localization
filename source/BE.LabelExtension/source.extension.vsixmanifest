@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
   <Metadata>
-    <Identity Id="BE.LabelExtension.7c41e2d9" Version="0.1.0" Language="en-US" Publisher="Adrian Aeschlimann" />
+    <Identity Id="BE.LabelExtension.7c41e2d9" Version="1.0.0" Language="en-US" Publisher="Adrian Aeschlimann" />
     <DisplayName>BE-LabelExtension</DisplayName>
     <Description xml:space="preserve">Search, create, edit and translate the labels of Dynamics 365 Finance and Operations directly in Visual Studio.</Description>
+    <!-- MIT: the license notice goes along with every copy of the package. -->
+    <License>LICENSE</License>
   </Metadata>
   <!--
     The extension type makes Visual Studio read .vsextension/extension.json of the new

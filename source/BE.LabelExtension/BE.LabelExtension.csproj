@@ -65,6 +65,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- The MIT license of the repository, named in the manifest and shown by the installer. -->
+    <Content Include="..\..\LICENSE" Link="LICENSE" IncludeInVSIX="true" />
+  </ItemGroup>
+
+  <ItemGroup>
     <!-- Remote UI: the XAML is sent to Visual Studio as text, not compiled as a WPF page. -->
     <Page Remove="ToolWindow\LabelToolWindowContent.xaml" />
     <EmbeddedResource Include="ToolWindow\LabelToolWindowContent.xaml" LogicalName="BE.LabelExtension.ToolWindow.LabelToolWindowContent.xaml" />
