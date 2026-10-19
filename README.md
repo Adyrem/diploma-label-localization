@@ -21,7 +21,9 @@ Gebaut wird BE-LabelExtension, eine Extension für Visual Studio, mit der sich L
 | Ordner | Inhalt |
 | --- | --- |
 | `documentation/` | Projektdokumentation in Typst, Diagramme in PlantUML |
-| `source/` | Quellcode |
+| `source/` | Quellcode der Extension, Installation, Build und Erweiterung in [source/README.md](source/README.md) |
+
+Die Version 1.0.0 der Extension trägt im Repository das Tag `v1.0.0`.
 
 ## Dokumentation bauen
 

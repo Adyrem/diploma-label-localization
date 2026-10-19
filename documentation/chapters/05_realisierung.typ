@@ -396,6 +396,91 @@ wieder gelöscht.
   ) <d3_ergebnisse>
 ]
 
+#heading(outlined: false, level: 4)[D4]
+
+D4 lief am 19.10.2026 als letzter Durchgang auf beiden Systemen der Testumgebung,
+auf dem Stand nach AP4.1 mit den umgesetzten Kann-Anforderungen. Auf der Unified
+Developer Experience lief der Debug-Build. Die klassische Entwicklungs-VM war aus
+organisatorischen Gründen wieder die aus D1, mit Visual Studio 2022, und dort lief
+der Release-Build. Er verhielt sich wie der Debug-Build. Korrekturen nach D4 sind
+nur auf dem privaten Gerät geprüft.
+
+#[
+  #show figure: set align(left)
+  #set text(size: 9.5pt)
+  #figure(
+    table(
+      align: left,
+      columns: (0.8fr, 1.7fr, 1fr),
+      table.header(
+        [*Prüfpunkt*], [*Ergebnis*], [*Folge*],
+      ),
+      [Laden (TC25, TC35)],
+      [392'953 Labels in 8,7 s, davon 7,6 s für das Lesen der Dateien. Während des
+       Ladens reagierte Visual Studio auf Menü und Solution Explorer.],
+      [Keine.],
+
+      [Suchdauer (TC35)],
+      [Zehn Suchen je Suchmodus dauerten höchstens 253 ms, im Median je nach Modus
+       72 bis 251 ms.],
+      [Keine.],
+
+      [Editor (TC26 bis TC28, KA03)],
+      [Tooltip, Inline-Anzeige mit dem Argument von `strFmt` an Stelle des
+       Platzhalters, Open in Label Window und Search Label am Wort funktionieren.],
+      [Keine.],
+
+      [Verwendungen und Labels des Elements (TC29, KA04)],
+      [Der Sprung an die Fundstellen öffnet Editor und Designer. Element labels
+       zeigt die Labels der Klasse und des Datentyps.],
+      [Keine.],
+
+      [Designer (TC32, KA05)],
+      [Der Bereich zur gewählten Node zeigt ihre Label-Eigenschaften, Open und
+       Extract funktionieren. Stand die ID schon im Suchfeld und hatte Element
+       labels die Trefferliste seither ersetzt, zeigte Open das Label nicht.],
+      [Behoben, Open sucht jetzt immer neu.],
+
+      [Extraktion (TC31, KA08)],
+      [Ein String mit dem Text eines bestehenden Labels erhielt dessen ID, statt
+       ein neues Label anzulegen. Undo und Redo funktionieren.],
+      [Keine.],
+
+      [Löschen und Wiederherstellen],
+      [Die Delete-Taste löscht, und Restore holt ein gelöschtes Label auch nach
+       einer neuen Suche zurück.],
+      [Keine.],
+
+      [Übersetzungsdienst (TC33)],
+      [Die Vorschläge von DeepL stehen kursiv, ohne Hinweiszeile.],
+      [Keine.],
+
+      [Verschieben und Kompilieren (TC30, TC34)],
+      [Das Label liess sich mit Umstellen der Referenzen in eine zweite Label-Datei
+       eines anderen Models verschieben, der Build lief danach ohne Fehler. Die eine
+       Datei hat nur de-CH, die andere nur de, deshalb kam der Text aus de-CH
+       nicht mit.],
+      [Anpassung umgesetzt. Fehlt dem Ziel de-CH, übernimmt de den Text, ebenso
+       bei fr-CH und it-CH.],
+
+      [Unbenutzte Labels (KA09)],
+      [Unused labels listet keines der verwendeten Test-Labels.],
+      [Keine.],
+
+      [Rückfragen beim Schliessen],
+      [Beide Rückfragen kamen. Die beim Schliessen des Tool Window war zu lang.],
+      [Gekürzt.],
+
+      [Klassische VM (TC24, TC37)],
+      [Die Extension fand das Verzeichnis auf J: selbst, die Optionsseite schlug
+       es vor, und sie lud 384'429 Labels in 9,3 s. Suche, Tooltip, Sprung und das
+       Nebeneinander mit dem bestehenden Tool funktionierten.],
+      [Keine.],
+    ),
+    caption: [Ergebnisse von D4 (eigene Darstellung)]
+  ) <d4_ergebnisse>
+]
+
 === Testergebnisse
 
 == Zielerreichung
