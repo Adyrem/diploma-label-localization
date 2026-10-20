@@ -1,3 +1,4 @@
+#set document(title: "IDE-Erweiterung zentraler Entwicklungsprozesse", author: "Adrian Aeschlimann")
 #set text(lang: "de")
 #set page("a4")
 #set page(margin: 2cm)
@@ -155,6 +156,10 @@ Unterschrift:
        das Befundprotokoll und die getroffenen Entscheide. Die Befunde wurden
        geprüft und anschliessend eingearbeitet.],
       [@initialisierung, @konzept, Lebenslauf, Verzeichnisse, Anhang],
+      [Claude Code (Anthropic)],
+      [Review der gesamten Arbeit gegen Richtlinien und Bewertungsraster in einer
+       eigenen Session. Die Befunde wurden geprüft und teilweise eingearbeitet.],
+      [Gesamtes Dokument],
       [Typst],
       [Formatierung und Erzeugung des Dokuments.],
       [Gesamtes Dokument],
@@ -198,6 +203,7 @@ Unterschrift:
       [Regex], [Regular Expression],
       [REST], [Representational State Transfer],
       [SDK], [Software Development Kit],
+      [SHA-256], [Secure Hash Algorithm mit 256 Bit],
       [TC], [Test Case, Testfall],
       [TO], [Testobjekt],
       [UC], [Use Case],
@@ -207,6 +213,7 @@ Unterschrift:
       [VSIX], [Visual Studio Extension],
       [VSSDK], [Visual Studio Software Development Kit],
       [WPF], [Windows Presentation Foundation],
+      [XAML], [Extensible Application Markup Language],
       [XML], [Extensible Markup Language],
     ),
     caption: [Abkürzungsverzeichnis (eigene Darstellung)]
@@ -253,6 +260,10 @@ Unterschrift:
        Package-Verzeichnis auf der Festplatte, sodass sich die dort abgelegten
        Models lesen und schreiben lassen, ohne dass ein Anwendungsserver oder eine
        Datenbank läuft.],
+      [Element],
+      [Objekt eines Models, etwa eine Klasse, Table, Form oder ein Datentyp. Jedes
+       Element liegt als XML-Datei in einem Ordner seines Typs wie `AxClass` und
+       öffnet sich im Designer, seinen Code zeigt der X++-Editor.],
       [Feature Parity],
       [Gleicher Funktionsumfang wie ein bestehendes System. In dieser Arbeit der
        Funktionsumfang des BE-LabelEditors.],

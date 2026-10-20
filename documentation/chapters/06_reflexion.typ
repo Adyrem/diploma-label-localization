@@ -31,20 +31,20 @@ Graue Balken zeigen die Planung, farbige den effektiven Verlauf.
       table.header(
         [*Nr.*],
         [*Arbeitspaket*],
-        [*Soll\ Tage*],
-        [*Ist\ Tage*],
+        [*Soll\ h*],
+        [*Ist\ h*],
         [*Ab-\ weichung*],
         [*Begründung*],
       ),
-      [AP1], [Projektinitialisierung], [7], [], [], [],
-      [AP2], [Konzept], [3], [], [], [],
-      [AP3], [Realisierung], [8], [], [], [],
-      [AP4], [Tests und Abschluss Realisierung], [3], [], [], [],
-      [AP5], [Dokumentation finalisieren], [3], [], [], [],
-      [AP6], [Präsentation vorbereiten], [4], [], [], [],
-      [], [*Total*], [*28*], [], [], [],
+      [AP1], [Projektinitialisierung], [56], [44], [−12], [],
+      [AP2], [Konzept], [24], [21], [−3], [],
+      [AP3], [Realisierung], [64], [48], [−16], [],
+      [AP4], [Tests und Abschluss Realisierung], [24], [9], [−15], [],
+      [AP5], [Dokumentation finalisieren], [24], [], [], [],
+      [AP6], [Präsentation vorbereiten], [32], [], [], [],
+      [], [*Total*], [*224*], [], [], [],
     ),
-    caption: [Soll/Ist-Vergleich Aufwand]
+    caption: [Soll/Ist-Vergleich Aufwand (eigene Darstellung)]
   ) <soll_ist_vergleich>
 ]
 
@@ -64,6 +64,6 @@ Graue Balken zeigen die Planung, farbige den effektiven Verlauf.
       [], [], [],
       [], [], [],
     ),
-    caption: [Lessons learned]
+    caption: [Lessons learned (eigene Darstellung)]
   ) <lessons_learned>
 ]

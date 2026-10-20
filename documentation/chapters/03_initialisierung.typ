@@ -48,7 +48,7 @@ mit einem synthetischen Demo-Datensatz.
 
 #figure(
   image("../screenshots/GUI_full.png", width: 100%),
-  caption: [BE-LabelEditor 1.8.3, Hauptansicht (eigene Darstellung)]
+  caption: [Hauptansicht der Version 1.8.3 (Screenshot BE-LabelEditor, BE-terna AG)]
 ) <ist_screenshot>
 
 Die Gruppe Tracing (Preview) im Ribbon ist eine interne Vorschaufunktion, die sich
@@ -110,29 +110,29 @@ abgeschlossen ist.
 
 #figure(
   image("../screenshots/search_options.png", width: 7cm),
-  caption: [Auswahl der Suchmodi (eigene Darstellung)]
+  caption: [Auswahl der Suchmodi (Screenshot BE-LabelEditor, BE-terna AG)]
 ) <ist_suchmodi>
 
 #figure(
   image("../screenshots/create_label.png", width: 7cm),
   caption: [Leiste zum Anlegen neuer Labels, ein Knopf je beschreibbares Model
-            (eigene Darstellung)]
+            (Screenshot BE-LabelEditor, BE-terna AG)]
 ) <ist_erstellen>
 
 #figure(
   image("../screenshots/find_references.png", width: 100%),
-  caption: [Ergebnis der Verwendungssuche (eigene Darstellung)]
+  caption: [Ergebnis der Verwendungssuche (Screenshot BE-LabelEditor, BE-terna AG)]
 ) <ist_verwendungssuche>
 
 #figure(
   image("../screenshots/settings.png", width: 11cm),
   caption: [Einstellungsseite, im Demo-Datensatz ohne hinterlegte User-IDs
-            (eigene Darstellung)]
+            (Screenshot BE-LabelEditor, BE-terna AG)]
 ) <ist_einstellungen>
 
 #figure(
   image("../screenshots/console.png", width: 100%),
-  caption: [Konsole beim Laden der Label-Dateien (eigene Darstellung)]
+  caption: [Konsole beim Laden der Label-Dateien (Screenshot BE-LabelEditor, BE-terna AG)]
 ) <ist_konsole>
 
 @kontextwechsel zeigt den heutigen Ablauf, wenn im Code ein Label gebraucht wird.
@@ -152,7 +152,7 @@ Kompilieren bereits heute. Herauslösen und ersetzen muss der Entwickler sie abe
 von Hand. Neue Labels werden in allen Sprachen mit demselben
 Ausgangstext vorbelegt, übersetzt wird anschliessend manuell.
 
-== Aufgabenstellung
+== Aufgabenstellung <aufgabenstellung>
 
 Das bestehende Tool soll durch eine Extension für Visual Studio abgelöst werden.
 Visual Studio ist dabei gesetzt, weil dort bereits das gesamte Tooling für Dynamics
@@ -1092,7 +1092,7 @@ Möglichkeiten im Editor, weil in beiden Fällen MEF zur Verfügung steht, und b
 teilen dasselbe Absturzrisiko. Das neue Modell definiert Commands und Tool Windows
 im Code statt in einer eigenen Konfigurationsdatei. Seine Commands laufen auf einem
 Background Thread, was ein ungewolltes Einfrieren der Oberfläche vermeidet
-@ms-extensibility-models. Microsoft empfiehlt es für neue Erweiterungen, welche auf
+@ms-extensibility-models. Das gibt C bei der Stabilität die bessere Note. Microsoft empfiehlt es für neue Erweiterungen, welche auf
 Dienste des VSSDK angewiesen sind, und beschreibt die Unterstützung im selben Prozess
 zugleich als Angebot für frühe Anwender @ms-inproc-extensions. Das klassische VSSDK
 ist dagegen das Modell, auf dem die meisten Extensions beruhen
@@ -1310,9 +1310,9 @@ ist.
       [AP0], [Dokumentation laufend], [04.09.], [31.10.], [--], [04.09.], [], [],
       [AP1], [Projektinitialisierung], [04.09.], [26.09.], [7], [04.09.], [24.09.], [2 Tage früher],
       [AP2], [Konzept], [01.10.], [08.10.], [3], [25.09.], [01.10.], [7 Tage früher],
-      [AP3], [Realisierung], [09.10.], [21.10.], [8], [02.10.], [], [],
-      [AP4], [Tests und Abschluss Realisierung], [22.10.], [24.10.], [3], [], [], [],
-      [AP5], [Dokumentation finalisieren und Review], [29.10.], [31.10.], [3], [], [], [],
+      [AP3], [Realisierung], [09.10.], [21.10.], [8], [02.10.], [15.10.], [6 Tage früher],
+      [AP4], [Tests und Abschluss Realisierung], [22.10.], [24.10.], [3], [16.10.], [19.10.], [5 Tage früher],
+      [AP5], [Dokumentation finalisieren und Review], [29.10.], [31.10.], [3], [15.10.], [], [],
       [AP6], [Präsentation vorbereiten], [05.11.], [12.11.], [4], [], [], [],
     ),
     caption: [Arbeitspakete Soll/Ist (eigene Darstellung)]
@@ -1338,8 +1338,8 @@ ist.
       [M1], [Projektinitialisierung abgeschlossen], [26.09.2026], [24.09.2026], [2 Tage früher],
       [M2], [1. Vorzeigetermin Betreuung], [07.10.2026], [07.10.2026], [keine],
       [M3], [Konzept abgeschlossen], [08.10.2026], [01.10.2026], [7 Tage früher],
-      [M4], [2. Vorzeigetermin Betreuung (zu vereinbaren)], [22.10.2026], [], [],
-      [M5], [Code Freeze], [24.10.2026], [], [],
+      [M4], [2. Vorzeigetermin Betreuung], [27.10.2026], [], [],
+      [M5], [Code Freeze], [24.10.2026], [19.10.2026], [5 Tage früher],
       [M6], [Abgabe Diplomarbeit, 17.00 Uhr], [02.11.2026], [], [],
       [M7], [Präsentation], [13.11.2026], [], [],
     ),

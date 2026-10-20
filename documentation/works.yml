@@ -67,7 +67,7 @@ ms-inproc-extensions:
 saxblog-xref:
   type: Web
   title: Code to build cross reference data without a full compile
-  author: Ievgen Miroshnikov
+  author: Miroshnikov, Ievgen
   url:
     value: https://ievgensaxblog.wordpress.com/2018/12/09/msdyn365fo-code-to-build-cross-reference-data-without-a-full-compile/
     date: 2026-09-10
@@ -260,3 +260,39 @@ osi-mit:
   url:
     value: https://opensource.org/license/mit
     date: 2026-10-01
+
+ms-remote-ui:
+  type: Web
+  title: Remote UI
+  author: Microsoft
+  publisher: Microsoft Learn
+  url:
+    value: https://learn.microsoft.com/en-us/visualstudio/extensibility/visualstudio.extensibility/inside-the-sdk/remote-ui
+    date: 2026-10-19
+
+ms-data-protection:
+  type: Web
+  title: How to use data protection
+  author: Microsoft
+  publisher: Microsoft Learn
+  url:
+    value: https://learn.microsoft.com/en-us/dotnet/standard/security/how-to-use-data-protection
+    date: 2026-10-19
+
+ms-max-path:
+  type: Web
+  title: Maximum Path Length Limitation
+  author: Microsoft
+  publisher: Microsoft Learn
+  url:
+    value: https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation
+    date: 2026-10-19
+
+ms-extensibility-license:
+  type: Web
+  title: Microsoft Software License Terms, Microsoft Visual Studio Add-ons and Extensions
+  author: Microsoft
+  publisher: NuGet
+  url:
+    value: https://www.nuget.org/packages/Microsoft.VisualStudio.Extensibility.Sdk/17.14.40608/License
+    date: 2026-10-19
