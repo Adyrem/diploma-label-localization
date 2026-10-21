@@ -1,6 +1,8 @@
 @startuml
 ' Zusammenhang von Model, Label-Datei, Label und Übersetzung.
 ' Rendern: plantuml -tpng -charset UTF-8 Labelstruktur.puml
+' Höhere Auflösung, damit das Bild im PDF scharf bleibt.
+skinparam dpi 240
 
 skinparam defaultFontSize 13
 skinparam classAttributeIconSize 0

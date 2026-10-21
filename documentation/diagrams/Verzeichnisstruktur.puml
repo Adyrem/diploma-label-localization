@@ -1,7 +1,7 @@
 @startsalt
-' Ablage der Label-Dateien im Package-Verzeichnis der lokalen Installation.
+' Aufbau des Package-Verzeichnisses mit einem Element und den Label-Dateien.
 ' Pfade entsprechen dem synthetischen Demo-Datensatz.
-' Rendern: plantuml -tpng -charset UTF-8 Verzeichnisstruktur.puml
+' Rendern: plantuml -tpng -charset UTF-8 -Sdpi=240 Verzeichnisstruktur.puml
 {
 {T
 + PackagesLocalDirectory
@@ -9,6 +9,8 @@
 +++ Descriptor
 ++++ BDM1.xml                    | beschreibt das Model und dessen Referenzen
 +++ BDM1                         | Model
+++++ AxClass
++++++ BDMDeliveryHelper.xml      | Klasse mit ihrem X++-Code
 ++++ AxLabelFile
 +++++ LabelResources
 ++++++ de

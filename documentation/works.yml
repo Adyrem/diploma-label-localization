@@ -296,3 +296,33 @@ ms-extensibility-license:
   url:
     value: https://www.nuget.org/packages/Microsoft.VisualStudio.Extensibility.Sdk/17.14.40608/License
     date: 2026-10-19
+
+ms-xpp:
+  type: Web
+  title: X++ language reference
+  author: Microsoft
+  publisher: Microsoft Learn
+  date: 2026-03-31
+  url:
+    value: https://learn.microsoft.com/en-us/dynamics365/fin-ops-core/dev-itpro/dev-ref/xpp-language-reference
+    date: 2026-10-20
+
+ms-service-description:
+  type: Web
+  title: Service description for finance and operations apps
+  author: Microsoft
+  publisher: Microsoft Learn
+  date: 2026-03-26
+  url:
+    value: https://learn.microsoft.com/en-us/dynamics365/fin-ops-core/dev-itpro/get-started/service-description
+    date: 2026-10-20
+
+ms-ude-overview:
+  type: Web
+  title: Unified developer experience for finance and operations apps
+  author: Microsoft
+  publisher: Microsoft Learn
+  date: 2026-02-02
+  url:
+    value: https://learn.microsoft.com/en-us/power-platform/developer/unified-experience/finance-operations-dev-overview
+    date: 2026-10-20

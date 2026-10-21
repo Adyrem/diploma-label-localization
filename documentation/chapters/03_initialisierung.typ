@@ -4,24 +4,110 @@
 
 == Ausgangslage
 
-Bei der Entwicklung für Microsoft Dynamics 365 werden angezeigte Texte nicht direkt
-im Code hinterlegt, sondern als Labels. Ein Label ist ein Platzhalter mit einer
-eindeutigen ID, den die Anwendung zur Laufzeit durch die Übersetzung in der Sprache
-des Benutzers ersetzt. Labels sind in Label-Dateien zusammengefasst. Eine
-Label-Datei wie `BDM1` ist eine logische Einheit, abgelegt wird sie als eine
-physische Datei pro Sprache @ms-field-help.
+=== Dynamics 365 Entiwcklung im Überblick <d365_ueberblick>
 
-Erweiterungen für Dynamics 365 entstehen in Models. Ein Model bündelt Elemente wie
-Code, Metadaten und die zugehörigen Label-Dateien zu einer auslieferbaren Lösung. Es
-gehört immer zu einem Package, der Einheit, die kompiliert und ausgeliefert wird
-@ms-models. Jedes Label gehört damit zu einer Label-Datei innerhalb eines Models,
-was sich an der Label-ID ablesen lässt. Bei `@BDM1:BDM110000003` steht `BDM1` für
-die Label-Datei und der Rest für das Label selbst @ms-field-help.
+Microsoft Dynamics 365 Finance and Operations ist eine Familie von ERP-Anwendungen,
+die Microsoft als Software as a Service betreibt, darunter Dynamics 365 Finance und
+Dynamics 365 Supply Chain Management. Kunden passen sie mit Erweiterungen an ihre
+Prozesse an, zusammen mit einem Implementierungspartner @ms-service-description.
+BE-terna ist ein solcher Partner.
 
-Nicht jedes Model ist beschreibbar. Models liegen in Schichten, von den Anbietern
-einer Lösung über Partner bis zum Kunden @ms-overlayering. Das bestehende Tool
-behandelt Models von Microsoft und Drittanbietern sowie gesperrte Models als
-schreibgeschützt.
+Programmiert wird in X++. Die Sprache ist objektorientiert, auf ERP- und
+Datenbankanwendungen ausgelegt und wird wie C\# zu .NET kompiliert @ms-xpp. Entwickelt
+wird ausschliesslich in Visual Studio. Die Developer Tools von Microsoft ergänzen es
+um den Application Explorer mit allen Elementen der Anwendung, um einen Designer für
+jede Art von Element und um einen Code-Editor für X++ @ms-devtools-overview.
+
+Ein Element ist ein Baustein der Anwendung, etwa eine Table, eine Form oder eine
+Klasse. Jedes Element liegt als eigene XML-Datei im Package-Verzeichnis, geordnet
+nach Packages und Models @ms-vc-navigation, wie @verzeichnisstruktur zeigt. Auch der
+X++-Code steht in dieser Datei, siehe @xml_element. Ein Model bündelt Elemente und Label-Dateien zu einer
+auslieferbaren Lösung und gehört immer zu einem Package, der Einheit, die kompiliert
+und ausgeliefert wird @ms-models. Beschrieben wird ein Model in einer XML-Datei im
+Ordner `Descriptor` seines Packages @ms-vc-navigation. Models liegen in Schichten,
+den Layern, von den Anbietern einer Lösung über Partner bis zum Kunden
+@ms-overlayering.
+
+#figure(
+  image("../diagrams/Verzeichnisstruktur.png", width: 9cm),
+  caption: [Aufbau des Package-Verzeichnisses (eigene Darstellung)]
+) <verzeichnisstruktur>
+
+#figure(
+  kind: image,
+  block(width: 100%, inset: 8pt, stroke: 0.5pt + luma(180),
+    align(left, text(size: 9pt, ```xml
+<AxClass>
+  <Name>BDMDeliveryHelper</Name>
+  <SourceCode>
+    <Methods>
+      <Method>
+        <Name>caption</Name>
+        <Source><![CDATA[
+    public static str caption()
+    {
+        return "@BDM1:BDM110000003";
+    }
+]]></Source>
+      </Method>
+    </Methods>
+  </SourceCode>
+</AxClass>
+```))),
+  caption: [Ausschnitt aus der XML-Datei einer Klasse mit X++-Code, synthetisches
+            Beispiel (eigene Darstellung)]
+) <xml_element>
+
+Der Build kompiliert ein Package und führt dabei auch Best-Practice-Checks aus
+@ms-xpp. Entwickelt wird auf einer von zwei Arten von
+Umgebungen. Die klassische Entwicklungs-VM ist eine virtuelle Maschine mit der ganzen
+Anwendung, bei Microsoft Tier-1-Sandbox genannt @ms-service-description. Alle Models
+liegen dort in einem gemeinsamen `PackagesLocalDirectory`, meist unter
+`K:\AOSService` @ms-vc-navigation. In der Unified Developer Experience (UDE) läuft
+die Anwendung dagegen in der Cloud, Visual Studio mit den Developer Tools auf dem
+Rechner des Entwicklers @ms-ude-overview. Welche Ordner dort die Models enthalten,
+legt eine Metadaten-Konfiguration fest, von der immer eine aktiv ist @ms-ude-tools.
+
+=== Labels und das bestehende Tool
+
+Angezeigte Texte stehen bei Dynamics 365 nicht direkt im Code, sondern als Labels.
+Ein Label ist ein Platzhalter mit einer eindeutigen ID, den die Anwendung zur
+Laufzeit durch die Übersetzung in der Sprache des Benutzers ersetzt. Labels sind in
+Label-Dateien zusammengefasst. Eine Label-Datei wie `BDM1` ist eine logische Einheit,
+abgelegt wird sie als eine physische Datei pro Sprache @ms-field-help. Jede Zeile
+enthält ein Label mit ID und Text, ein Kommentar folgt in der Zeile darunter, wie
+@label_datei zeigt. Jedes Label gehört damit zu einer Label-Datei innerhalb eines
+Models, was sich an der Label-ID ablesen lässt. Bei `@BDM1:BDM110000003` steht `BDM1`
+für die Label-Datei und der Rest für das Label selbst @ms-field-help.
+
+#figure(
+  kind: image,
+  grid(
+    columns: (1fr, 1fr),
+    column-gutter: 8pt,
+    ..(
+      ("BDM1.de.label.txt", ```
+BDM110000001=Kunde
+BDM110000002=Kundenname
+BDM110000003=Lieferadresse
+ ;Adresse, an die geliefert wird
+```),
+      ("BDM1.en-US.label.txt", ```
+BDM110000001=Customer
+BDM110000002=Customer name
+BDM110000003=Delivery address
+ ;Address the goods are delivered to
+```),
+    ).map(((name, code)) => block(width: 100%, inset: 8pt,
+      stroke: 0.5pt + luma(180), align(left, {
+        text(size: 9pt, raw(name))
+        v(0.2em)
+        text(size: 9pt, code)
+      }))),
+  ),
+  caption: [Ausschnitt aus der Label-Datei `BDM1` auf Deutsch und Englisch,
+            synthetisches Beispiel (eigene Darstellung)]
+) <label_datei>
 
 #figure(
   image("../diagrams/Labelstruktur.png", width: 7.5cm),
@@ -32,13 +118,13 @@ Die von Microsoft mitgelieferte Verwaltung dieser Labels wurde bei BE-terna als
 unzureichend beurteilt. Aus diesem Grund entstand intern ein eigenes Tool, der
 BE-LabelEditor. Es handelt sich um eine eigenständige Desktop-Anwendung, mit der
 Labels gesucht, erstellt und bearbeitet werden können. Ebenso lassen sich die
-Verwendungen eines Labels im Quellcode auffinden.
+Verwendungen eines Labels im Quellcode auffinden. Nicht jedes Model ist beschreibbar.
+Das bestehende Tool behandelt Models von Microsoft und Drittanbietern sowie gesperrte
+Models als schreibgeschützt.
 
-Die Entwicklung für Dynamics 365 findet in Visual Studio statt, weil Microsoft dort
-das gesamte Tooling für die Plattform bereitstellt @ms-devtools-overview. Der BE-LabelEditor läuft daneben
-als zweite Anwendung. Wer ein Label sucht oder anlegt, verlässt also die IDE,
-erledigt die Arbeit im separaten Fenster und kehrt mit der kopierten Label-ID
-zurück.
+Der BE-LabelEditor läuft neben Visual Studio als zweite Anwendung. Wer ein Label
+sucht oder anlegt, verlässt also die IDE, erledigt die Arbeit im separaten Fenster
+und kehrt mit der kopierten Label-ID zurück.
 
 == Situationsanalyse (IST-Zustand)
 
@@ -67,15 +153,17 @@ abgeschlossen ist.
       ),
       [Suche],
       [Acht Suchmodi. Exact match, Substring und Anything like that jeweils mit und
-       ohne Beachtung der Gross- und Kleinschreibung, dazu Label id und MatchWord.
-       Die Treffer erscheinen nach Relevanz sortiert in einer Liste.],
+       ohne Beachtung der Gross- und Kleinschreibung, dazu Label id und Match word.
+       Die Treffer erscheinen nach Relevanz sortiert in einer Liste, siehe
+       @ist_suchmodi.],
       [Detailansicht],
       [Zu einem ausgewählten Label werden die Übersetzungen aller konfigurierten
        Sprachen angezeigt, etwa de-CH, en-US, fr-CH und it-CH. Text und Kommentar
        sind direkt editierbar.],
       [Erstellen],
       [Ein neues Label wird im gewählten Model angelegt und in allen zu erstellenden
-       Sprachen mit dem zuletzt eingegebenen Suchbegriff vorbelegt.],
+       Sprachen mit dem zuletzt eingegebenen Suchbegriff vorbelegt, siehe
+       @ist_erstellen.],
       [Löschen, Kopieren, Verschieben],
       [Kopieren legt eine Kopie in einem Ziel-Model an, Verschieben löscht
        anschliessend das Original. Bestehende Referenzen im Code lassen sich dabei
@@ -85,17 +173,18 @@ abgeschlossen ist.
        bereits bestehende Label-ID ersetzt.],
       [Verwendungssuche],
       [Listet alle Fundstellen einer Label-ID mit Model, Datei, Zeile und Spalte
-       auf.],
+       auf, siehe @ist_verwendungssuche.],
       [Apply],
       [Kopiert die vollständige Label-ID in die Zwischenablage und minimiert das
        Fenster, damit der Entwickler zurück nach Visual Studio wechseln kann. Save
        and apply speichert vorher die Änderungen.],
       [Einstellungen],
       [Auswahl der User-ID sowie Konfiguration der zu ladenden und der beim Erstellen
-       anzulegenden Sprachen. Eine Änderung der geladenen Sprachen wird erst nach
-       einem Neustart wirksam.],
+       anzulegenden Sprachen, siehe @ist_einstellungen. Eine Änderung der geladenen
+       Sprachen wird erst nach einem Neustart wirksam.],
       [Konsole],
-      [Meldungsprotokoll mit den Kategorien Errors, Warnings und Messages.],
+      [Meldungsprotokoll mit den Kategorien Errors, Warnings und Messages, siehe
+       @ist_konsole.],
       [Dateiüberwachung],
       [Ändert sich eine beschreibbare Label-Datei von aussen, bietet das Tool an, die
        Label-Dateien neu zu laden.],
@@ -115,7 +204,7 @@ abgeschlossen ist.
 
 #figure(
   image("../screenshots/create_label.png", width: 7cm),
-  caption: [Leiste zum Anlegen neuer Labels, ein Knopf je beschreibbares Model
+  caption: [Leiste zum Anlegen neuer Labels, ein Button je beschreibbares Model
             (Screenshot BE-LabelEditor, BE-terna AG)]
 ) <ist_erstellen>
 
@@ -142,15 +231,18 @@ abgeschlossen ist.
   caption: [Ablauf beim Suchen oder Anlegen eines Labels (eigene Darstellung)]
 ) <kontextwechsel>
 
-Aus dem Aufbau als eigenständige Anwendung ergeben sich mehrere Schwachstellen. Der
-Wechsel zwischen IDE und Tool unterbricht den Arbeitsfluss bei jedem
-Lokalisierungsvorgang. Visual Studio zeigt beim Überfahren einer Label-ID mit der
-Maus nur die englische Übersetzung an, die übrigen Sprachen bleiben verborgen. Eine
-Suche lässt sich nicht aus dem Editor heraus starten. Hardcodierte Texte, die
-eigentlich als Label hinterlegt sein müssten, meldet der Best-Practice-Check beim
-Kompilieren bereits heute. Herauslösen und ersetzen muss der Entwickler sie aber
-von Hand. Neue Labels werden in allen Sprachen mit demselben
-Ausgangstext vorbelegt, übersetzt wird anschliessend manuell.
+Aus dem Aufbau als eigenständige Anwendung ergeben sich mehrere Schwachstellen.
+
+- Der Wechsel zwischen IDE und Tool unterbricht den Arbeitsfluss bei jedem
+  Lokalisierungsvorgang.
+- Visual Studio zeigt beim Überfahren einer Label-ID mit der Maus nur die englische
+  Übersetzung an, die übrigen Sprachen bleiben verborgen.
+- Eine Suche lässt sich nicht aus dem Editor heraus starten.
+- Hardcodierte Texte, die eigentlich als Label hinterlegt sein müssten, meldet der
+  Best-Practice-Check beim Kompilieren bereits heute. Herauslösen und ersetzen muss
+  der Entwickler sie aber von Hand.
+- Neue Labels werden in allen Sprachen mit demselben Ausgangstext vorbelegt,
+  übersetzt wird anschliessend manuell.
 
 == Aufgabenstellung <aufgabenstellung>
 
@@ -168,7 +260,15 @@ ergeben.
 - Hardcodierte Texte aus dem Code oder dem Properties Window extrahieren und durch
   ein übersetztes Label ersetzen
 
-Auftraggeberin ist die BE-terna AG, mein aktueller Arbeitgeber. Die Arbeit gilt als
+Ausser der Themeneingabe bestehen keine Vorarbeiten. Die Extension entsteht
+vollständig im Rahmen dieser Arbeit. Der bestehende BE-LabelEditor ist die
+fachliche Referenz. Er zeigt, welches Verhalten die Anwender gewohnt sind,
+insbesondere beim Suchen und Anlegen von Labels. Sein Code wird nicht übernommen.
+Die Verfahren werden analysiert und dort überarbeitet, wo sich Verbesserungen
+anbieten. Gerade bei der Referenzsuche ist das wahrscheinlich, weil sich im Editor
+andere Möglichkeiten bieten als in einem eigenständigen Fenster.
+
+Auftraggeberin ist die BE-terna AG, die Arbeitgeberin des Autors. Die Arbeit gilt als
 erfolgreich, wenn die Funktionalität des bestehenden Tools vollumfänglich
 übernommen und um die genannten IDE-Funktionen erweitert wird.
 
@@ -206,11 +306,11 @@ erfolgreich, wenn die Funktionalität des bestehenden Tools vollumfänglich
 
       [Z3], [Suche aus dem Editor],
       [Eine Label-Suche lässt sich aus dem geöffneten Editor starten, ohne das
-       Extension-Fenster von Hand zu öffnen.],
+       Tool Window der Extension von Hand zu öffnen.],
       [2],
 
       [Z4], [Bearbeiten aus dem Code heraus],
-      [Ein im Code referenziertes Label lässt sich im Extension-Panel öffnen und
+      [Ein im Code referenziertes Label lässt sich im Tool Window öffnen und
        bearbeiten. Die Änderung steht nach dem Speichern in der Label-Datei.],
       [2],
 
@@ -295,17 +395,9 @@ Welche weiteren Möglichkeiten die Extension-API eröffnet, ist noch nicht
 vollständig untersucht. Diese Analyse gehört ins Konzept. Funktionen, die dabei
 hinzukommen, sind Kann-Anforderungen und zählen nicht zu den Erfolgskriterien.
 
-Ausser der Themeneingabe bestehen keine Vorarbeiten. Die Extension entsteht
-vollständig im Rahmen dieser Arbeit. Der bestehende BE-LabelEditor dient als
-fachliche Referenz. Er zeigt, welches Verhalten die Anwender gewohnt sind,
-insbesondere beim Suchen und Anlegen von Labels. Sein Code wird nicht übernommen.
-Die Verfahren werden analysiert und dort überarbeitet, wo sich Verbesserungen
-anbieten. Gerade bei der Referenzsuche ist das wahrscheinlich, weil sich im Editor andere
-Möglichkeiten bieten als in einem eigenständigen Fenster.
-
 == Rahmenbedingungen
 
-=== Prozessbezogene Rahmenbedingungen
+=== Prozessbezogene Rahmenbedingungen <rahmenbedingungen_prozess>
 
 Die Entwicklung erfolgt ausschliesslich auf einem privaten Gerät und ausserhalb der
 Unternehmenssysteme. Die im Projekt eingesetzten KI-Tools dürfen auf den Systemen
@@ -413,10 +505,10 @@ ausgelieferte Lösungen eingreift.
   ) <stakeholderanalyse>
 ]
 
-Zwei der sechs Rollen aus der Tabelle nehme ich selbst ein, einerseits als
+Zwei der sechs Rollen aus der Tabelle nimmt der Autor selbst ein, einerseits als
 Entwickler, der das Tool täglich benutzt, andererseits als Maintainer, der es
 weiterentwickelt und bereitstellt. Dazu kommt die Rolle des Firmenbetreuers. Das verkürzt die
-Abstimmungswege erheblich, birgt aber die Gefahr, dass Anforderungen aus meiner
+Abstimmungswege erheblich, birgt aber die Gefahr, dass Anforderungen aus seiner
 eigenen Arbeitsweise heraus formuliert werden und nicht aus der Sicht der übrigen
 Entwickler. Dagegen gibt der Experte im Betrieb als weiterer Entwickler während der
 Realisierung Rückmeldungen zur Entwicklung und unterstützt bei den Tests. Der Punkt
@@ -457,10 +549,10 @@ Abhängigkeiten in @detailanforderungen.
       [FA06], [Inline-Anzeige],
       [Die Übersetzung dauerhaft im Code einblenden, ein- und ausschaltbar.], [Z2],
       [FA07], [Inline-Suche],
-      [Eine Label-Suche aus dem Editor starten, ohne das Extension-Fenster von Hand
-       zu öffnen.], [Z3],
-      [FA08], [Im Extension-Panel öffnen],
-      [Ein im Code referenziertes Label im Panel öffnen und bearbeiten.], [Z4],
+      [Eine Label-Suche aus dem Editor starten, ohne das Tool Window von Hand zu
+       öffnen.], [Z3],
+      [FA08], [Im Tool Window öffnen],
+      [Ein im Code referenziertes Label im Tool Window öffnen und bearbeiten.], [Z4],
       [FA09], [Extraktion hardcodierter Texte],
       [Hardcodierten Text im Editor oder im Properties Window als neues Label
        anlegen und durch die Label-ID ersetzen.], [Z6],
@@ -472,7 +564,7 @@ Abhängigkeiten in @detailanforderungen.
        API-Schlüssel für externe Dienste hinterlegen.], [Z1, Z7],
       [FA12], [Erweiterte Suchmodi],
       [Zusätzlich zu FA01 die Suchmodi Anything like that mit und ohne Beachtung
-       der Gross- und Kleinschreibung sowie MatchWord. Die Treffer erscheinen nach
+       der Gross- und Kleinschreibung sowie Match word. Die Treffer erscheinen nach
        Relevanz sortiert.], [Z1],
       [FA13], [Label ersetzen],
       [Alle Verwendungen eines Labels im Code durch eine andere, bestehende
@@ -572,12 +664,7 @@ Microsoft liefert mit den Developer Tools eine Metadata-API aus. Das ist eine
 Sammlung von Assemblies, über die sich die Elemente eines Models lesen und schreiben
 lassen, ohne die Dateien selbst zu kennen. Ein Disk-Provider richtet diesen Zugriff
 auf das Package-Verzeichnis, also den Ordner, in dem die lokale Installation ihre
-Models ablegt. @verzeichnisstruktur zeigt den Aufbau dieses Ordners.
-
-#figure(
-  image("../diagrams/Verzeichnisstruktur.png", width: 9cm),
-  caption: [Ablage der Label-Dateien im Package-Verzeichnis (eigene Darstellung)]
-) <verzeichnisstruktur>
+Models ablegt, siehe @verzeichnisstruktur.
 
 #[
   #show figure: set align(left)
@@ -690,8 +777,8 @@ Inline-Anzeige ist.
       table.header(
         [*Kriterium*],
         [*A VSSDK, in-process*],
-        [*B VS.Extensibility, out-of-process*],
-        [*C VS.Extensibility, in-process*],
+        [*B VisualStudio.Extensibility, out-of-process*],
+        [*C VisualStudio.Extensibility, in-process*],
       ),
       [Target Framework], [.NET Framework], [.NET 8], [.NET Framework],
       [VSSDK und MEF], [Voller Zugriff], [Kein Zugriff], [Voller Zugriff],
@@ -730,10 +817,7 @@ Machbarkeitsstudie, siehe @befundprotokoll.
   caption: [Prozessgrenze der drei Extension-Modelle (eigene Darstellung)]
 ) <extensionmodelle>
 
-Die Entscheidung steht im Zielkonflikt mit NFA04. Ein Fehler in der Extension soll
-Visual Studio nicht zum Absturz bringen, was für den out-of-process-Betrieb
-spricht. QuickInfo und die Anbindung an das D365-Add-in-Modell verlangen aber
-Zugriff auf VSSDK und MEF und damit den Betrieb im selben Prozess.
+Die Entscheidung steht im Zielkonflikt mit NFA04, siehe @zielkonflikt_e3.
 
 #heading(outlined: false, level: 4)[E4 Verfahren der Verwendungssuche]
 
@@ -801,97 +885,89 @@ Die Verwendungssuche ist über die Textsuche gesichert, weil das bestehende Tool
 genau so arbeitet. Die Cross-Reference-Datenbank ist eine Verbesserung, kein
 Risiko.
 
-#heading(outlined: false, level: 4)[Prototypenvergleich zum Extension-Modell]
+#heading(outlined: false, level: 4)[Prototypenvergleich zum Extension-Modell] <prototypenvergleich>
+
+Ausserhalb des Prozesses gibt es keinen Tooltip am Token. Im selben Prozess lässt
+sich das neue Modell mit klassischem MEF-Code verbinden, schützt aber nicht besser
+vor Abstürzen als das klassische.
 
 Zu E3 wurden drei Prototypen gebaut, je einer pro Modell. Sie kompilieren und
-paketieren reproduzierbar unter Visual Studio Community 2026 in der Version 18.9.2
-mit dem .NET SDK 10.0.400. Keiner der drei wurde in einer laufenden
+paketieren reproduzierbar, keiner wurde aber in einer laufenden
 Visual-Studio-Instanz geladen. Belegt ist damit, dass sich die jeweiligen
 Schnittstellen ansprechen und kompilieren lassen, nicht dass sie zur Laufzeit
-funktionieren. Aussagen darüber, dass etwas fehlt, stützen sich auf die
-Schnittstellen des SDK und auf fehlgeschlagene Kompilierversuche.
+funktionieren.
 
-Der wichtigste Befund betrifft den Betrieb ausserhalb des Prozesses. Die
-WPF-Editor-Typen existieren dort nicht. Derselbe Quelltext, der im klassischen
-Modell kompiliert, scheitert mit der Meldung, dass `IWpfTextViewCreationListener`
-nicht gefunden wird. An deren Stelle tritt eine eigene, deutlich kleinere
-Oberfläche mit Listenern für das Öffnen und Ändern einer Ansicht, einer
-Margin und einem Tagger.
+Ausserhalb des Prozesses fehlen die WPF-Editor-Typen. An ihre Stelle tritt eine
+deutlich kleinere Oberfläche, in der kein QuickInfo-Typ vorkommt. Ein Tooltip hängt
+dort nur an einer CodeLens-Zeile, nicht am Text selbst. Am Text bleiben Tags zum
+Einfärben, die Margin und CodeLens, keines davon zeigt beim Überfahren eines Tokens
+Text an. Tagger und CodeLens sind in dieser Fassung des SDK als Vorschau
+markiert. Die Einzelheiten stehen im @befundprotokoll.
 
-Daraus folgt für die beiden Anzeigeziele, dass CodeLens ausserhalb des Prozesses
-erreichbar ist. Ein QuickInfo-Typ kommt in der Oberfläche dagegen nicht vor, eine
-Suche über alle Assemblies des gebauten Pakets lieferte keinen Treffer. Ein
-Tooltip existiert dort nur als Eigenschaft eines CodeLens-Labels, hängt also an
-der CodeLens-Zeile und nicht am Text selbst. Freie Einblendungen mitten im Text
-sind ebenfalls nicht möglich, es bleiben Margin, Einfärbung und
-CodeLens.
+#heading(outlined: false, level: 4)[Befunde aus der Testumgebung] <befunde_testumgebung>
 
-Am Text selbst können ausserhalb des Prozesses überhaupt nur vier Dinge ansetzen.
-Zwei Tag-Arten, die einfärben oder die Darstellung ändern, aber keinen Text tragen,
-dazu CodeLens oberhalb der Zeile und die Margin am Rand. Keines davon zeigt
-beim Überfahren eines Tokens Text an.
+In einer zweiten Runde wurden die Developer Tools von Dynamics 365 statisch
+ausgewertet und eine Testerweiterung auf der Testumgebung des Arbeitgebers
+ausgeführt, siehe @befundprotokoll.
 
-Tagger und CodeLens sind in dieser Fassung des SDK als Vorschau markiert. Der
-Compiler bricht den Build ab, bis die entsprechende Warnung ausdrücklich
-unterdrückt wird, und weist darauf hin, dass die Schnittstelle sich ändern oder
-obsolet werden kann.
+#[
+  #show figure: set align(left)
+  #set text(size: 10pt)
+  #figure(
+    table(
+      align: left,
+      columns: (1.3fr, 1fr),
+      table.header(
+        [*Befund*], [*Folge*],
+      ),
+      [Der X++-Editor meldet einen gewöhnlichen Content Type und ist nicht
+       abgeschottet. Eine eigene Erweiterung hängt sich daran an, was der Versuch
+       auf der Testumgebung bestätigt hat.],
+      [Z2 und Z3 sind umsetzbar.],
 
-Zum Modell im selben Prozess ergab der Versuch zwei Punkte. Erstens lässt es sich
-mit klassischem MEF-Code in einer einzigen Assembly verbinden, beides kompiliert
-gemeinsam. Zweitens bringt es gegenüber dem klassischen Modell keinen Gewinn bei
-der Ausfallsicherheit, denn es läuft im selben Prozess und trägt damit dasselbe
-Absturzrisiko.
+      [Der Classifier von Dynamics 365 kennzeichnet Label-Token bereits selbst,
+       unter anderem als `"X++ Modern Label"`.],
+      [Die Extension findet Label-IDs über die vorhandene Classification, statt X++
+       selbst parsen zu müssen. Das senkt den Aufwand für Z2 und Z3 erheblich.],
 
-#heading(outlined: false, level: 4)[Befunde aus der Testumgebung]
+      [Die eigene QuickInfo-Quelle wird beim Überfahren von X++-Code gefragt und
+       erkennt Label-Token. Ihr Eintrag erscheint im selben Tooltip wie der von
+       Dynamics 365.],
+      [Der Mechanismus für FA05 ist belegt, das Auflösen eines Labels in alle
+       konfigurierten Sprachen noch nicht erprobt.],
 
-In einer zweiten Runde wurden die Developer Tools von Dynamics 365 statisch ausgewertet
-und eine Testerweiterung auf der Testumgebung des Arbeitgebers ausgeführt. Die Ergebnisse
-stehen in @befundprotokoll.
+      [Für CodeLens verwenden die Developer Tools eine eigene Nachbildung auf
+       öffentlichen Typen des Editors, nicht die Infrastruktur von Visual Studio.
+       Ein Aufruf der CodeLens-Schnittstelle wurde zur Laufzeit nie beobachtet.],
+      [FA06 ist im selben Prozess umsetzbar, jedoch nicht über CodeLens.],
 
-Der X++-Editor meldet einen gewöhnlichen Content Type und ist nicht abgeschottet.
-Eine eigene Erweiterung kann sich daran anhängen, was der Versuch auf der
-Testumgebung bestätigt hat. Damit sind Z2 und Z3 umsetzbar. Der Classifier von Dynamics 365
-kennzeichnet Label-Token bereits selbst, unter anderem als `"X++ Modern Label"`.
-Eine Erweiterung findet Label-IDs damit über die vorhandene Classification,
-statt X++ selbst parsen zu müssen. Das senkt den Aufwand für Z2 und Z3
-erheblich.
+      [Für das Properties Window hat das Add-in-Modell keinen
+       Erweiterungspunkt. Über das Selection Tracking lässt sich das im Designer
+       gewählte Element aber lesen, einschliesslich seiner Label-Eigenschaften.],
+      [Das genügt für Z6. Das Schreiben über den Designer wird nicht weiter
+       verfolgt, weil Änderungen direkt in den Dateien erfolgen können.],
 
-Die eigene QuickInfo-Quelle wird beim Überfahren von X++-Code gefragt und erkennt
-Label-Token. Ihr Eintrag erscheint im selben Tooltip wie der von Dynamics 365.
-Der Mechanismus für FA05 ist damit belegt, das Auflösen eines Labels in alle
-konfigurierten Sprachen dagegen noch nicht erprobt.
+      [Die Metadata-API lief auf einem privaten Gerät ohne Anwendungsserver,
+       Datenbank und Developer Tools. Im warmen Zustand sind beide Zugriffsarten
+       gleich schnell, und die API liefert den Dateiinhalt unverarbeitet.],
+      [Das Parsen bleibt bei beiden Varianten von E1 eigene Arbeit.],
 
-Für CodeLens verwenden die Developer Tools von Dynamics 365 nicht die Infrastruktur von
-Visual Studio, sondern eine eigene Nachbildung. Ein Aufruf der
-CodeLens-Schnittstelle wurde zur Laufzeit nie beobachtet. Die von Dynamics 365
-verwendete Technik beruht aber auf öffentlichen Typen des Editors und steht einer
-eigenen Erweiterung im gleichen Prozess ebenfalls offen. FA06 ist damit
-umsetzbar, jedoch nicht über CodeLens.
+      [Die Developer Tools enthalten einen Label-Resolver von Microsoft, der zu
+       einer Label-ID den Text in einer gewählten Sprache liefert. Ausserhalb von
+       Visual Studio scheiterte er an einer fehlenden Abhängigkeit.],
+      [Er entspricht fast genau der Abfrage für FA05, steht aber nur mit
+       installierten Developer Tools zur Verfügung und ist nicht zur Weitergabe
+       bestimmt.],
 
-Für das Properties Window bietet das Add-in-Modell keinen Erweiterungspunkt.
-Über das Selection Tracking von Visual Studio lässt sich das im Designer gewählte
-Element jedoch lesen, einschliesslich seiner Label-Eigenschaften. Für Z6 genügt
-das, um ausgewählte Elemente heranzuziehen. Das Schreiben über den Designer wurde
-nicht erprobt und wird nicht weiter verfolgt, weil Änderungen bei Bedarf direkt in
-den Dateien erfolgen können.
+      [Eine klassische Erweiterung mit MEF-Anteilen lädt in Visual Studio 2026 und
+       läuft neben den Developer Tools, ohne diese erkennbar zu stören.],
+      [Der MEF-Anteil der Extension ist auf der Testumgebung belegt, siehe R06.],
+    ),
+    caption: [Befunde aus der Testumgebung (eigene Darstellung)]
+  ) <befunde_tabelle>
+]
 
-Die Metadata-API lief auf einem privaten Gerät ohne Anwendungsserver, Datenbank
-und Developer Tools. Im warmen Zustand sind beide Zugriffsarten gleich
-schnell, weil das Parsen der Dateien den Aufwand bestimmt. Die API liefert den
-Dateiinhalt unverarbeitet, das Parsen bleibt in beiden Fällen eigene Arbeit.
-
-Die Developer Tools enthalten einen fertigen Label-Resolver von Microsoft, der zu
-einer Label-ID den Text in einer gewählten Sprache liefert. Das entspricht fast
-genau der Abfrage, die FA05 braucht. Er steht nur innerhalb von Visual Studio mit
-installierten Developer Tools zur Verfügung und ist nicht zur Weitergabe mit einer
-eigenen Extension bestimmt. Ausserhalb von Visual Studio scheiterte er an einer
-fehlenden Abhängigkeit.
-
-Belegt ist ausserdem, dass eine klassische Erweiterung mit MEF-Anteilen in Visual
-Studio 2026 lädt und neben den Developer Tools von Dynamics 365 läuft, ohne diese
-erkennbar zu stören.
-
-#heading(outlined: false, level: 4)[Offen]
+#heading(outlined: false, level: 4)[Offen] <offen_machbarkeit>
 
 Nicht geprüft wurde das Auflösen eines Labels in alle konfigurierten Sprachen
 innerhalb des Tooltips. Ebenso wenig, ob sich Eigenschaften über den Designer
@@ -900,7 +976,7 @@ neuen Modells wurden nie in einer laufenden Instanz geladen, belegt ist dort nur
 das Kompilieren und Paketieren. Offen ist auch, ob der Label-Resolver von
 Microsoft innerhalb von Visual Studio läuft.
 
-#heading(outlined: false, level: 4)[Zielkonflikt aus E3]
+#heading(outlined: false, level: 4)[Zielkonflikt aus E3] <zielkonflikt_e3>
 
 Der Betrieb ausserhalb des Visual-Studio-Prozesses würde NFA04 am besten erfüllen,
 denn ein Fehler bliebe auf die Extension beschränkt. Er schliesst aber den Zugriff
@@ -920,10 +996,8 @@ acht Arbeitstage. Nach dem Grundgerüst am ersten Tag erhält Stufe 1 vier Tage,
 Stufe 2 zwei und Stufe 3 einen. Für Tests und Restarbeiten folgen drei weitere
 Tage.
 
-Entlastend wirkt ein Befund aus der zweiten Runde. Weil der Classifier von
-Dynamics 365 Label-Token bereits selbst kennzeichnet, entfällt das Parsen von
-X++ für Z2 und Z3. Das war vorher der grösste Unsicherheitsposten der beiden
-Ziele.
+Entlastend wirkt der Befund zum Classifier aus @befunde_testumgebung. Ohne eigenes
+Parsen von X++ fällt der vorher grösste Unsicherheitsposten von Z2 und Z3 weg.
 
 Die Ziele sind damit erreichbar, aber ohne Reserve. Die Reihenfolge aus
 @projektziele ist die Vorkehrung dagegen. Fällt Zeit aus, wird an den Zielen der
@@ -1058,8 +1132,8 @@ Versuch auf der Testumgebung hat entsprechend nie einen Aufruf dieser
 Infrastruktur beobachtet. Damit fiele auch die letzte verbleibende Anzeigeform
 für X++ aus.
 
-Der Zielkonflikt mit NFA04 wird damit zugunsten der Ziele aufgelöst, weil diese in
-den Erfolgskriterien stehen.
+Der Zielkonflikt mit NFA04 aus @zielkonflikt_e3 wird damit zugunsten der Ziele
+aufgelöst, weil diese in den Erfolgskriterien stehen.
 
 Zwischen A und C entscheidet die Nutzwertanalyse. Die Testbarkeit unterscheidet die
 beiden nicht, weil die Kernlogik in beiden Fällen getrennt ist. An ihre Stelle tritt
@@ -1074,7 +1148,7 @@ die Stabilität von Visual Studio aus NFA04.
       align: left,
       columns: (auto, auto, auto, auto),
       table.header(
-        [*Kriterium*], [*Gewicht*], [*A VSSDK, in-process*], [*C VS.Extensibility, in-process*],
+        [*Kriterium*], [*Gewicht*], [*A VSSDK, in-process*], [*C VisualStudio.Extensibility, in-process*],
       ),
       [Aufwand], [35 %], [3], [4],
       [Erprobtheit], [20 %], [5], [3],
@@ -1101,16 +1175,17 @@ sich der MEF-Anteil für QuickInfo und die Einblendung im Code im neuen Modell
 unverändert mitverwenden lässt. Microsoft verwendet für die eigenen Developer Tools
 von Dynamics 365 dieselbe Mischform, siehe @befundprotokoll.
 
-Drei Folgen sind dabei in Kauf zu nehmen. Das Target Framework bleibt .NET Framework,
-und die Erweiterung trägt zwei Manifeste, weil sie ihre Identität aus dem
-klassischen Manifest bezieht. Sie ist damit strukturell eine Mischform und kein
-reiner Vertreter des neuen Modells.
+Drei Folgen sind dabei in Kauf zu nehmen.
 
-Die dritte Folge betrifft NFA04. Der Betrieb im selben Prozess bietet keinen
-strukturellen Schutz davor, dass ein Fehler in der Extension Visual Studio
-mitreisst. Die Anforderung bleibt im Wortlaut bestehen und wird über die Umsetzung
-so weit abgedeckt, wie es ohne Prozesstrennung möglich ist. Wie das geschieht und
-wie es nachgewiesen wird, legt das Konzept fest.
+- Das Target Framework bleibt .NET Framework.
+- Die Erweiterung trägt zwei Manifeste, weil sie ihre Identität aus dem klassischen
+  Manifest bezieht. Sie ist damit strukturell eine Mischform und kein reiner
+  Vertreter des neuen Modells.
+- Der Betrieb im selben Prozess schützt strukturell nicht davor, dass ein Fehler in
+  der Extension Visual Studio mitreisst. NFA04 bleibt im Wortlaut
+  bestehen und wird über die Umsetzung so weit abgedeckt, wie es ohne
+  Prozesstrennung möglich ist. Wie das geschieht und wie es nachgewiesen wird, legt
+  das Konzept fest.
 
 Eine Aufteilung in zwei Erweiterungen, also die inhaltliche Arbeit ausserhalb des
 Prozesses und eine bewusst dünne Anzeigeschicht darin, würde beide Anliegen
@@ -1151,6 +1226,35 @@ liessen. Die Datenbank ist aber nur so aktuell wie der letzte Build mit
 Referenzdaten und damit von einem Schritt abhängig, den die Extension nicht auslöst.
 Die Metadata-API hat den höchsten Aufwand und brächte die Abhängigkeit zurück, die
 E1 vermeidet. Die Cross-Reference-Datenbank bleibt als Möglichkeit vorgemerkt.
+
+#heading(outlined: false, level: 4)[Übersicht]
+
+#[
+  #show figure: set align(left)
+  #show figure: set block(breakable: false)
+  #set text(size: 10pt)
+  #figure(
+    table(
+      align: left,
+      columns: (auto, 1fr, auto, 1.4fr),
+      table.header(
+        [*Entscheidung*], [*Gewählt*], [*Nutzwert*], [*Hauptgrund*],
+      ),
+      [E1 Zugriff auf die Label-Dateien], [A Direkter Dateizugriff mit eigenem
+       Parser], [4,45 gegen 2,85], [Erprobt und ohne Assemblies der lokalen
+       Installation testbar.],
+      [E2 Ablage zur Laufzeit], [B Einmal in den Arbeitsspeicher], [4,00 gegen
+       2,65], [Wie im bestehenden Tool und mit weniger Aufwand als ein eigener Index. A
+       scheidet an NFA02 aus.],
+      [E3 Extension-Modell], [C VisualStudio.Extensibility im selben Prozess],
+       [3,90 gegen 3,30], [B scheidet an FA05 aus. C braucht weniger Aufwand als A
+       und ist zukunftssicherer.],
+      [E4 Verwendungssuche], [A Textsuche in den XML-Dateien], [4,30 gegen 3,05],
+       [Im bestehenden Tool erprobt und ohne Voraussetzungen.],
+    ),
+    caption: [Übersicht der Variantenentscheide (eigene Darstellung)]
+  ) <variantenentscheid_uebersicht>
+]
 
 === Wirtschaftlichkeit <wirtschaftlichkeit>
 
@@ -1196,7 +1300,7 @@ Betrieb wird in die Realisierung eingebunden, gibt Rückmeldungen zur Entwicklun
 unterstützt bei den Tests. Jede Besprechung mit ihm erhält ein Protokoll im
 Anhang.
 
-=== Projektplanung
+=== Projektplanung <projektplanung>
 
 Das Projekt folgt dem Wasserfallmodell. Die Phasen Initialisierung, Konzept,
 Realisierung sowie Test und Abschluss werden nacheinander durchlaufen, wobei eine
@@ -1268,11 +1372,11 @@ verteilt dieselben Teilpakete auf die verfügbaren Arbeitstage.
   ) <projektstrukturplan>
 ]
 
-=== Terminplan (Soll)
-
 #page(flipped: true, margin: (x: 2cm, y: 2cm))[
+  === Terminplan (Soll)
+
   #figure(
-    image("../diagrams/Terminplan_Soll.png", height: 15cm),
+    image("../diagrams/Terminplan_Soll.png", height: 14cm),
     caption: [Soll-Terminplan (eigene Darstellung)]
   ) <terminplan_soll>
 ]
@@ -1645,7 +1749,8 @@ Repositories in einem lokalen Ordner.
 
 Gegenüber der Themeneingabe vom 26.05.2026 weicht die Planung in den folgenden
 Punkten ab. Zur Themeneingabe ging keine Rückmeldung der TEKO ein. Die Abweichungen
-werden der Betreuung deshalb am ersten Vorzeigetermin vorgelegt.
+wurden der Betreuung deshalb am ersten Vorzeigetermin vorgelegt und von ihr
+akzeptiert, siehe @protokoll_1.
 
 #[
   #show figure: set align(left)

@@ -3,6 +3,8 @@
 ' Zeigt, warum der Betrieb ausserhalb des Prozesses den Zugriff
 ' auf VSSDK und MEF ausschliesst.
 ' Rendern: plantuml -tpng -charset UTF-8 Extensionmodelle.puml
+' Höhere Auflösung, damit das Bild im PDF scharf bleibt.
+skinparam dpi 240
 
 skinparam defaultFontSize 13
 skinparam componentStyle rectangle

@@ -1,6 +1,8 @@
 @startuml
 ' Sollablauf beim Ersetzen eines hardcodierten Textes durch ein Label.
 ' Rendern: plantuml -tpng -charset UTF-8 Sollablauf_Extraktion.puml
+' Höhere Auflösung, damit das Bild im PDF scharf bleibt.
+skinparam dpi 240
 
 skinparam defaultFontSize 13
 skinparam ActivityBackgroundColor White

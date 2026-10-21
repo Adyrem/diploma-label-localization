@@ -15,6 +15,10 @@
 // X++ darf nicht zwischen den Pluszeichen umbrechen.
 #show "X++": it => box(it)
 
+// Lange Namen mit Punkt dürfen nach dem Punkt umbrechen, sonst laufen sie in
+// schmalen Tabellenspalten über den Zellrand.
+#show "VisualStudio.Extensibility": [VisualStudio.#{sym.zws}Extensibility]
+
 // Verweise auf ein Kapitel heissen «Kapitel», nicht «Abschnitt».
 #show heading.where(level: 1): set heading(supplement: [Kapitel])
 
@@ -143,8 +147,9 @@ Unterschrift:
        sämtliche Abbildungen ausser den Screenshots],
       [Claude Code (Anthropic)],
       [Generieren des Quellcodes der Extension und der Unit Tests nach dem Konzept
-       in einer eigenen Session, mit Rückfragen und Befunden an mich. Die
-       Durchgänge auf der Testumgebung habe ich selbst ausgeführt.],
+       in einer eigenen Session, mit Rückfragen und Befunden an den Autor. Dazu die
+       Anleitungen und Skripte für die Durchgänge, die der Autor geprüft und auf der
+       Testumgebung selbst ausgeführt hat.],
       [Quellcode im Repository, @realisierung],
       [Claude Code (Anthropic)],
       [Durchführung der Machbarkeitsstudie zum Extension-Modell in einer eigenen
@@ -186,20 +191,26 @@ Unterschrift:
       [AP], [Arbeitspaket],
       [API], [Application Programming Interface],
       [CI/CD], [Continuous Integration / Continuous Deployment],
+      [D], [Durchgang auf der Testumgebung],
       [D365], [Microsoft Dynamics 365],
+      [E], [Entscheidung im Variantenentscheid],
       [EDT], [Extended Data Type],
       [EFZ], [Eidgenössisches Fähigkeitszeugnis],
+      [ERP], [Enterprise Resource Planning],
       [FA], [Funktionale Anforderung],
       [GUI], [Graphical User Interface],
+      [GUID], [Globally Unique Identifier],
       [HF], [Höhere Fachschule],
       [ID], [Identifier, Bezeichner],
       [IDE], [Integrated Development Environment],
       [JSON], [JavaScript Object Notation],
       [KA], [Kann-Anforderung],
       [KI], [Künstliche Intelligenz],
+      [M], [Meilenstein],
       [MEF], [Managed Extensibility Framework],
       [NFA], [Nicht-funktionale Anforderung],
       [OA], [Organisatorische Anforderung],
+      [R], [Risiko],
       [Regex], [Regular Expression],
       [REST], [Representational State Transfer],
       [SDK], [Software Development Kit],
@@ -207,6 +218,7 @@ Unterschrift:
       [TC], [Test Case, Testfall],
       [TO], [Testobjekt],
       [UC], [Use Case],
+      [UDE], [Unified Developer Experience],
       [UI], [User Interface],
       [UTF-8], [Unicode Transformation Format, 8 Bit],
       [VM], [Virtuelle Maschine],
@@ -215,6 +227,7 @@ Unterschrift:
       [WPF], [Windows Presentation Foundation],
       [XAML], [Extensible Application Markup Language],
       [XML], [Extensible Markup Language],
+      [Z], [Ziel],
     ),
     caption: [Abkürzungsverzeichnis (eigene Darstellung)]
   ) <abkuerzungsverzeichnis>
@@ -234,10 +247,28 @@ Unterschrift:
       [Add-in],
       [Komponente, die Visual Studio lädt und die an fest vorgegebenen Stellen der
        Oberfläche erscheint. Dynamics 365 stellt dafür ein eigenes Modell bereit.],
+      [Adornment Layer],
+      [Zeichenebene des Editors von Visual Studio, auf der eine Extension eigene
+       Inhalte über oder neben den Text legt. Die Inline-Anzeige zeichnet darauf
+       die Übersetzungen.],
+      [AsyncPackage],
+      [Klasse des Visual Studio SDK, von der eine klassische Erweiterung ableitet,
+       damit Visual Studio sie im Hintergrund lädt.],
+      [Best-Practice-Check],
+      [Prüfung, die der Compiler von Dynamics 365 beim Build ausführt. Verstösse
+       gegen die Regeln von Microsoft, etwa hardcodierte Texte, erscheinen als
+       Meldungen.],
       [Classifier],
       [Komponente des Editors, die Spans eine Classification zuweist, etwa
-       Schlüsselwort oder Label. Die Developer Tools bringen einen eigenen
+       Keyword oder Label. Die Developer Tools bringen einen eigenen
        Classifier für X++ mit.],
+      [Classification],
+      [Art eines Spans im Editor, etwa Keyword, String oder Label. Für
+       Label-IDs vergeben die Developer Tools `"X++ Modern Label"` und
+       `"X++ Legacy Label"`.],
+      [Code Freeze],
+      [Stand, ab dem sich der Code nicht mehr ändert. In dieser Arbeit die Version
+       1.0.0 vom 19.10.2026.],
       [CodeLens],
       [Einblendung oberhalb einer Codezeile, die zusätzliche Angaben zu dieser Zeile
        anzeigt.],
@@ -247,6 +278,13 @@ Unterschrift:
       [Cross-Reference-Datenbank],
       [Datenbank von Dynamics 365, die beim Build gefüllt wird und festhält, wo ein
        Element verwendet wird. Visual Studio nutzt sie für die Referenzsuche.],
+      [Debug-Build],
+      [Build für die Entwicklung. Er enthält zusätzlich die Probe-Commands, einen
+       simulierten Übersetzungsdienst und den Ersatz für den X++-Editor. Ausgeliefert
+       wird der Release-Build ohne diese Teile.],
+      [Descriptor],
+      [XML-Datei im Ordner `Descriptor` eines Packages, die ein Model beschreibt,
+       unter anderem mit Layer, Referenzen und ob es gesperrt ist.],
       [Designer],
       [Fenster der Developer Tools, das ein Element als Baum seiner Nodes zeigt,
        etwa die Felder einer Table. Die Eigenschaften der gewählten Node stehen
@@ -264,19 +302,35 @@ Unterschrift:
       [Objekt eines Models, etwa eine Klasse, Table, Form oder ein Datentyp. Jedes
        Element liegt als XML-Datei in einem Ordner seines Typs wie `AxClass` und
        öffnet sich im Designer, seinen Code zeigt der X++-Editor.],
+      [Error Boundary],
+      [Fehlerbehandlung an einem Einstiegspunkt der Extension. Sie fängt jede
+       Exception ab und meldet sie im Output Window, damit Visual Studio
+       weiterläuft.],
+      [Experimentelle Instanz],
+      [Eigene Instanz von Visual Studio mit getrennten Einstellungen, in der eine
+       Extension während der Entwicklung läuft, ohne die normale Installation zu
+       verändern.],
       [Feature Parity],
       [Gleicher Funktionsumfang wie ein bestehendes System. In dieser Arbeit der
        Funktionsumfang des BE-LabelEditors.],
       [Klassische Entwicklungs-VM],
-      [Virtuelle Maschine mit Dynamics 365, Visual Studio und den Developer Tools.
-       Eigene Models und die von Microsoft liegen dort in einem gemeinsamen
-       `PackagesLocalDirectory`, meist unter `K:\AOSService`.],
+      [Virtuelle Maschine mit Dynamics 365, Visual Studio und den Developer Tools,
+       in der Regel eine Tier-1-Sandbox. Eigene Models und die von Microsoft liegen dort in einem gemeinsamen
+       `PackagesLocalDirectory`, meist unter `K:\AOSService`. In
+       @konzept und @realisierung kurz klassische VM.],
       [Label],
       [Platzhalter mit einer eindeutigen ID, den die Anwendung zur Laufzeit durch die
        Übersetzung in der Sprache des Benutzers ersetzt.],
+      [Label-Datei],
+      [Sammlung von Labels unter einem gemeinsamen Namen wie `BDM1`. Je Sprache
+       gibt es eine Textdatei, etwa `BDM1.de.label.txt`.],
       [Label-ID],
       [Eindeutiger Bezeichner eines Labels aus Label-Datei und Label, etwa
        `@BDM1:BDM110000003`.],
+      [Layer],
+      [Schicht, in der ein Model liegt, von Microsoft über Anbieter und Partner bis
+       zum Kunden. Der Layer entscheidet mit, ob die Extension ein Model
+       beschreiben darf.],
       [Margin],
       [Leiste am Rand des Editors, in der eine Extension Symbole oder Angaben zu
        einer Zeile anzeigen kann.],
@@ -299,11 +353,18 @@ Unterschrift:
       [Package-Verzeichnis],
       [Ordner, in dem eine Installation von Dynamics 365 ihre Models mit Code,
        Metadaten und Label-Dateien ablegt.],
+      [Probe-Command],
+      [Command im Debug-Build, mit dem sich auf der Testumgebung einzelne Fragen
+       des Konzepts prüfen liessen, etwa ob ungespeicherte Elemente erkennbar
+       sind.],
       [Properties Window],
       [Fenster von Visual Studio, das die Eigenschaften des gewählten Elements
        anzeigt und bearbeiten lässt.],
       [QuickInfo],
       [Fenster im Editor, das beim Überfahren einer Stelle mit der Maus erscheint.],
+      [Remote UI],
+      [Technik von VisualStudio.Extensibility, bei der die Extension die Oberfläche
+       als XAML beschreibt und Visual Studio sie darstellt.],
       [Selection Tracking],
       [Mechanismus von Visual Studio, über den eine Extension erfährt, welches
        Element gerade gewählt ist, etwa im Designer.],
@@ -320,6 +381,10 @@ Unterschrift:
       [Tagger],
       [Bestandteil einer Editor-Erweiterung, der Textbereiche mit
        Zusatzinformationen verknüpft, auf die andere Funktionen aufbauen.],
+      [Testumgebung],
+      [Systeme von BE-terna mit Dynamics 365, ein System mit der UDE und klassische
+       VMs. Die Extension lief dort in den Durchgängen D1 bis D4, entwickelt wurde
+       darauf nicht.],
       [Tool Window],
       [Fenster einer Extension, das sich in Visual Studio wie das Properties
        Window andocken lässt.],
@@ -334,6 +399,9 @@ Unterschrift:
       [VSSDK],
       [Ursprüngliches Erweiterungspaket von Visual Studio mit Zugriff auf alle
        internen Dienste.],
+      [X++],
+      [Objektorientierte Programmiersprache von Dynamics 365 für ERP- und
+       Datenbankanwendungen. Sie wird wie C\# zu .NET kompiliert.],
       [X++-Editor],
       [Code-Fenster von Visual Studio, in dem die Developer Tools den Code eines
        Elements anzeigen, etwa nach View code auf einer Klasse, Table oder Form.
@@ -341,6 +409,10 @@ Unterschrift:
        Einfärbung und den Tooltip der Developer Tools mit. Nicht dazu gehören der
        Designer mit den Nodes eines Elements und die `.xpp`-Textdateien, die auf
        dem privaten Gerät den X++-Editor im Debug-Build ersetzen.],
+      [XppSource],
+      [Ordner, in dem die Developer Tools beim Öffnen eines Elements dessen Code als
+       `.xpp`-Datei ablegen. Der X++-Editor zeigt diese Datei, gespeichert wird in
+       die XML-Datei des Elements.],
     ),
     caption: [Glossar (eigene Darstellung)]
   ) <glossar>

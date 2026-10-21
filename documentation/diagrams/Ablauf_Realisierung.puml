@@ -1,0 +1,44 @@
+@startuml
+' Ablauf der Realisierung: Arbeitspakete des Agenten, Prüfung durch den Autor
+' und Durchgänge auf der Testumgebung.
+' Rendern: plantuml -tpng -charset UTF-8 Ablauf_Realisierung.puml
+' Höhere Auflösung, damit das Bild im PDF scharf bleibt.
+skinparam dpi 240
+
+skinparam defaultFontSize 13
+skinparam shadowing false
+skinparam ActivityBackgroundColor #F5F5F5
+skinparam ActivityBorderColor #555555
+skinparam SwimlaneBorderColor #888888
+
+|Agent auf dem privaten Gerät|
+start
+repeat
+  :Arbeitspaket oder Befunde
+  nach dem Konzept umsetzen;
+  :Unit Tests, Prüfung in der
+  experimentellen Instanz;
+  :Commit und Bericht mit Rückfragen,
+  Entscheiden und Befunden;
+  |Autor|
+  :Rückfragen beantworten,
+  Entscheide und Commit prüfen;
+  if (Durchgang fällig?) then (ja)
+    |Agent auf dem privaten Gerät|
+    :Anleitung und Skripte
+    für den Durchgang schreiben;
+    |Autor|
+    :Anleitung prüfen;
+    |Testumgebung|
+    :Durchgang ausführen (Autor);
+    |Autor|
+    :Ergebnisse, Befunde und
+    Anpassungen zurückmelden;
+  else (nein)
+  endif
+  |Agent auf dem privaten Gerät|
+repeat while (Arbeit offen?) is (ja)
+->nein;
+:Code Freeze;
+stop
+@enduml

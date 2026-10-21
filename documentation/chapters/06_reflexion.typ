@@ -39,7 +39,7 @@ Graue Balken zeigen die Planung, farbige den effektiven Verlauf.
       [AP1], [Projektinitialisierung], [56], [44], [−12], [],
       [AP2], [Konzept], [24], [21], [−3], [],
       [AP3], [Realisierung], [64], [48], [−16], [],
-      [AP4], [Tests und Abschluss Realisierung], [24], [9], [−15], [],
+      [AP4], [Tests und Abschluss Realisierung], [24], [12], [−12], [],
       [AP5], [Dokumentation finalisieren], [24], [], [], [],
       [AP6], [Präsentation vorbereiten], [32], [], [], [],
       [], [*Total*], [*224*], [], [], [],

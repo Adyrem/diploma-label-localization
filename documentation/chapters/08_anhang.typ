@@ -46,7 +46,7 @@ Der Soll-Aufwand beträgt pro Arbeitstag acht Stunden.
       [3.7], [20.10.], [Öffnen im Panel, Verwendungssuche mit Navigation (Stufe 2)], [8], [5], [Verwendungssuche über alle Models mit Sprung an die Fundstelle, Suche und Öffnen im Tool Window aus dem Kontextmenü des X++-Editors. Auf den 11.10. vorgezogen. D2 am 15.10., Fehler und Anpassungen daraus umgesetzt], [Erledigt],
       [3.8], [21.10.], [Extraktion hardcodierter Texte, automatische Übersetzung (Stufe 3)], [8], [10], [Extraktion im X++-Editor und im Designer, Übersetzungsvorschläge über DeepL mit verschlüsselt gespeichertem API-Schlüssel. Auf den 15.10. vorgezogen], [Erledigt],
       table.cell(colspan: 7)[*AP4 Tests und Abschluss Realisierung*],
-      [4.1], [22.10.], [Restarbeiten und Bugfixing], [8], [3], [Korrekturen aus D3, danach die Kann-Anforderungen KA03, KA04, KA05, KA08 und KA09 und die Vorbereitung von D4. Auf den 16.10. vorgezogen], [Erledigt],
+      [4.1], [22.10.], [Restarbeiten und Bugfixing], [8], [6], [Korrekturen aus D3, danach die Kann-Anforderungen KA03, KA04, KA05, KA08 und KA09 und die Vorbereitung von D4. Auf den 16.10. vorgezogen], [Erledigt],
       [4.2], [23.10.], [Unit- und Integration-Tests, Testprotokoll], [8], [4], [D4 als letzter Durchgang auf der Testumgebung mit den Systemtests, Korrekturen daraus. Auf den 19.10. vorgezogen], [Erledigt],
       [4.3], [24.10.], [Code Freeze, Deployment], [8], [2], [Version 1.0.0 mit Lizenz im Paket, README für Nutzer und Weiterentwicklung, Release-Build ohne Warnung. Das VSIX liegt nicht im öffentlichen Repository. Auf den 19.10. vorgezogen], [Erledigt],
       table.cell(colspan: 7)[*AP5 Dokumentation finalisieren*],
@@ -98,6 +98,29 @@ Der Soll-Aufwand beträgt pro Arbeitstag acht Stunden.
     ),
     caption: [Besprechungsprotokoll Vorzeigetermin 1 (eigene Darstellung)]
   ) <protokoll_1>
+]
+
+#[
+  #show figure: set align(left)
+  #figure(
+    table(
+      columns: (auto, 1fr),
+      [*Datum*], [Ab 21.10.2026, schriftlich über Chat, über mehrere Tage],
+      [*Teilnehmende*], [Experte im Betrieb, Diplomand],
+      [*Traktanden*],
+      [- Review des Release-Builds und Rückmeldungen dazu],
+      [*Beschlüsse*],
+      [- Der Start von Visual Studio fühlt sich langsam an.
+       - Mehrere Anliegen liessen sich mit Funktionen erfüllen, die die Extension
+         bereits hat.
+       - Die Anbindung an das Properties Window lässt sich nach der Diplomarbeit
+         nochmals anschauen, vielleicht gibt es eine schönere Lösung.],
+      [*Pendenzen*],
+      [- Die Punkte in die Empfehlungen aufnehmen.],
+    ),
+    caption: [Besprechungsprotokoll Review des Experten im Betrieb (eigene
+              Darstellung)]
+  ) <protokoll_experte>
 ]
 
 #[

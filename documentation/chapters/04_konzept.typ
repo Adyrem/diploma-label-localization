@@ -9,7 +9,7 @@
 
 Die Extension läuft in Visual Studio und hat vier Nachbarn. Von den Developer
 Tools erfährt sie, was der X++-Editor als Label erkennt und welches Element im
-Designer gewählt ist. In der Unified Developer Experience liest sie aus deren
+Designer gewählt ist. In der Unified Developer Experience (UDE) liest sie aus deren
 Metadaten-Konfiguration, wo die Package-Verzeichnisse liegen. Mit dem Package-Verzeichnis tauscht sie Label-Dateien und
 die XML-Dateien der Elemente aus. Den Übersetzungsdienst ruft sie beim Anlegen
 eines Labels auf. Über Visual Studio fügt sie Text in den Editor ein und schreibt
@@ -50,7 +50,7 @@ Hand herauszulösen und die Label-ID von Hand einzusetzen.
 
 == Detailanforderungen an das neue System <detailanforderungen>
 
-Wo eine Label-ID vorkommt, gelten beide Formen aus @festlegungen. Neue Labels
+Wo eine Label-ID vorkommt, gelten beide Formen, siehe @festlegung_label_formen. Neue Labels
 entstehen nur in der neuen Form.
 
 === Funktionale Anforderungen
@@ -61,7 +61,7 @@ entstehen nur in der neuen Form.
   #figure(
     table(
       align: left,
-      columns: (8.5em, 1fr, auto, auto),
+      columns: (9.5em, 1fr, auto, auto),
       table.header(
         [*Anforderung*], [*Akzeptanzkriterien*], [*Setzt\ voraus*], [*Stufe*],
       ),
@@ -78,7 +78,7 @@ entstehen nur in der neuen Form.
       [FA02\ Label-Erstellung],
       [- Das Label entsteht in einer Label-Datei eines beschreibbaren Models.
          Schreibgeschützte Models werden nicht angeboten.
-       - Die ID folgt @festlegungen.
+       - Die ID folgt @festlegungen (Zeile Neue Label-IDs).
        - Alle anzulegenden Sprachen sind mit dem Suchbegriff vorbelegt.
        - Angelegt wird nur in Sprachen, für die es in der Label-Datei schon eine
          Datei gibt. Eine fehlende Sprache nennt das Output Window, eine neue
@@ -103,7 +103,7 @@ entstehen nur in der neuen Form.
          Package-Verzeichnisse.
        - Jede Fundstelle zeigt Model, Datei, Zeile und Spalte.
        - Ein Klick öffnet die Fundstelle in Visual Studio, siehe
-         @festlegungen.],
+         @festlegung_sprung.],
       [--], [1, 2],
 
       [FA05\ Hover-Tooltip],
@@ -131,7 +131,7 @@ entstehen nur in der neuen Form.
          erreichbar.],
       [FA01], [2],
 
-      [FA08\ Im Extension-Panel öffnen],
+      [FA08\ Im Tool Window öffnen],
       [- Ein Command auf einer Label-ID im Code öffnet das Label in der
          Detailansicht des Tool Window.
        - Dort lässt es sich wie in FA03 bearbeiten.],
@@ -169,7 +169,7 @@ entstehen nur in der neuen Form.
 
       [FA12\ Erweiterte Suchmodi],
       [- Zusätzlich die Suchmodi Anything like that mit und ohne Beachtung der
-         Gross- und Kleinschreibung sowie MatchWord.
+         Gross- und Kleinschreibung sowie Match word.
        - Für denselben Datensatz und Suchbegriff liefert jeder Suchmodus dieselben
          Treffer wie das bestehende Tool. Der Treffer, den das bestehende Tool
          zuoberst zeigt, steht auch in der Extension zuoberst.],
@@ -226,10 +226,8 @@ entstehen nur in der neuen Form.
       ),
       [NFA01\ Kompatibilität],
       [- Das VSIX-Paket lässt sich in Visual Studio 2026 und 2022 installieren.
-       - Die Extension arbeitet auf der Unified Developer Experience und auf der
-         klassischen Entwicklungs-VM. Getestet wird vor allem auf der Unified
-         Developer Experience der Testumgebung, auf der klassischen
-         Entwicklungs-VM mit TC37.
+       - Die Extension arbeitet auf der UDE und auf der
+         klassischen Entwicklungs-VM, kurz klassische VM. Getestet wird vor allem auf der UDE der Testumgebung, auf der klassischen VM mit TC37.
        - Alle Testfälle bestehen unter Visual Studio 2026.
        - Unter Visual Studio 2022 hält das Testprotokoll das Ergebnis jedes
          Testfalls fest.],
@@ -313,11 +311,7 @@ entstehen nur in der neuen Form.
 
 === Kann-Anforderungen <kann_anforderungen>
 
-Die Initialisierung hat die Anforderungen aus der Themeneingabe übernommen und
-verfeinert. Was sich mit den Erweiterungspunkten von Visual Studio zusätzlich
-umsetzen lässt, zeigte erst die Machbarkeitsstudie, und wo solche Funktionen
-ansetzen könnten, erst die Systemarchitektur. @abgrenzung hat diese Analyse deshalb bewusst
-ins Konzept verschoben. Die Kann-Anforderungen zählen nicht zu den
+Die Kann-Anforderungen zählen nicht zu den
 Erfolgskriterien und stehen nicht im Realisierungsplan. Umgesetzt werden sie nur,
 wenn nach AP4.1 Zeit bleibt, sonst fliessen sie in die Empfehlungen ein.
 
@@ -327,19 +321,19 @@ wenn nach AP4.1 Zeit bleibt, sonst fliessen sie in die Empfehlungen ein.
   #figure(
     table(
       align: left,
-      columns: (8.5em, 1.6fr, 1fr),
+      columns: (9.5em, 1.6fr, 1fr),
       table.header(
         [*Kann-Anforderung*], [*Beschreibung*], [*Technische Grundlage*],
       ),
       [KA01\ Fehlende Übersetzungen hervorheben],
       [Label-IDs, denen in einer der konfigurierten Sprachen eine Übersetzung
        fehlt, sind im Code farblich markiert.],
-      [Tags zum Einfärben von Text, siehe @machbarkeitsbeurteilung.],
+      [Tags zum Einfärben von Text, siehe @prototypenvergleich.],
 
       [KA02\ Markierung am Rand],
       [Zeilen mit unvollständig übersetzten Labels tragen eine Markierung in der
        Margin des Editors. Ein Klick darauf öffnet das Label im Tool Window.],
-      [Margin, siehe @machbarkeitsbeurteilung.],
+      [Margin, siehe @prototypenvergleich.],
 
       [KA03\ Platzhalter in der Inline-Anzeige],
       [Steht eine Label-ID in einem Aufruf von `strFmt`, ersetzt die
@@ -495,14 +489,14 @@ externes System einbeziehen. Für die übrigen legen die Akzeptanzkriterien in
        Übersetzungsdienst schlägt die Übersetzungen vor.],
       [*Akteure*], [Entwickler, Übersetzungsdienst],
       [*Auslöser*],
-      [Knopf im Tool Window oder Shortcut für ein neues Label, auch aus UC01 ohne
+      [Button im Tool Window oder Shortcut für ein neues Label, auch aus UC01 ohne
        Treffer und aus UC08.],
       [*Vorbedingungen*],
       [Die Labels sind geladen. Mindestens ein beschreibbares Model hat eine
        Label-Datei.],
       [*Typischer Ablauf*],
       [+ Der Entwickler wählt im Tool Window eine Label-Datei und legt ein neues
-         Label an, per Knopf oder Shortcut.
+         Label an, per Button oder Shortcut.
        + Alle anzulegenden Sprachen sind mit dem letzten Suchbegriff vorbelegt.
        + Die Extension schickt den Text in der Quellsprache an den
          Übersetzungsdienst und ersetzt die Vorbelegung der übrigen Sprachen durch
@@ -617,7 +611,7 @@ externes System einbeziehen. Für die übrigen legen die Akzeptanzkriterien in
                Extraktion auf. Die Extension bietet dessen Label-Eigenschaften mit
                hardcodiertem Text an, etwa Label und Help Text. Nach der Wahl geht
                es mit Schritt 3 weiter. In Schritt 5 schreibt die Extension die
-               Label-ID in die XML-Datei des Elements, siehe @festlegungen. Der
+               Label-ID in die XML-Datei des Elements, siehe @festlegung_extraktion. Der
                Designer meldet die Änderung, und der Entwickler lädt das Element
                neu. Hat das Element ungespeicherte Änderungen, bietet die
                Extension vorher an, es zu speichern.],
@@ -746,45 +740,21 @@ der Extension und der Kernlogik.
   #figure(
     table(
       align: left,
-      columns: (auto, 1.6fr, 1fr),
+      columns: (9em, 1.3fr, 1fr),
       table.header(
         [*Thema*], [*Festlegung*], [*Stand*],
       ),
       [Package-Verzeichnis],
       [Konfigurierbar, mehrere Verzeichnisse möglich. Die Extension arbeitet auf
-       der Unified Developer Experience wie auf der klassischen Entwicklungs-VM.
-
-       In der Unified Developer
-       Experience gilt genau eine aktive Metadaten-Konfiguration der Developer
-       Tools. Sie nennt einen Ordner für die eigenen Models und Ordner für
-       Referenz-Metadaten, darunter das entpackte `PackagesLocalDirectory` mit den
-       Models von Microsoft @ms-ude-tools. Die Konfigurationen liegen als je eine
-       JSON-Datei im Ordner `XPPConfig` unter
-       `%LOCALAPPDATA%\Microsoft\Dynamics365` @bucher-ude. Der Ordner für eigene
-       Models steht dort unter `ModelStoreFolder`, die Referenz-Metadaten unter
-       `FrameworkDirectory` und `ReferencePackagesPaths`. Welche Konfiguration
-       aktiv ist, lässt sich an diesen Dateien nicht ablesen. Der Entwickler wählt
-       sie deshalb in den Einstellungen, bei nur einer ist sie vorgewählt. Die
-       Extension liest die Datei bei jedem Laden neu, weil sich Namen und Pfade
-       mit Updates ändern.
-
-       Auf der klassischen Entwicklungs-VM liegen eigene Models und die von
-       Microsoft in einem gemeinsamen `PackagesLocalDirectory`, meist unter
-       `K:\AOSService` oder `C:\AOSService`, je nach Maschine auch auf einem
-       anderen Laufwerk @ms-vc-navigation. Findet die Extension keine
-       Metadaten-Konfiguration, schlägt sie wie das bestehende Tool das erste
-       vorhandene dieser beiden Verzeichnisse vor. Weitere Verzeichnisse lassen
-       sich von Hand ergänzen.],
-      [Einträge und Ablage der Unified Developer Experience auf der Testumgebung
+       der UDE wie auf der klassischen VM,
+       siehe @festlegung_package.],
+      [Einträge und Ablage der UDE auf der Testumgebung
        geprüft. Beim Wechsel der aktiven Konfiguration änderte sich keine Datei.
        Die aktive Konfiguration automatisch zu erkennen bleibt vorgemerkt.],
 
       [Kompilierte Labels],
-      [Labels ohne Label-Datei liest das bestehende Tool aus kompilierten
-       Ressourcen, indem es die Assembly lädt. Im Prozess von Visual Studio bliebe
-       die Datei bis zum Schliessen geladen @ms-assembly-unload, und ein erneutes
-       Laden lieferte die alte Fassung @ms-assembly-loadfrom. Die Kernlogik liest
-       die Ressourcen deshalb direkt aus der Datei, ohne die Assembly zu laden.],
+      [Direkt aus der Datei lesen, ohne die Assembly zu laden, siehe
+       @festlegung_kompiliert.],
       [Es gibt Models, die nur kompilierte Ressourcen haben. Umgesetzt in AP3.2
        mit selbst erzeugten Ressourcen, an einem echten Model geprüft in D1.],
 
@@ -808,13 +778,8 @@ der Extension und der Kernlogik.
       [Aus der Logik übernommen, die BE-terna bereits einsetzt.],
 
       [Label-Formen],
-      [Die alte Form ohne Doppelpunkt, etwa `@SYS12345`, kommt im Code und in
-       Eigenschaften noch an vielen Stellen vor. In der Label-Datei steht sie mit
-       vollständiger ID samt `@`. Ihre Label-Datei ergibt sich nur aus der Datei,
-       in der das Label steht, nicht aus den Buchstaben der ID. Suche, Tooltip, Inline-Anzeige, Öffnen im Tool Window,
-       Auswahl im Designer, Bearbeiten, Verwendungssuche, Ersetzen, Kopieren und
-       Verschieben verarbeiten beide Formen. Neue Labels entstehen nur in der
-       neuen Form, auch beim Kopieren und Verschieben.],
+      [Alte und neue Form werden überall verarbeitet, neue Labels entstehen nur in
+       der neuen Form, siehe @festlegung_label_formen.],
       [Das bestehende Tool verarbeitet beide Formen.],
 
       [Label-Erkennung],
@@ -846,7 +811,7 @@ der Extension und der Kernlogik.
       [Tooltip],
       [Eigene QuickInfo-Quelle über MEF. Ihr Eintrag erscheint im selben Tooltip
        wie der Eintrag der Developer Tools.],
-      [Belegt, siehe @machbarkeitsbeurteilung.],
+      [Belegt, siehe @befunde_testumgebung.],
 
       [Inline-Anzeige],
       [Platz oberhalb der Zeile über dieselbe Technik, mit der die Developer Tools
@@ -859,53 +824,24 @@ der Extension und der Kernlogik.
       [Standardschnittstelle des Editors, nicht eigens erprobt.],
 
       [Extraktion im Properties Window],
-      [Lesen über das Selection Tracking. Geschrieben wird direkt in die
-       XML-Datei des Elements, wie in @machbarkeitsbeurteilung festgelegt. Ein
-       geöffneter Designer meldet die Änderung danach und bietet an, das Element
-       neu zu laden. Das Element muss vorher gespeichert sein, siehe die nächste
-       Zeile. Die XML-Datei findet die Extension über Elementtyp und Elementname
-       aus dem Selection Tracking, die Stelle darin über den Namen der gewählten
-       Node. Ersetzt wird nur, wenn die Eigenschaft dort genau den angezeigten
-       Text enthält. Ist die Stelle nicht eindeutig, bricht die Extension mit
-       einer Meldung ab.],
+      [Lesen über das Selection Tracking, Schreiben direkt in die XML-Datei des
+       Elements, siehe @festlegung_extraktion.],
       [Lesen belegt. Verhalten des Designers auf der Testumgebung beobachtet.
        Die Zuordnung zur Stelle im XML zeigt eine Probe in D1.],
 
       [Schreiben in Elemente],
-      [Die Extraktion im Designer, das Umstellen der Referenzen beim Kopieren und
-       Verschieben und das Ersetzen schreiben in die XML-Dateien von Elementen.
-       Hat ein betroffenes Element in Visual Studio ungespeicherte Änderungen,
-       schreibt die Extension nicht in dieses Element, nennt es im Output Window
-       und bietet an, zuerst zu speichern. Fallback ist, vor jedem Schreiben
-       anzubieten, alle Dokumente über den Command `File.SaveAll` zu speichern
-       @ms-vs-shortcuts. In `.xpp`-Dateien schreibt die Extension nie, siehe die
-       nächste Zeile.],
+      [Nur in gespeicherte Elemente, nie in `.xpp`-Dateien, siehe
+       @festlegung_schreiben.],
       [Auf der Testumgebung beobachtet, dass ein Element vor dem Ändern der
        XML-Datei gespeichert sein muss. Ob die Extension ungespeicherte
        Änderungen erkennt und wie ein geöffneter X++-Editor auf eine geänderte
        XML-Datei reagiert, zeigt D1. Abschliessend prüft es D2.],
 
       [Sprung an die Fundstelle],
-      [Die Verwendungssuche findet die Label-ID in der XML-Datei des Elements.
-       Der X++-Editor zeigt dagegen eine `.xpp`-Datei im Ordner XppSource, siehe
-       @befundprotokoll. Die Developer Tools erzeugen sie erst beim Öffnen des
-       Elements, eine Datei je Element, für Klassen wie für Tables. Ihre Zeilen
-       entsprechen dem Editor, die Methoden folgen, soweit geprüft, der
-       Reihenfolge im XML. XML und `.xpp` ändern sich erst beim Speichern. Eine
-       Änderung direkt an der `.xpp`-Datei zeigt der Editor zwar an, beim
-       nächsten Öffnen des Elements ist sie aber verworfen. Die Verwendungssuche
-       sieht deshalb nur gespeicherte Stände.
-
-       Ein Klick auf das Symbol einer Fundstelle öffnet das Element dort, wo die
-       Label-ID steht. Steht sie im Code, öffnet die Extension das Element im
-       X++-Editor und setzt den Cursor auf dasselbe Vorkommen der Label-ID, also
-       auf das dritte, wenn die Fundstelle das dritte Vorkommen im Code des XML
-       ist. Steht sie in einer Eigenschaft, öffnet die Extension das Element im
-       Designer, wählt die Node mit der Eigenschaft, etwa ein Feld einer Table,
-       und markiert die Eigenschaft im Properties Window. Gelingt das nicht, ist
-       das Element trotzdem geöffnet, nur ohne Sprung an die Fundstelle.],
-      [Ablage und Speichern auf der Unified Developer Experience der
-       Testumgebung geprüft, auf der klassischen Entwicklungs-VM erst in D1. Wie
+      [Im Code in den X++-Editor auf dasselbe Vorkommen der Label-ID, in einer
+       Eigenschaft in den Designer, siehe @festlegung_sprung.],
+      [Ablage und Speichern auf der UDE der
+       Testumgebung geprüft, auf der klassischen VM erst in D1. Wie
        die
        Extension ein Element öffnet und darin eine Node und eine Eigenschaft
        wählt, ist nicht untersucht. Eine Probe zeigt es in D1, abschliessend
@@ -931,6 +867,86 @@ der Extension und der Kernlogik.
     caption: [Technische Festlegungen (eigene Darstellung)]
   ) <festlegungen>
 ]
+
+#heading(outlined: false, level: 4)[Package-Verzeichnisse] <festlegung_package>
+
+In der UDE gilt genau eine aktive Metadaten-Konfiguration
+der Developer Tools. Sie nennt einen Ordner für die eigenen Models und Ordner für
+Referenz-Metadaten, darunter das entpackte `PackagesLocalDirectory` mit den Models
+von Microsoft @ms-ude-tools. Die Konfigurationen liegen als je eine JSON-Datei im
+Ordner `XPPConfig` unter `%LOCALAPPDATA%\Microsoft\Dynamics365` @bucher-ude. Der
+Ordner für eigene Models steht dort unter `ModelStoreFolder`, die Referenz-Metadaten
+unter `FrameworkDirectory` und `ReferencePackagesPaths`. In diesen Dateien fand
+sich keine Angabe, welche Konfiguration aktiv ist. Der Entwickler wählt sie deshalb in
+den Einstellungen, bei nur einer ist sie vorgewählt. Die Extension liest die Datei
+bei jedem Laden neu, weil sich Namen und Pfade mit Updates ändern.
+
+Auf der klassischen VM liegen eigene Models und die von Microsoft in
+einem gemeinsamen `PackagesLocalDirectory`, meist unter `K:\AOSService` oder
+`C:\AOSService`, je nach Maschine auch auf einem anderen Laufwerk
+@ms-vc-navigation. Findet die Extension keine Metadaten-Konfiguration, schlägt sie
+wie das bestehende Tool das erste vorhandene dieser beiden Verzeichnisse vor.
+Weitere Verzeichnisse lassen sich von Hand ergänzen.
+
+#heading(outlined: false, level: 4)[Kompilierte Labels] <festlegung_kompiliert>
+
+Labels ohne Label-Datei liest das bestehende Tool aus kompilierten Ressourcen, indem
+es die Assembly lädt. Im Prozess von Visual Studio bliebe die Datei bis zum Schliessen
+geladen @ms-assembly-unload, und ein erneutes Laden lieferte die alte Fassung
+@ms-assembly-loadfrom. Die Kernlogik liest die Ressourcen deshalb direkt aus der
+Datei, ohne die Assembly zu laden.
+
+#heading(outlined: false, level: 4)[Label-Formen] <festlegung_label_formen>
+
+Die alte Form ohne Doppelpunkt, etwa `@SYS12345`, kommt im Code und in Eigenschaften
+noch an vielen Stellen vor. In der Label-Datei steht sie mit vollständiger ID samt
+`@`. Ihre Label-Datei ergibt sich nur aus der Datei, in der das Label steht, nicht
+aus den Buchstaben der ID. Suche, Tooltip, Inline-Anzeige, Öffnen im Tool Window,
+Auswahl im Designer, Bearbeiten, Verwendungssuche, Ersetzen, Kopieren und
+Verschieben verarbeiten beide Formen. Neue Labels entstehen nur in der neuen Form,
+auch beim Kopieren und Verschieben.
+
+#heading(outlined: false, level: 4)[Extraktion im Properties Window] <festlegung_extraktion>
+
+Gelesen wird über das Selection Tracking. Geschrieben wird direkt in die XML-Datei
+des Elements, wie in den Befunden aus der Testumgebung festgelegt, siehe
+@befunde_testumgebung. Ein geöffneter Designer
+meldet die Änderung danach und bietet an, das Element neu zu laden. Das Element muss
+vorher gespeichert sein, siehe @festlegung_schreiben. Die XML-Datei findet die
+Extension über Elementtyp und Elementname aus dem Selection Tracking, die Stelle
+darin über den Namen der gewählten Node. Ersetzt wird nur, wenn die Eigenschaft
+dort genau den angezeigten Text enthält. Ist die Stelle nicht eindeutig, bricht die
+Extension mit einer Meldung ab.
+
+#heading(outlined: false, level: 4)[Schreiben in Elemente] <festlegung_schreiben>
+
+Die Extraktion im Designer, das Umstellen der Referenzen beim Kopieren und
+Verschieben und das Ersetzen schreiben in die XML-Dateien von Elementen. Hat ein
+betroffenes Element in Visual Studio ungespeicherte Änderungen, schreibt die
+Extension nicht in dieses Element, nennt es im Output Window und bietet an, zuerst zu
+speichern. Fallback ist, vor jedem Schreiben anzubieten, alle Dokumente über den
+Command `File.SaveAll` zu speichern @ms-vs-shortcuts. In `.xpp`-Dateien schreibt die
+Extension nie, siehe @festlegung_sprung.
+
+#heading(outlined: false, level: 4)[Sprung an die Fundstelle] <festlegung_sprung>
+
+Die Verwendungssuche findet die Label-ID in der XML-Datei des Elements. Der
+X++-Editor zeigt dagegen eine `.xpp`-Datei im Ordner XppSource, siehe
+@befundprotokoll. Die Developer Tools erzeugen sie erst beim Öffnen des Elements,
+eine Datei je Element, für Klassen wie für Tables. Ihre Zeilen entsprechen dem
+Editor, die Methoden folgen, soweit geprüft, der Reihenfolge im XML. XML und `.xpp`
+ändern sich erst beim Speichern. Eine Änderung direkt an der `.xpp`-Datei zeigt der
+Editor zwar an, beim nächsten Öffnen des Elements ist sie aber verworfen. Die
+Verwendungssuche sieht deshalb nur gespeicherte Stände.
+
+Ein Klick auf das Symbol einer Fundstelle öffnet das Element dort, wo die Label-ID
+steht. Steht sie im Code, öffnet die Extension das Element im X++-Editor und setzt
+den Cursor auf dasselbe Vorkommen der Label-ID, also auf das dritte, wenn die
+Fundstelle das dritte Vorkommen im Code des XML ist. Steht sie in einer Eigenschaft,
+öffnet die Extension das Element im Designer, wählt die Node mit der Eigenschaft,
+etwa ein Feld einer Table, und markiert die Eigenschaft im Properties Window.
+Gelingt das nicht, ist das Element trotzdem geöffnet, nur ohne Sprung an die
+Fundstelle.
 
 === Fachliche Regeln
 
@@ -1010,7 +1026,7 @@ Methoden.
         [*Klasse*], [*Beschreibung*], [*Wichtige Methoden*],
       ),
       [`LabelId`],
-      [Label-ID in einer der beiden Formen aus @festlegungen. Trennt eine ID der
+      [Label-ID in einer der beiden Formen, siehe @festlegung_label_formen. Trennt eine ID der
        neuen Form in Label-Datei und Label, die alte Form bleibt ungeteilt. `FindAll` findet Label-IDs in einer Textzeile, für
        den Ersatz des X++-Editors im Debug-Build und als Fallback aus R07.],
       [`TryParse`\ `Parse`\ `FindAll`],
@@ -1032,8 +1048,7 @@ Methoden.
        Package-Verzeichnisse und erkennt schreibgeschützte Models. Ordnet einer
        Datei ihr Model zu, für den Vorschlag der Label-Datei bei der
        Extraktion. `FindModelFor` versteht dafür Pfade aus den
-       Package-Verzeichnissen und aus XppSource, wo der X++-Editor der Unified
-       Developer Experience arbeitet.],
+       Package-Verzeichnissen und aus XppSource, wo der X++-Editor der UDE arbeitet.],
       [`ReadConfiguration`\ `FindModels`\ `FindModelFor`],
 
       [`ILabelSource`],
@@ -1079,7 +1094,7 @@ Methoden.
       [`Create`\ `Update`\ `Delete`\ `Copy`\ `Move`],
 
       [`LabelIdGenerator`],
-      [Erzeugt neue Label-IDs nach @festlegungen.],
+      [Erzeugt neue Label-IDs nach @festlegungen (Zeile Neue Label-IDs).],
       [`NewId`],
 
       [`UsageSearch`\ `LabelUsage`],
@@ -1185,7 +1200,7 @@ Abläufe bleiben im Tool Window und in der Kernlogik.
 === Laden
 
 Das Laden beginnt, sobald das Tool Window oder die erste X++-Datei geöffnet wird,
-siehe @festlegungen. Visual Studio wartet nicht darauf. Eine beschädigte oder
+siehe @festlegungen (Zeile Laden). Visual Studio wartet nicht darauf. Eine beschädigte oder
 gesperrte Datei erzeugt eine Warnung, geladen werden die übrigen.
 
 #figure(
@@ -1249,8 +1264,8 @@ nebeneinander wie in @ist_screenshot. Die Trefferliste hat eine Spalte je gelade
       [Insert, Save und Save and insert in der Toolbar. Insert fügt die Label-ID
        an der Cursorposition ein, statt sie in die Zwischenablage zu kopieren
        (FA14).],
-      [Ein Knopf je beschreibbares Model, siehe @ist_erstellen],
-      [Auswahl der Label-Datei und ein Knopf New. Eine Reihe von Knöpfen passt nicht
+      [Ein Button je beschreibbares Model, siehe @ist_erstellen],
+      [Auswahl der Label-Datei und ein Button New. Eine Reihe von Buttons passt nicht
        in ein schmales Tool Window.],
       [Verwendungssuche in einer eigenen Ansicht, siehe @ist_verwendungssuche],
       [Bereich References unter der Detailansicht. Ein Klick auf das Symbol einer
@@ -1258,7 +1273,7 @@ nebeneinander wie in @ist_screenshot. Die Trefferliste hat eine Spalte je gelade
       [Console],
       [Eigener Bereich BE-LabelExtension im Output Window (FA17).],
       [Settings],
-      [Seite in den Optionen von Visual Studio, siehe @gui_einstellungen. Der Knopf
+      [Seite in den Optionen von Visual Studio, siehe @gui_einstellungen. Der Button
        Settings öffnet sie.],
       [Tracing (Preview)],
       [Entfällt, siehe @abgrenzung.],
@@ -1276,8 +1291,8 @@ bestätigt (FA10). Nicht gespeicherte Labels sind in der Trefferliste markiert.
 
 Im X++-Editor erscheinen die Übersetzungen im Tooltip und oberhalb der Zeile wie in
 @demo_quickinfo und @demo_inline. Eine fehlende Übersetzung ist als `missing`
-markiert. Das Kontextmenü des Editors erhält drei Commands, Search label (FA07),
-Open in label window (FA08) und Extract to label (FA09). Im Designer wirkt der Knopf
+markiert. Das Kontextmenü des Editors erhält drei Commands, Search Label (FA07),
+Open in Label Window (FA08) und Extract to Label (FA09). Im Designer wirkt der Button
 Extract im Tool Window auf das gewählte Element. Ob sich der Command auch ins
 Kontextmenü des Designers einhängen lässt, ist nicht untersucht.
 
@@ -1285,8 +1300,7 @@ Kontextmenü des Designers einhängen lässt, ist nicht untersucht.
 
 In den Optionen von Visual Studio erhält die Extension eine eigene Seite
 BE-LabelExtension mit den Einstellungen aus FA11. Der API-Schlüssel erscheint dort
-verdeckt und wird nach NFA06 verschlüsselt abgelegt. Auf einer klassischen
-Entwicklungs-VM bleibt die Auswahl der Metadaten-Konfiguration leer, und unter den
+verdeckt und wird nach NFA06 verschlüsselt abgelegt. Auf einer klassischen VM bleibt die Auswahl der Metadaten-Konfiguration leer, und unter den
 weiteren Package-Verzeichnissen steht das gefundene Standardverzeichnis.
 
 #figure(
@@ -1313,19 +1327,18 @@ Getestet wird auf drei Stufen.
   laufen bei jedem Build unter .NET Framework 4.8.
 - Systemtests prüfen die Extension in Visual Studio. Sie laufen zuerst auf dem
   privaten Gerät mit dem Debug-Build, die Testfälle zum X++-Editor dort über den
-  Ersatz aus @festlegungen. Auf der Testumgebung laufen sie in den Durchgängen aus
+  Ersatz aus @festlegungen (Zeile Entwicklung ohne X++-Editor). Auf der Testumgebung laufen sie in den Durchgängen aus
   @durchgaenge, in D4 vollständig. Die Testumgebung umfasst ein System mit der
-  Unified Developer Experience und eine klassische Entwicklungs-VM, beide mit
-  Visual Studio 2026. Die Durchgänge laufen vor allem auf der Unified Developer
-  Experience.
+  UDE und eine klassische VM, beide mit
+  Visual Studio 2026. Die Durchgänge laufen vor allem auf der UDE.
 - Reviews prüfen, was sich nicht ausführen lässt, etwa die Abhängigkeiten der
   Kernlogik.
 
 Die Unit Tests arbeiten mit synthetischen Testdaten, die in AP3.2 entstehen und
 keine Daten des Arbeitgebers enthalten (OA03). Sie decken beide Label-Formen,
 schreibgeschützte Models, kompilierte Ressourcen und beschädigte Label-Dateien ab,
-dazu beide Ablagen, eine Metadaten-Konfiguration der Unified Developer Experience
-und das `PackagesLocalDirectory` einer klassischen Entwicklungs-VM.
+dazu beide Ablagen, eine Metadaten-Konfiguration der UDE
+und das `PackagesLocalDirectory` einer klassischen VM.
 Für FA12 werden die Treffer des bestehenden Tools auf denselben Testdaten einmal
 erfasst und als erwartete Ergebnisse abgelegt.
 
@@ -1333,9 +1346,8 @@ Testfälle, die auf der Testumgebung schreiben, verwenden dort ein bestehendes
 Model.
 
 Ein Testfall ist bestanden, wenn alle erwarteten Ergebnisse eintreten. Fehler, die
-eine Anforderung verletzen, werden bis AP4.1 behoben. Unter Visual Studio 2022 hält
-das Testprotokoll die Ergebnisse nur fest, Fehler dort haben nach NFA01 tiefe
-Priorität. Die Ergebnisse stehen im Testprotokoll, siehe @testprotokoll.
+eine Anforderung verletzen, werden bis AP4.1 behoben. Die Ergebnisse stehen im
+Testprotokoll, siehe @testprotokoll.
 
 === Testobjekte
 
@@ -1352,14 +1364,11 @@ Priorität. Die Ergebnisse stehen im Testprotokoll, siehe @testprotokoll.
       ),
       [TO1], [Kernlogik], [Unit Tests bei jedem Build],
       [TO2], [Extension im Debug-Build auf dem privaten Gerät], [Systemtest],
-      [TO3], [VSIX-Paket unter Visual Studio 2026 auf der Unified Developer
-       Experience der Testumgebung],
+      [TO3], [VSIX-Paket unter Visual Studio 2026 auf der UDE der Testumgebung],
       [Systemtest in D1 bis D4],
-      [TO4], [VSIX-Paket unter Visual Studio 2022 auf der Unified Developer
-       Experience der Testumgebung],
+      [TO4], [VSIX-Paket unter Visual Studio 2022 auf der UDE der Testumgebung],
       [Systemtest in D4],
-      [TO5], [VSIX-Paket unter Visual Studio 2026 auf der klassischen
-       Entwicklungs-VM der Testumgebung],
+      [TO5], [VSIX-Paket unter Visual Studio 2026 auf der klassischen VM der Testumgebung],
       [Systemtest in D4],
       [TO6], [Quellcode und Repository], [Review],
     ),
@@ -1369,9 +1378,7 @@ Priorität. Die Ergebnisse stehen im Testprotokoll, siehe @testprotokoll.
 
 === Testfälle
 
-Die Systemtests auf dem privaten Gerät laufen in D4 auf der Unified Developer
-Experience der Testumgebung ein zweites Mal, TC24 auf der klassischen
-Entwicklungs-VM. OA04 folgt erst nach Projektabschluss und hat keinen Testfall.
+Die Systemtests auf dem privaten Gerät laufen in D4 auf der UDE der Testumgebung ein zweites Mal, TC24 auf der klassischen VM. OA04 folgt erst nach Projektabschluss und hat keinen Testfall.
 
 #[
   #show figure: set align(left)
@@ -1385,9 +1392,9 @@ Entwicklungs-VM. OA04 folgt erst nach Projektabschluss und hat keinen Testfall.
       ),
       table.cell(colspan: 4)[*Unit Tests der Kernlogik, TO1*],
       [TC01],
-      [Label-Datei mit Kommentaren, beiden Label-Formen und leeren Texten im
-       Format aus @festlegungen, also als ein Leerzeichen, lesen und wieder
-       schreiben.],
+      [Label-Datei mit Kommentaren, beiden Label-Formen und leeren Texten lesen
+       und wieder schreiben. Leere Texte stehen als ein Leerzeichen, siehe
+       @festlegungen (Zeile Schreiben).],
       [Die geschriebene Datei ist Byte für Byte gleich wie die gelesene, in
        UTF-8.],
       [FA03],
@@ -1440,7 +1447,7 @@ Entwicklungs-VM. OA04 folgt erst nach Projektabschluss und hat keinen Testfall.
       [Alle Labels sind gelesen. Die Assembly ist danach nicht geladen und die
        Datei lässt sich ersetzen. Gibt es zur selben Label-Datei und Sprache eine
        `.label.txt`, wird die Ressource übersprungen.],
-      [@festlegungen],
+      [@festlegung_kompiliert],
 
       [TC09],
       [Ein Label ungespeichert ändern, die Label-Datei von aussen ändern und neu
@@ -1479,8 +1486,7 @@ Entwicklungs-VM. OA04 folgt erst nach Projektabschluss und hat keinen Testfall.
 
       [TC14],
       [Package-Verzeichnisse aus einer Metadaten-Konfiguration bestimmen, danach
-       aus einem Aufbau ohne Konfiguration wie auf einer klassischen
-       Entwicklungs-VM.],
+       aus einem Aufbau ohne Konfiguration wie auf einer klassischen VM.],
       [Die Ordner aus `ModelStoreFolder`, `FrameworkDirectory` und
        `ReferencePackagesPaths` werden gefunden. Ohne Konfiguration schlägt die
        Extension das vorhandene Standardverzeichnis vor.],
@@ -1511,7 +1517,7 @@ Entwicklungs-VM. OA04 folgt erst nach Projektabschluss und hat keinen Testfall.
       [Nach einer Suche ohne Treffer mit dem Shortcut ein neues Label anlegen,
        auch in einer Label-Datei, der eine anzulegende Sprache fehlt.],
       [Alle anzulegenden Sprachen sind mit dem Suchbegriff vorbelegt. Nach dem
-       Bestätigen steht das Label mit einer ID nach @festlegungen in allen
+       Bestätigen steht das Label mit einer ID nach @festlegungen (Zeile Neue Label-IDs) in allen
        vorhandenen Dateien. Die fehlende Sprache nennt das Output Window.],
       [FA02\ FA16],
 
@@ -1548,7 +1554,7 @@ Entwicklungs-VM. OA04 folgt erst nach Projektabschluss und hat keinen Testfall.
 
       [TC24],
       [Eine Label-Datei der Testdaten im bestehenden Tool ändern und speichern,
-       danach in der Extension. In D4 auf der klassischen Entwicklungs-VM
+       danach in der Extension. In D4 auf der klassischen VM
        wiederholt, weil das bestehende Tool nur deren Pfade kennt.],
       [Nach der Änderung im bestehenden Tool bietet die Extension das Neuladen
        an, nach der Änderung in der Extension das bestehende Tool. Nicht
@@ -1648,12 +1654,11 @@ Entwicklungs-VM. OA04 folgt erst nach Projektabschluss und hat keinen Testfall.
       [NFA01],
 
       [TC37],
-      [Auf der klassischen Entwicklungs-VM installieren, das vorgeschlagene
+      [Auf der klassischen VM installieren, das vorgeschlagene
        Standardverzeichnis übernehmen, suchen, eine Label-ID im X++-Editor
        überfahren und eine Fundstelle anspringen, in D4.],
       [Das Standardverzeichnis ist vorgeschlagen, die Labels sind geladen.
-       Suche, Tooltip und Sprung funktionieren wie auf der Unified Developer
-       Experience.],
+       Suche, Tooltip und Sprung funktionieren wie auf der UDE.],
       [NFA01\ FA04\ FA05],
 
       table.cell(colspan: 4)[*Reviews, TO6*],
@@ -1683,7 +1688,7 @@ Entwicklungs-VM. OA04 folgt erst nach Projektabschluss und hat keinen Testfall.
 == Einführung und Betrieb <einfuehrung>
 
 Eine Datenmigration entfällt. Die Extension liest und schreibt dieselben
-Label-Dateien im selben Format wie das bestehende Tool, siehe @festlegungen. Die
+Label-Dateien im selben Format wie das bestehende Tool, siehe @festlegungen (Zeile Schreiben). Die
 Einstellungen des bestehenden Tools werden nicht übernommen, weil es nur zwei Listen
 von Sprachen sind.
 
@@ -1698,13 +1703,13 @@ Eingeführt wird in drei Schritten.
   Neuladen an, siehe FA15 und @ist_funktionen.
 
 Ob und wann das bestehende Tool abgelöst wird, entscheidet BE-terna nach
-Projektabschluss (OA04). Ich empfehle eine Pilotphase mit einzelnen Entwicklern,
+Projektabschluss (OA04). Sinnvoll ist eine Pilotphase mit einzelnen Entwicklern,
 deren Rückmeldungen vor der Ablösung einfliessen. Das wirkt zugleich R09 entgegen.
 
 Im Betrieb braucht die Extension weder Server noch Datenbank. Eine neue Version
 kommt als neues VSIX-Paket, das die alte ersetzt. Wie das Paket verteilt wird und
 woher die API-Schlüssel im Betrieb stammen, legt BE-terna fest. Für Entwicklung und
-Tests während des Projekts stelle ich einen eigenen Schlüssel. Die
+Tests während des Projekts stellt der Autor einen eigenen Schlüssel. Die
 Weiterentwicklung liegt beim Maintainer, siehe @stakeholderanalyse. Nach einem Uninstall bleiben die Label-Dateien unverändert.
 
 Der Code steht im öffentlichen Repository unter der MIT-Lizenz. Sie erlaubt
@@ -1841,7 +1846,7 @@ Unsicherheiten früh zeigen.
        XML finden. Von Hand messen, wie lange eine Textsuche über die
        XML-Dateien aller Models dauert, und prüfen, wie ein geöffneter
        X++-Editor auf eine geänderte XML-Datei reagiert und welche Datei der
-       X++-Editor auf der klassischen Entwicklungs-VM öffnet.],
+       X++-Editor auf der klassischen VM öffnet.],
       [D2], [AP3.7],
       [Label-Erkennung, Tooltip, Inline-Anzeige, Suche aus dem Editor, Öffnen im
        Tool Window, Verwendungssuche mit Öffnen im X++-Editor, Schreiben in geöffnete
@@ -1851,7 +1856,7 @@ Unsicherheiten früh zeigen.
        Kompilieren nach Änderungen (TC31 bis TC34).],
       [D4], [AP4.2],
       [Alle Systemtests aus @testfaelle, zusätzlich unter Visual Studio 2022
-       (TC36) und auf der klassischen Entwicklungs-VM (TC24, TC37).],
+       (TC36) und auf der klassischen VM (TC24, TC37).],
     ),
     caption: [Durchgänge auf der Testumgebung (eigene Darstellung)]
   ) <durchgaenge>

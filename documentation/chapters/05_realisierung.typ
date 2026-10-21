@@ -2,13 +2,44 @@
 
 = Realisierung <realisierung>
 
+== Vorgehen <vorgehen_realisierung>
+
+Die Phasen des Projekts liefen wie in @projektplanung geplant nacheinander.
+Innerhalb der Realisierung wiederholte sich dagegen ein Ablauf aus Umsetzung,
+Prüfung und Rückmeldung, den @ablauf_realisierung zeigt. Vier dieser Runden endeten
+mit einem Durchgang auf der Testumgebung. Was dort auffiel, setzte der Agent in den
+folgenden Arbeitspaketen um.
+
+#figure(
+  image("../diagrams/Ablauf_Realisierung.png", width: 85%),
+  caption: [Ablauf der Realisierung (eigene Darstellung)]
+) <ablauf_realisierung>
+
+Den Code schrieb Claude Code als Agent in einer eigenen Session auf dem privaten
+Gerät, siehe @hilfsmittelverzeichnis. Vorgabe war das Konzept aus @konzept mit seinem
+Realisierungsplan. Nach jedem Arbeitspaket meldete der Agent, was entstanden war,
+welche Fragen offen blieben, was er selbst entschieden hatte und was ihm aufgefallen
+war. In 30 Nachrichten kamen so 17 Rückfragen, 100 Realisierungsentscheide und 53
+Befunde zusammen. Der Autor beantwortete die Rückfragen und prüfte die Entscheide.
+Weil der Agent direkt in das öffentliche Repository schrieb, prüfte der Autor
+ausserdem jeden Commit auf Daten des Arbeitgebers und Secrets.
+
+Auf den Systemen des Arbeitgebers dürfen die KI-Tools nicht laufen, siehe
+@rahmenbedingungen_prozess. Zwischen den Durchgängen prüfte der Agent deshalb mit
+Unit Tests und in der experimentellen Instanz, in der der Debug-Build Tooltip und
+Inline-Anzeige an `.xpp`-Textdateien hängt. Vor jedem Durchgang schrieb er eine
+Anleitung mit Skripten, die zusammen mit dem VSIX-Paket auf die Testumgebung kamen.
+Der Autor prüfte sie unter anderem darauf, dass nichts aus dem Internet geladen wird
+und sich schreibende Schritte rückgängig machen lassen. Den Durchgang führte er
+selbst aus und meldete Ergebnisse, Befunde und Anpassungen ohne Namen von Models,
+Benutzern oder Rechnern zurück. Der nächste Durchgang prüfte die Korrekturen nach,
+wie die Spalte Folge in den Tabellen von @testprotokoll zeigt.
+
 == Programmierumgebung und Richtlinien
 
 === Programmierumgebung
 
-Entwickelt wurde auf dem privaten Gerät, einer Windows-VM ohne Dynamics 365.
-Geprüft wurde dort in der experimentellen Instanz von Visual Studio und in vier
-Durchgängen auf der Testumgebung, siehe @testprotokoll.
+Das private Gerät ist eine Windows-VM ohne Dynamics 365.
 
 #[
   #show figure: set align(left)
@@ -50,13 +81,13 @@ Die meisten Richtlinien prüft der Build selbst.
 
 - Gemeinsame Einstellungen aller Projekte stehen in `Directory.Build.props`. Jede
   Warnung bricht den Build ab, und öffentliche Typen und Member brauchen eine
-  XML-Dokumentation (NFA05). Ausgenommen von der Dokumentationspflicht ist nur das
+  XML-Dokumentation (NFA05 Wartbarkeit). Ausgenommen von der Dokumentationspflicht ist nur das
   Testprojekt.
 - Nullable Reference Types sind eingeschaltet, der Build ist deterministisch.
 - Die Kernlogik referenziert Visual Studio nicht. Alles, was Visual Studio braucht,
-  liegt in der Extension (Z8, NFA03).
+  liegt in der Extension (Z8 Erweiterbare Architektur, NFA03 Erweiterbarkeit).
 - Jeder Einstiegspunkt läuft durch die Error Boundary, keine Exception erreicht
-  Visual Studio (NFA04).
+  Visual Studio (NFA04 Stabilität).
 - Fehler beim Parsen von Eingaben sind der Normalfall und kommen als Rückgabewert
   zurück, nach dem Try-Parse Pattern @ms-try-parse. Exceptions bleiben echten
   Fehlern vorbehalten.
@@ -98,8 +129,8 @@ Klassen gibt es alle, in der Realisierung kamen Klassen dazu und einige Signatur
 änderten sich.
 
 - `ILabelSource.Load` liefert alle Label-Dateien eines Package-Verzeichnisses, auch
-  solche in Sprachen, die nicht geladen sind. Ohne sie wüsste FA02 nicht, in welchen
-  Sprachen ein neues Label angelegt werden kann.
+  solche in Sprachen, die nicht geladen sind. Ohne sie wüsste die Extension nicht, in welchen
+  Sprachen ein neues Label angelegt werden kann (FA02 Label-Erstellung).
 - Eine `Translation` kennt ihre Label-Datei, weil eine Übersetzung in einer anderen
   Datei liegen kann als das Label. Das kommt vor, wenn ein anderes Model die
   Label-Datei mit einer Erweiterung um Übersetzungen ergänzt, wie es auf der
@@ -147,8 +178,9 @@ Klassen gibt es alle, in der Realisierung kamen Klassen dazu und einige Signatur
 
 Das Laden folgt @sequenz_laden. Es läuft im Hintergrund und beginnt, sobald das
 Tool Window oder die erste `.xpp`-Datei offen ist, nicht schon beim Start von Visual
-Studio. `ModelDiscovery` liest die Package-Verzeichnisse
-aus der Metadaten-Konfiguration oder sucht auf der klassischen Entwicklungs-VM das
+Studio. Sind beim Start aber noch Elemente geöffnet, beginnt es praktisch immer gleich
+mit. `ModelDiscovery` liest die Package-Verzeichnisse
+aus der Metadaten-Konfiguration oder sucht auf der klassischen Entwicklungs-VM, kurz klassische VM, das
 Standardverzeichnis, zuerst auf K:, dann auf den übrigen Laufwerken. Aus dem
 Descriptor jedes Models liest sie Layer und Locked, `ModelAccessRule` macht daraus
 den Schreibschutz. Die beiden Quellen lesen danach die Label-Dateien und die
@@ -157,13 +189,13 @@ kompilierten Ressourcen. Gibt es zu einer Label-Datei und Sprache eine
 Testumgebung rund 4000 Dateien. Am Ende führt `LabelStore` alles zusammen und
 sortiert die Labels nach ID. IDs mit anderen Zeichen als Buchstaben, Ziffern und
 Unterstrich lädt die Extension wie das bestehende Tool, denn Microsoft liefert einige
-solche Labels aus (D2). Im Code erkennt sie nur IDs ohne solche Zeichen.
+solche Labels aus, wie sich in D2 zeigte. Im Code erkennt sie nur IDs ohne solche Zeichen.
 
 Speichern schreibt nur die geänderten Labels einer Datei. Die Datei entsteht dabei
 als temporäre Datei daneben und ersetzt dann das Original, ein Abbruch hinterlässt
 also nie eine halbe Label-Datei. Die Kodierung und die Zeilenenden der Datei bleiben,
 wie sie waren. Während die Extension selbst schreibt, schweigt `LabelFileWatcher`,
-damit nur Änderungen von aussen das Neuladen anbieten (FA15).
+damit nur Änderungen von aussen das Neuladen anbieten (FA15 Dateiüberwachung).
 
 Neue IDs bestehen aus `L` und 16 hexadezimalen Ziffern aus einem kryptografischen
 Zufallsgenerator, etwa `@BDM1:L8583DF5058DD2AD2`. Sollte es zu einer Kollision mit einer bestehenden ID kommen, wird eine weitere ID generiert.
@@ -186,6 +218,30 @@ Suchmodi und Ranking folgen dem bestehenden Tool. Die Extension kennt acht Modi.
   ID.
 - Label id findet genau das Label mit dieser ID.
 
+@ranking_beispiel zeigt das Ranking für Substring mit dem Begriff "kunde" ohne
+Beachtung der Gross- und Kleinschreibung.
+
+#[
+  #show figure: set align(left)
+  #show figure: set block(breakable: false)
+  #set text(size: 10pt)
+  #figure(
+    table(
+      align: left,
+      columns: (auto, auto, auto, auto),
+      table.header(
+        [*Label-ID*], [*Text*], [*Kommentar*], [*Wert*],
+      ),
+      [`@BDM1:KundeNr`], [Nummer], [--], [3, nur in der ID],
+      [`@BDM1:L3F2A9C15B8047DE1`], [Kunde], [--], [2, im Text],
+      [`@BDM1:L8583DF5058DD2AD2`], [Lieferadresse], [Adresse des Kunden],
+      [1, nur im Kommentar],
+    ),
+    caption: [Beispiel zum Ranking bei Substring, synthetische Labels (eigene
+              Darstellung)]
+  ) <ranking_beispiel>
+]
+
 Ein Label erhält den höchsten Wert über alle Sprachen. Die Trefferliste zeigt die
 1000 Labels mit dem höchsten Wert, absteigend sortiert und bei Gleichstand nach ID,
 die Statuszeile nennt die Gesamtzahl. Ein Klick auf einen Spaltenkopf sortiert diese
@@ -200,7 +256,8 @@ weg, weil das bestehende Tool bei Match word den Begriff als Regex auswertet, si
 @abweichungen_realisierung.
 
 In D1 brauchte Anything like that ohne Beachtung der Gross- und Kleinschreibung
-über 392'858 Labels 623 bis 656 ms und verfehlte NFA02. Vier Änderungen brachten
+über 392'858 Labels 623 bis 656 ms und verfehlte die 500 ms aus NFA02
+(Performance). Vier Änderungen brachten
 die längste Suche in D4 auf 253 ms.
 
 - Die Übersetzungen eines Labels liegen in einem Array statt in einem Dictionary.
@@ -239,7 +296,7 @@ Teilen aus dem klassischen Visual Studio SDK, wie in @architektur festgelegt.
        Auswahl im Designer],
       [Elemente], [Visual Studio SDK], [Sprung an Fundstellen, ungespeicherte
        Elemente erkennen],
-      [Output Window], [Visual Studio SDK], [Bereich BE-LabelExtension (FA17)],
+      [Output Window], [Visual Studio SDK], [Bereich BE-LabelExtension (FA17 Meldungsprotokoll)],
       [Probes], [VisualStudio.Extensibility], [Nur im Debug-Build, Diagnostics und
        Testing auf der Testumgebung],
     ),
@@ -256,7 +313,8 @@ Dafür liegt im selben VSIX ein AsyncPackage aus dem Visual Studio SDK.
 
 Label-IDs im Editor erkennt die Extension über die Classifications der Developer
 Tools, `"X++ Modern Label"` und `"X++ Legacy Label"`. Fehlen sie, erkennt eine Regex
-die IDs im Text, wie in R07 vorgesehen. Auf dem privaten Gerät gibt es keinen
+die IDs im Text, wie beim Risiko R07 (Unbelegte Annahmen erzwingen Nacharbeit)
+vorgesehen. Auf dem privaten Gerät gibt es keinen
 X++-Editor. Der Debug-Build hängt Tooltip und Inline-Anzeige deshalb zusätzlich an
 `.xpp`-Dateien, die als Text offen sind.
 
@@ -281,7 +339,7 @@ Eintrag und über den Methoden die Referenzanzeige der Developer Tools.
 Übersetzungen stehen kursiv als missing. de-CH ist gesperrt, weil die Label-Datei
 diese Sprache nicht hat. Ein Klick auf einen Spaltenkopf sortiert die Trefferliste.
 Gegenüber dem Wireframe hat die Toolbar zwei Buttons und eine Checkbox mehr,
-Element labels für die Labels des offenen Elements (KA04), Unused labels für
+Element labels für die Labels des offenen Elements (Kann-Anforderung KA04), Unused labels für
 unbenutzte Labels (KA09) und Side by side.
 
 #figure(
@@ -300,7 +358,7 @@ Trefferliste links neben Detailansicht und References.
 
 Ein neues Label erscheint ohne ID, bis der Entwickler Create klickt. Vorschläge des Übersetzungsdienstes stehen kursiv, bis er sie
 ändert oder bestätigt. Im Bild stammen sie vom simulierten Dienst des Debug-Builds,
-der jeder Sprache ihren Code voranstellt. Übersetzt wird aus der Ausgangssprache,
+der jeder Sprache ihren Code voranstellt. Übersetzt wird aus der Quellsprache,
 die in den Optionen für alle Labels gilt, standardmässig de. Translate fragt den
 Dienst noch einmal, wenn sich der Ausgangstext geändert hat.
 
@@ -314,11 +372,12 @@ Dienst noch einmal, wenn sich der Ausgangstext geändert hat.
   caption: [Tooltip über einer Label-ID (eigene Darstellung)]
 ) <gui_tooltip>
 
-Die Inline-Anzeige in @gui_inline steht über jeder Zeile mit einer Label-ID. In einem
+Die Inline-Anzeige in @gui_inline steht wie in @demo_inline geplant über jeder Zeile
+mit einer Label-ID. In einem
 Aufruf von `strFmt` ersetzt sie die Platzhalter durch die Argumente, hier
 `{_customerAccount}` statt `%1` (KA03). Sprachen und Reihenfolge lassen sich in den
 Optionen getrennt von den geladenen Sprachen wählen. Der Tooltip in @gui_tooltip
-zeigt alle geladenen Sprachen.
+zeigt wie in @demo_quickinfo alle geladenen Sprachen.
 
 #figure(
   image("../screenshots/extension-kontextmenue.png", width: 60%),
@@ -332,7 +391,43 @@ New, L für Search Label, E für Open in Label Window und X für Extract to Labe
 Shortcuts des bestehenden Tools belegt Visual Studio @ms-vs-shortcuts. Die neuen
 waren in D2 frei, nur S ist im Scope `VC Image Editor` belegt. Alle lassen sich in den
 Optionen von Visual Studio umbelegen. Im Designer wurde das Kontextmenü wegen technischen Limitierungen nicht erweitert, als Ersatz wird Extract im Tool Window verwendet. Wählt der Entwickler dort eine Node, zeigt das Tool Window zwischen Suche und Trefferliste ihre
-Label-Eigenschaften mit Open oder Extract (KA05).
+Label-Eigenschaften mit Open oder Extract (KA05). In @gui_designer_node hat das
+gewählte Feld ein Label und einen hardcodierten Help Text.
+
+#figure(
+  image("../screenshots/extension-designer-node.png", width: 100%),
+  caption: [Bereich zur gewählten Node im Tool Window, mit synthetischen Daten und
+            nachgestellter Auswahl im Designer (eigene Darstellung)]
+) <gui_designer_node>
+
+@extraktion_beispiel zeigt Extract to Label an einem String Literal. Der Text steht
+danach als neues Label in der Label-Datei, im Code bleibt nur seine ID. Gibt es in
+der Label-Datei schon ein Label mit diesem Text, setzt die Extension dessen ID ein
+(KA08). Im Designer schreibt sie die ID auf dieselbe Weise in die Eigenschaft der
+XML-Datei des Elements.
+
+#figure(
+  kind: image,
+  grid(
+    columns: (1fr, 1fr),
+    column-gutter: 8pt,
+    ..(
+      ("Vorher", ```cs
+info("Lieferadresse fehlt.");
+```),
+      ("Nachher", ```cs
+info("@BDM1:L3F2A9C15B8047DE1");
+```),
+    ).map(((name, code)) => block(width: 100%, inset: 8pt,
+      stroke: 0.5pt + luma(180), align(left, {
+        text(size: 9pt, name)
+        v(0.2em)
+        text(size: 9pt, code)
+      }))),
+  ),
+  caption: [Extract to Label im X++-Editor, synthetisches Beispiel (eigene
+            Darstellung)]
+) <extraktion_beispiel>
 
 #figure(
   image("../screenshots/extension-optionen.png", width: 85%),
@@ -399,7 +494,8 @@ eigenen Models in weniger als einer Sekunde durchsucht, alle 185 Models mit rund
 In XML-Dateien schreibt die Extension nur, wenn das Element gespeichert ist. Sonst
 nennt eine Rückfrage die ungespeicherten Elemente und bietet an, sie zuerst zu
 speichern. Speichert der Designer ein Element mit ungespeicherten Änderungen, nachdem
-die Datei von aussen geändert wurde, überschreibt er die Änderung von aussen (D1).
+die Datei von aussen geändert wurde, überschreibt er die Änderung von aussen, wie
+sich in D1 zeigte.
 Ersetzt wird nur der Text der betroffenen Stelle, der Rest der Datei bleibt Zeichen für
 Zeichen gleich.
 
@@ -409,10 +505,10 @@ Jeder Übersetzungsdienst setzt `ITranslationService` um, mit Name, der Angabe, 
 eingerichtet ist, und `TranslateAsync`. Ein Fehler kommt als Ergebnis mit Grund
 zurück, nicht als Exception. Die Extension findet alle Klassen, die das Interface
 umsetzen. Ein weiterer Dienst ist deshalb eine neue Klasse, an bestehenden Klassen
-ändert sich nichts (NFA03, TC38).
+ändert sich nichts (NFA03 Erweiterbarkeit, TC38).
 
 Für DeepL schickt die Extension je Zielsprache eine Anfrage @deepl-translate, mit den
-Sprachcodes aus @festlegungen. Der Schlüssel steht im Header, Schlüssel der freien
+Sprachcodes aus @klassen (Zeile `DeepLTranslationService`). Der Schlüssel steht im Header, Schlüssel der freien
 Variante gehen an `api-free.deepl.com` @deepl-auth. Antwortet DeepL nicht innerhalb
 von 20 s, lehnt den Schlüssel ab oder meldet ein aufgebrauchtes Kontingent, nennen
 Statuszeile und Output Window den Grund, und das neue Label behält den Ausgangstext.
@@ -421,7 +517,7 @@ Vorschläge gibt es nur für Sprachen, die die Label-Datei hat.
 Den API-Schlüssel verschlüsselt die Extension mit der Data Protection API von Windows
 für den angemeldeten Benutzer, nur derselbe Benutzer kann ihn wieder entschlüsseln
 @ms-data-protection. Gelesen und entschlüsselt wird er erst für eine Übersetzung, in
-keiner Meldung und keinem Feld steht er im Klartext (NFA06, TC23). Der Debug-Build
+keiner Meldung und keinem Feld steht er im Klartext (NFA06 Sicherheit, TC23). Der Debug-Build
 hat zusätzlich einen simulierten Dienst, damit sich die Vorschläge ohne Schlüssel
 prüfen lassen.
 
@@ -441,7 +537,7 @@ prüfen lassen.
       [Signaturen und zusätzliche Klassen im Klassenmodell, siehe
        @projekte und die Liste darunter.],
       [Was die Realisierung brauchte, etwa die Label-Dateien nicht geladener
-       Sprachen für FA02.],
+       Sprachen für FA02 Label-Erstellung.],
 
       [Die Optionsseite ist ein Property Grid statt der Seite aus
        @gui_einstellungen und hat keinen Button Apply.],
@@ -450,21 +546,23 @@ prüfen lassen.
 
       [Der Sprung in eine Eigenschaft öffnet das Element, wählt aber die Node
        nicht.],
-      [Die Developer Tools bieten kein Command, das eine Node wählt (D1). Das
-       Konzept lässt diesen Fallback zu.],
+      [Die Developer Tools bieten kein Command, das eine Node wählt, wie sich in
+       D1 zeigte. Das Konzept lässt diesen Fallback zu.],
 
       [Ein Button Translate beim neuen Label fragt den Übersetzungsdienst noch
        einmal.],
       [Ohne ihn bliebe nach einer Änderung des Ausgangstexts nur Cancel und New.],
 
       [Kopieren und Verschieben übernehmen den Text aus de-CH in de, wenn dem
-       Ziel de-CH fehlt. FA03 sieht nur gemeinsame Sprachen vor.],
-      [Anpassung aus D4. Die eine Label-Datei hatte nur de-CH, die andere nur de.],
+       Ziel de-CH fehlt. FA03 Label-Bearbeitung sieht nur gemeinsame Sprachen
+       vor.],
+      [Anpassung aus D4, siehe @d4_ergebnisse. Die eine Label-Datei hatte nur
+       de-CH, die andere nur de.],
 
       [Side by side, sortierbare Spalten, eigene Sprachen und Anzahl der
        Inline-Anzeige, Rückfrage beim Schliessen des Tool Window, Wiederherstellen
        gelöschter Labels, Delete-Taste, Search Label am Wort.],
-      [Anpassungen aus D2 bis D4.],
+      [Anpassungen aus D2 bis D4, siehe @testprotokoll.],
 
       table.cell(colspan: 2)[*Gegenüber dem bestehenden Tool*],
       [Speichern schreibt nur geänderte Labels und erreicht auch Sprachen, die
@@ -500,7 +598,7 @@ in ihrer Produktversion. Das Paket hat die SHA-256-Prüfsumme
 `EBFCC8F3787BC6815CED43287C4B8871B1F37C50E20CC7716A326A18549E3E3B`.
 
 Das Paket enthält die Lizenz des Codes, der VSIX Installer zeigt einen Link darauf.
-Install bleibt der einzige Schritt (OA01). Im öffentlichen Repository liegt das Paket
+Install bleibt der einzige Schritt (OA01 Bereitstellung). Im öffentlichen Repository liegt das Paket
 nicht. Das SDK packt Bibliotheken von VisualStudio.Extensibility hinein, deren Lizenz
 das Weitergeben und Veröffentlichen untersagt @ms-extensibility-license. Das Paket
 liegt der Abgabe bei und wird bei BE-terna intern verteilt.
@@ -532,9 +630,8 @@ Installiert wird in drei Schritten, siehe auch @einfuehrung.
 + Visual Studio schliessen.
 + Doppelklick auf das VSIX-Paket, Install, danach Close.
 + In Visual Studio Extensions > BE-LabelExtension Window öffnen und beim ersten
-  Mal in Settings die Sprachen prüfen. Auf der Unified Developer Experience nimmt die
-  Extension die zuletzt geänderte Metadaten-Konfiguration, auf der klassischen
-  Entwicklungs-VM schlägt die Optionsseite das gefundene Package-Verzeichnis vor.
+  Mal in Settings die Sprachen prüfen. Auf der UDE nimmt die
+  Extension die zuletzt geänderte Metadaten-Konfiguration, auf der klassischen VM schlägt die Optionsseite das gefundene Package-Verzeichnis vor.
 
 Ein Update ist ein neues Paket mit höherer Version, das auf dieselbe Weise
 installiert wird. Einstellungen und API-Schlüssel bleiben dabei erhalten.
@@ -562,11 +659,9 @@ Tooltip, Inline-Anzeige, der Sprung in den X++-Editor und der Bereich zum Design
 brauchen die Developer Tools. Der Debug-Build bietet dafür einen Ersatz, den
 `source/README.md` beschreibt.
 
-Geprüft ist die Installation auf der Unified Developer Experience mit Visual Studio
-2026 in D1 bis D4 und auf der klassischen Entwicklungs-VM mit Visual Studio 2026 in
-D2 und D3 sowie mit Visual Studio 2022 in D1 und D4, in D4 mit dem Release-Build. Für
-die Weiterentwicklung beschreibt `source/README.md` Aufbau, Build und
-Erweiterungspunkte (OA02).
+Auf der Testumgebung ist die Installation in allen vier Durchgängen auf beiden
+Systemen geprüft, siehe @durchgaenge_uebersicht. Für die Weiterentwicklung beschreibt `source/README.md` Aufbau, Build und
+Erweiterungspunkte (OA02 Dokumentation).
 
 == Testprotokoll <testprotokoll>
 
@@ -615,14 +710,36 @@ Anfragen an DeepL mit simulierten Antworten, auch mit den Fehlern 403, 429, 456 
 
 === Durchgänge auf der Testumgebung
 
+Alle vier Durchgänge liefen auf beiden Systemen der Testumgebung.
+
+#[
+  #show figure: set align(left)
+  #show figure: set block(breakable: false)
+  #set text(size: 9.5pt)
+  #figure(
+    table(
+      align: left,
+      columns: (auto, 1fr, 1fr, 1fr, 1fr),
+      table.header(
+        [], [*D1*], [*D2*], [*D3*], [*D4*],
+      ),
+      [*Datum*], [08.10. und 09.10.2026], [15.10.2026], [16.10.2026], [19.10.2026],
+      [*UDE*], table.cell(colspan: 4)[Visual Studio 2026, Debug-Build],
+      [*Klassische VM*], [Erste VM, Visual Studio 2022, Debug-Build],
+      table.cell(colspan: 2)[Zweite VM, Visual Studio 2026, Debug-Build],
+      [Erste VM, Visual Studio 2022, Release-Build],
+      [*Testfälle*], [TC15, TC22, TC25, TC36], [TC20, TC26 bis TC30, TC37],
+      [TC23, TC26, TC29, TC31 bis TC34, TC37], [TC24 bis TC37],
+    ),
+    caption: [Übersicht der Durchgänge (eigene Darstellung)]
+  ) <durchgaenge_uebersicht>
+]
+
 #heading(outlined: false, level: 4)[D1]
 
-D1 lief am 08.10. und 09.10.2026 auf beiden Systemen der Testumgebung, mit dem
-Debug-Build und den Probe-Commands aus AP3.1. Auf dem System mit der Unified
-Developer Experience lief Visual Studio 2026. Auf der
-klassischen Entwicklungs-VM lief Visual Studio 2022, weil
-Visual Studio 2026 dort Probleme machte. Die Zeiten der Extension stammen aus ihren
-eigenen Meldungen, die des bestehenden Tools aus dessen Anzeige.
+D1 lief mit den Probe-Commands aus AP3.1. Auf der klassischen VM lief Visual Studio
+2022, weil Visual Studio 2026 dort Probleme machte. Die Zeiten der Extension stammen
+aus ihren eigenen Meldungen, die des bestehenden Tools aus dessen Anzeige.
 
 #[
   #show figure: set align(left)
@@ -709,9 +826,8 @@ eigenen Meldungen, die des bestehenden Tools aus dessen Anzeige.
 
 #heading(outlined: false, level: 4)[D2]
 
-D2 lief am 15.10.2026 auf beiden Systemen der Testumgebung, mit dem Debug-Build
-auf dem Stand von AP3.7. Die klassische Entwicklungs-VM war eine andere als in D1
-und hatte Visual Studio 2026. Für die schreibenden Testfälle wurden in einem
+D2 lief auf dem Stand von AP3.7, auf einer anderen klassischen VM als D1, mit Visual
+Studio 2026. Für die schreibenden Testfälle wurden in einem
 beschreibbaren Model ein Test-Label, eine Klasse und ein Datentyp angelegt und am
 Ende wieder gelöscht.
 
@@ -727,10 +843,10 @@ Ende wieder gelöscht.
       ),
       [Laden],
       [392'949 Labels aus 946 Label-Dateien in 185 Models in 16,2 s, in D1 waren
-       es 12,2 s. Die 18 Label-Dateien mit langen Pfaden waren jetzt lesbar.],
-      [Auf dem privaten Gerät lädt der Stand von D2 eine gleich grosse Menge
-       synthetischer Labels schneller als der von D1. D3 misst die Ladezeit
-       nochmals, aufgeteilt nach Phasen.],
+       es 12,2 s. Die 18 Label-Dateien mit langen Pfaden waren jetzt lesbar. Auf
+       dem privaten Gerät lädt der Stand von D2 eine gleich grosse Menge
+       synthetischer Labels schneller als der von D1.],
+      [Nachmessung in D3, aufgeteilt nach Phasen.],
 
       [Speicher],
       [Der Speicher von Visual Studio stieg beim Laden um 963 MB, in D1 um rund
@@ -775,7 +891,7 @@ Ende wieder gelöscht.
 
       [Verwendungssuche (TC29)],
       [Die Suche fand alle Fundstellen. Ein Klick auf eine Fundstelle im Code
-       öffnete auf der Unified Developer Experience den Designer statt des
+       öffnete auf der UDE den Designer statt des
        X++-Editors, weil die Extension die `.xpp`-Datei im falschen Ordner
        suchte. Fundstellen in Eigenschaften öffneten das Element.],
       [Behoben, Nachprüfung in D3.],
@@ -814,7 +930,7 @@ Ende wieder gelöscht.
       [Klassische VM],
       [Die Extension fand das Standardverzeichnis auf K: selbst und lud 391'535
        Labels aus 905 Label-Dateien in 30,4 s. Tooltip und Inline-Anzeige
-       verhielten sich wie auf der Unified Developer Experience. Ein Klick auf
+       verhielten sich wie auf der UDE. Ein Klick auf
        eine Fundstelle im Code öffnete den X++-Editor an der richtigen Stelle.],
       [Keine.],
     ),
@@ -824,8 +940,7 @@ Ende wieder gelöscht.
 
 #heading(outlined: false, level: 4)[D3]
 
-D3 lief am 16.10.2026 auf beiden Systemen der Testumgebung, mit dem Debug-Build
-auf dem Stand von AP3.8. Vor jeder Messung des Ladens war Visual Studio ruhig und
+D3 lief auf dem Stand von AP3.8. Vor jeder Messung des Ladens war Visual Studio ruhig und
 hatte keine Dokumente offen. Die Testobjekte wurden wie in D2 angelegt und am Ende
 wieder gelöscht.
 
@@ -905,7 +1020,7 @@ wieder gelöscht.
 
       [Klassische VM],
       [Die Extension lud in 15,0 s statt 30,4 s wie in D2, der Speicher stieg um
-       691 MB. Die Extraktion lief wie auf der Unified Developer Experience.],
+       691 MB. Die Extraktion lief wie auf der UDE.],
       [Keine.],
     ),
     caption: [Ergebnisse von D3 (eigene Darstellung)]
@@ -914,12 +1029,10 @@ wieder gelöscht.
 
 #heading(outlined: false, level: 4)[D4]
 
-D4 lief am 19.10.2026 als letzter Durchgang auf beiden Systemen der Testumgebung,
-auf dem Stand nach AP4.1 mit den umgesetzten Kann-Anforderungen. Auf der Unified
-Developer Experience lief der Debug-Build. Die klassische Entwicklungs-VM war aus
-organisatorischen Gründen wieder die aus D1, mit Visual Studio 2022, und dort lief
-der Release-Build. Er verhielt sich wie der Debug-Build. Korrekturen nach D4 sind
-nur auf dem privaten Gerät geprüft.
+D4 war der letzte Durchgang auf der Testumgebung, auf dem Stand nach AP4.1 mit den
+umgesetzten Kann-Anforderungen. Die klassische VM war aus organisatorischen Gründen
+wieder die aus D1. Der Release-Build verhielt sich dort wie der Debug-Build.
+Korrekturen nach D4 sind nur auf dem privaten Gerät geprüft.
 
 #[
   #show figure: set align(left)
@@ -997,6 +1110,65 @@ nur auf dem privaten Gerät geprüft.
   ) <d4_ergebnisse>
 ]
 
+#heading(outlined: false, level: 4)[Messwerte]
+
+@messwerte fasst die Messungen auf der UDE zusammen. Die längste Suche liegt seit D2
+unter den 500 ms aus NFA02, gestrichelt eingezeichnet. Die längere Ladezeit in D2
+geht darauf zurück, dass Visual Studio kurz nach dem Start noch beschäftigt war,
+siehe @d3_ergebnisse. Die Suche wurde in D3 nicht gemessen. Das bestehende Tool hatte
+in D1 nur zwei Sprachen geladen.
+
+#let balken(zeilen, max, grenze: none) = {
+  let breite = 8cm
+  grid(
+    columns: (4cm, breite + 2.4cm),
+    column-gutter: 0.6em,
+    row-gutter: 0.4em,
+    ..zeilen.map(z => {
+      let (name, wert, beschriftung, hell) = z
+      let laenge = breite * wert / max
+      (
+        align(right + horizon, name),
+        box(width: breite + 2.4cm, height: 1.2em, {
+          place(left + horizon, rect(width: laenge, height: 0.9em, stroke: none,
+            fill: if hell { luma(205) } else { luma(110) }))
+          place(left + horizon, dx: laenge + 0.4em, beschriftung)
+          if grenze != none {
+            place(left + top, dx: breite * grenze / max, line(angle: 90deg,
+              length: 1.2em, stroke: (paint: rgb("#c0392b"), thickness: 0.9pt,
+              dash: "dashed")))
+          }
+        }),
+      )
+    }).flatten(),
+  )
+}
+
+#figure(
+  {
+    set text(size: 9.5pt)
+    align(left)[
+      Ladezeit in s
+      #balken((
+        ([D1], 12.2, [12,2], false),
+        ([D2], 16.2, [16,2], false),
+        ([D3], 9.1, [8,6 und 9,1], false),
+        ([D4], 8.7, [8,7], false),
+        ([Bestehendes Tool, D1], 23.5, [23,5], true),
+      ), 23.5)
+      #v(0.8em)
+      Längste Suche in ms
+      #balken((
+        ([D1], 656, [656], false),
+        ([D2], 301, [301], false),
+        ([D4], 253, [253], false),
+        ([Bestehendes Tool, D1], 1100, [bis 1'100], true),
+      ), 1100, grenze: 500)
+    ]
+  },
+  caption: [Ladezeit und längste Suche je Durchgang (eigene Darstellung)],
+) <messwerte>
+
 === Testergebnisse
 
 #[
@@ -1029,17 +1201,17 @@ nur auf dem privaten Gerät geprüft.
       [TC14], [Package-Verzeichnisse mit und ohne Konfiguration], [Bestanden],
        [Unit Test],
       table.cell(colspan: 4)[*Systemtests auf dem privaten Gerät*],
-      [TC15], [Installation und Tool Window], [Bestanden], [Privat, D1],
-      [TC16], [Suche in jedem Suchmodus], [Bestanden], [Privat],
-      [TC17], [Ändern und Löschen], [Bestanden], [Privat],
-      [TC18], [Neues Label per Shortcut], [Bestanden], [Privat],
-      [TC19], [Label-ID einfügen], [Bestanden], [Privat],
-      [TC20], [Shortcuts auslösen und umbelegen], [Bestanden], [Privat, D2],
-      [TC21], [Sprachen und Metadaten-Konfiguration ändern], [Bestanden], [Privat],
-      [TC22], [Fehler auslösen], [Bestanden], [Privat, D1],
-      [TC23], [API-Schlüssel nirgends im Klartext], [Bestanden], [Privat, D3],
+      [TC15], [Installation und Tool Window], [Bestanden], [Privates Gerät, D1],
+      [TC16], [Suche in jedem Suchmodus], [Bestanden], [Privates Gerät],
+      [TC17], [Ändern und Löschen], [Bestanden], [Privates Gerät],
+      [TC18], [Neues Label per Shortcut], [Bestanden], [Privates Gerät],
+      [TC19], [Label-ID einfügen], [Bestanden], [Privates Gerät],
+      [TC20], [Shortcuts auslösen und umbelegen], [Bestanden], [Privates Gerät, D2],
+      [TC21], [Sprachen und Metadaten-Konfiguration ändern], [Bestanden], [Privates Gerät],
+      [TC22], [Fehler auslösen], [Bestanden], [Privates Gerät, D1],
+      [TC23], [API-Schlüssel nirgends im Klartext], [Bestanden], [Privates Gerät, D3],
       [TC24], [Bestehendes Tool und Extension nebeneinander], [Bestanden],
-       [Privat, D4],
+       [Privates Gerät, D4],
       table.cell(colspan: 4)[*Systemtests auf der Testumgebung*],
       [TC25], [Laden neben den Developer Tools], [Bestanden], [D1, D4],
       [TC26], [Tooltip beider Label-Formen], [Bestanden], [D2 bis D4],
@@ -1054,7 +1226,7 @@ nur auf dem privaten Gerät geprüft.
       [TC34], [Kompilieren nach Änderungen], [Bestanden], [D3, D4],
       [TC35], [Suchdauer und Laden], [Bestanden], [D4],
       [TC36], [Systemtests unter Visual Studio 2022], [Teilweise], [D1, D4],
-      [TC37], [Klassische Entwicklungs-VM], [Bestanden], [D2 bis D4],
+      [TC37], [Klassische VM], [Bestanden], [D2 bis D4],
       table.cell(colspan: 4)[*Reviews*],
       [TC38], [Kernlogik ohne Visual Studio, zweiter Übersetzungsdienst],
        [Bestanden], [Review],
@@ -1067,8 +1239,7 @@ nur auf dem privaten Gerät geprüft.
   ) <testergebnisse>
 ]
 
-Bis auf TC36 haben alle Testfälle bestanden. TC29 bestand in D2 auf der Unified
-Developer Experience nicht, weil die Extension die `.xpp`-Datei im falschen Ordner
+Bis auf TC36 haben alle Testfälle bestanden. TC29 bestand in D2 auf der UDE nicht, weil die Extension die `.xpp`-Datei im falschen Ordner
 suchte. Nach der Korrektur bestand er in D3 und D4. TC26 und TC28 hatten in D2
 Befunde, die D3 nachprüfte. Die Systemtests TC15 bis TC24 liefen am 19.10.2026 auf
 dem Stand des Code Freeze noch einmal in der experimentellen Instanz.
@@ -1082,7 +1253,7 @@ dem Stand des Code Freeze noch einmal in der experimentellen Instanz.
       [*Beschreibung*],
       [Alle Systemtests unter Visual Studio 2022 wiederholen.],
       [*Vorgehen*],
-      [Die klassische Entwicklungs-VM lief in D1 und D4 mit Visual Studio 2022
+      [Die klassische VM lief in D1 und D4 mit Visual Studio 2022
        17.14. In D1 mit dem Debug-Build, in D4 mit dem Release-Build. Die übrigen
        Systemtests liefen nur unter Visual Studio 2026.],
       [*Erwartetes Ergebnis*],
@@ -1123,7 +1294,7 @@ dem Stand des Code Freeze noch einmal in der experimentellen Instanz.
       [Z4], [Bearbeiten aus dem Code heraus], [Ja], [Open in Label Window öffnet das
        Label in der Detailansicht (TC28).],
       [Z5], [Verwendungssuche in der IDE], [Ja], [Fundstellen mit Model, Datei, Zeile
-       und Spalte, Sprung in Editor und Designer (TC29, ab D3).],
+       und Spalte, Sprung in Editor und Designer seit D3 (TC29).],
       [Z6], [Extraktion hardcodierter Texte], [Ja], [Im X++-Editor und im Designer
        (TC31, TC32).],
       [Z7], [Automatische Übersetzung], [Ja], [Vorschläge von DeepL, vor dem
@@ -1137,7 +1308,13 @@ dem Stand des Code Freeze noch einmal in der experimentellen Instanz.
 
 Alle Ziele aus @projektziele sind erreicht, auch die der Stufen 2 und 3. Damit ist
 das Erfolgskriterium aus @aufgabenstellung erfüllt. Die Funktionen des bestehenden
-Tools sind übernommen (Z1) und um die IDE-Funktionen erweitert (Z2 bis Z7).
+Tools sind übernommen (Z1) und um die IDE-Funktionen erweitert (Z2 bis Z7). Ein
+vorhandenes Label findet der Entwickler wie im Sollablauf aus @sollablauf_label in
+vier statt sieben Schritten, ohne Visual Studio zu verlassen.
+
+@erfuellung_anforderungen zeigt den Nachweis je Anforderung. Bis auf NFA01, das
+unter Visual Studio 2022 nur teilweise geprüft ist, und OA04, über das BE-terna erst
+nach dem Projekt entscheidet, sind alle Anforderungen erfüllt.
 
 #[
   #show figure: set align(left)
@@ -1149,8 +1326,31 @@ Tools sind übernommen (Z1) und um die IDE-Funktionen erweitert (Z2 bis Z7).
       table.header(
         [*Anforderung*], [*Erfüllt*], [*Nachweis*],
       ),
-      [NFA01 Kompatibilität], [Teilweise], [Unified Developer Experience und
-       klassische Entwicklungs-VM mit Visual Studio 2026 (TC25, TC37). Unter Visual
+      table.cell(colspan: 3)[*Funktionale Anforderungen*],
+      [FA01 Label-Suche], [Ja], [TC02, TC04, TC12, TC16],
+      [FA02 Label-Erstellung], [Ja], [TC03, TC07, TC18, TC34],
+      [FA03 Label-Bearbeitung], [Ja], [TC01, TC06, TC07, TC17, TC30, TC34. Beim
+       Kopieren und Verschieben füllt de-CH auch de, siehe
+       @abweichungen_realisierung.],
+      [FA04 Verwendungssuche], [Ja], [TC05, TC29, TC37. Eine Eigenschaft öffnet das
+       Element ohne gewählte Node, siehe @abweichungen_realisierung.],
+      [FA05 Hover-Tooltip], [Ja], [TC02, TC26, TC37],
+      [FA06 Inline-Anzeige], [Ja], [TC27],
+      [FA07 Inline-Suche], [Ja], [TC28],
+      [FA08 Im Tool Window öffnen], [Ja], [TC28],
+      [FA09 Extraktion hardcodierter Texte], [Ja], [TC13, TC31, TC32],
+      [FA10 Automatische Übersetzung], [Ja], [TC11, TC33],
+      [FA11 Einstellungen], [Ja], [TC14, TC21, TC25],
+      [FA12 Erweiterte Suchmodi], [Ja], [TC04, TC16. Match word wertet den Begriff
+       als Text, nicht als Regex, siehe @abweichungen_realisierung.],
+      [FA13 Label ersetzen], [Ja], [TC05],
+      [FA14 Label-ID einfügen], [Ja], [TC19],
+      [FA15 Dateiüberwachung], [Ja], [TC09, TC24],
+      [FA16 Shortcuts], [Ja], [TC18, TC20],
+      [FA17 Meldungsprotokoll], [Ja], [TC22],
+      table.cell(colspan: 3)[*Nicht-funktionale Anforderungen*],
+      [NFA01 Kompatibilität], [Teilweise], [UDE und
+       klassische VM mit Visual Studio 2026 (TC25, TC37). Unter Visual
        Studio 2022 nur Installation, TC24, TC25 und TC37, siehe @tc_36.],
       [NFA02 Performance], [Ja], [Längste Suche 253 ms, das Laden blockiert die
        Oberfläche nicht (TC35).],
@@ -1161,6 +1361,7 @@ Tools sind übernommen (Z1) und um die IDE-Funktionen erweitert (Z2 bis Z7).
       [NFA05 Wartbarkeit], [Ja], [Build ohne Warnungen, öffentliche Typen
        dokumentiert (TC39).],
       [NFA06 Sicherheit], [Ja], [API-Schlüssel nirgends im Klartext (TC23).],
+      table.cell(colspan: 3)[*Organisatorische Anforderungen*],
       [OA01 Bereitstellung], [Ja], [Ein VSIX-Paket, Installation per Doppelklick in
        D1 bis D4 (TC15).],
       [OA02 Dokumentation], [Ja], [`source/README.md` mit Aufbau, Build und
@@ -1170,33 +1371,45 @@ Tools sind übernommen (Z1) und um die IDE-Funktionen erweitert (Z2 bis Z7).
       [OA04 Ablösung], [Offen], [Die Voraussetzung, alle Anforderungen zu Z1, ist
        erfüllt. Über den Umstieg entscheidet BE-terna nach Projektabschluss.],
     ),
-    caption: [Erfüllung der nicht-funktionalen und organisatorischen Anforderungen
-              (eigene Darstellung)]
-  ) <zielerreichung_nfa_oa>
+    caption: [Erfüllung der Anforderungen (eigene Darstellung)]
+  ) <erfuellung_anforderungen>
 ]
- Von den
-zehn Kann-Anforderungen sind fünf umgesetzt, KA03, KA04, KA05, KA08 und KA09. Sie
-kamen nach AP4.1 dazu, weil die Realisierung vor dem Plan lag.
+
+Von den zehn Kann-Anforderungen sind fünf umgesetzt, KA03 Platzhalter in der
+Inline-Anzeige, KA04 Labels des geöffneten Elements, KA05 Übersetzungen im Designer,
+KA08 Duplicates beim Anlegen und KA09 Unbenutzte Labels. Sie kamen nach AP4.1 dazu,
+weil die Realisierung vor dem Plan lag.
 
 == Empfehlungen
 
 - Pilotphase mit einzelnen Entwicklern, wie in @einfuehrung vorgesehen. Das
   bestehende Tool kann daneben weiterlaufen, TC24 zeigt, dass beide dieselben Dateien
-  bearbeiten können. Vorher den Release-Build einmal auf der Unified Developer
-  Experience mit Visual Studio 2026 prüfen, auf der Testumgebung lief er nur unter
+  bearbeiten können. Vorher den Release-Build einmal auf der UDE mit Visual Studio 2026 prüfen, auf der Testumgebung lief er nur unter
   Visual Studio 2022.
-- Das Paket darf nicht öffentlich liegen. BE-terna braucht dafür einen internen
-  Ablageort, von dem Entwickler neue Versionen holen.
+- Das Paket darf wegen der Lizenz der mitgepackten Bibliotheken von
+  VisualStudio.Extensibility nicht öffentlich liegen @ms-extensibility-license.
+  BE-terna braucht dafür einen internen Ablageort, von dem Entwickler neue Versionen
+  holen.
 - Welcher Übersetzungsdienst im Betrieb läuft und wie die API-Schlüssel verteilt
-  werden, muss BE-terna festlegen. Klassische Entwicklungs-VMs nutzen oft mehrere
+  werden, muss BE-terna festlegen. Klassische VMs nutzen oft mehrere
   Personen mit demselben Windows-Benutzer. Die Data Protection API schützt den
   Schlüssel dann gegen andere Benutzer, nicht gegen die anderen Personen auf derselben
   VM. Soll jede Person einen eigenen Schlüssel haben, muss die Ablage des Schlüssels
   umgebaut werden.
 - Die Verwendungssuche über alle Models dauert bis knapp eine Minute. Stört das im
-  Alltag, ist die Cross-Reference-Datenbank aus E4 der nächste Schritt.
+  Alltag, ist die Cross-Reference-Datenbank aus E4 (Verwendungssuche) der nächste Schritt.
+- Die Label-Eigenschaften einer Node zeigt die Extension im Tool Window, weil das
+  Properties Window keinen Erweiterungspunkt hat, siehe @befunde_tabelle. Der
+  Experte im Betrieb regte im Review an, nach dem Projekt nach einer schöneren
+  Lösung zu suchen, siehe @protokoll_experte.
+- Im Review wirkte der Start von Visual Studio langsam, siehe @protokoll_experte.
+  Sind beim Start Elemente geöffnet, lädt die Extension die Labels fast immer schon
+  dann. Das Laden läuft im Hintergrund, konkurriert aber mit dem Start von Visual
+  Studio, wie sich in D2 zeigte. Abhilfe wäre, erst zu laden, wenn Visual Studio
+  ruht oder ein Label tatsächlich gebraucht wird. Kürzer würde das Laden mit einem
+  eigenen Index nach Variante C aus E2.
 - Die Labels belegen im Prozess von Visual Studio rund 0,9 GB. Wird der Speicher
-  knapp, ist ein eigener Index die Variante C aus E2.
+  knapp, ist ein eigener Index die Variante C aus E2 (Ablage zur Laufzeit).
 - Die aktive Metadaten-Konfiguration erkennt die Extension nicht, sie nimmt die
   zuletzt geänderte. Wer oft zwischen Konfigurationen wechselt, muss sie in den
   Optionen wählen. Eine automatische Erkennung wäre eine Verbesserung.
