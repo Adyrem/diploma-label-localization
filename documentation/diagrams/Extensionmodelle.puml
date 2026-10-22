@@ -15,12 +15,12 @@ rectangle "Prozess devenv.exe" as proc #F5F5F5 {
   component "Code-Editor" as editor
   component "Element-Designer" as designer
   component "VSSDK und MEF" as sdk
-  component "Entwicklungswerkzeuge\nDynamics 365" as d365
+  component "Developer Tools\nDynamics 365" as d365
   component "A  VSSDK, in-process" as a #E8E8F5
-  component "C  VS.Extensibility,\nin-process" as c #E8E8F5
+  component "C  VisualStudio.Extensibility,\nin-process" as c #E8E8F5
 }
 
-component "B  VS.Extensibility,\nout-of-process" as b #D6ECF5
+component "B  VisualStudio.Extensibility,\nout-of-process" as b #D6ECF5
 
 editor -- sdk
 designer -- d365

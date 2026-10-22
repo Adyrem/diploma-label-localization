@@ -7,7 +7,7 @@ ms-addins:
   publisher: Microsoft Learn
   url:
     value: https://learn.microsoft.com/en-us/dynamics365/fin-ops-core/dev-itpro/dev-tools/developer-tools-add-ins
-    date: 2026-09-10
+    date: 2026-10-22
   date: 2026-03-30
 
 ms-editor-extension-points:
@@ -15,27 +15,30 @@ ms-editor-extension-points:
   title: Language Service and Editor Extension Points
   author: Microsoft
   publisher: Microsoft Learn
+  date: 2025-10-22
   url:
     value: https://learn.microsoft.com/en-us/visualstudio/extensibility/language-service-and-editor-extension-points
-    date: 2026-09-10
+    date: 2026-10-22
 
 ms-editor-extensibility:
   type: Web
   title: Editor Overview, VisualStudio.Extensibility
   author: Microsoft
   publisher: Microsoft Learn
+  date: 2023-03-31
   url:
     value: https://learn.microsoft.com/en-us/visualstudio/extensibility/visualstudio.extensibility/editor/editor
-    date: 2026-09-10
+    date: 2026-10-22
 
 ms-devtools-overview:
   type: Web
   title: Development tools in Visual Studio
   author: Microsoft
   publisher: Microsoft Learn
+  date: 2026-03-30
   url:
     value: https://learn.microsoft.com/en-us/dynamics365/fin-ops-core/dev-itpro/dev-tools/development-tools-overview
-    date: 2026-09-10
+    date: 2026-10-22
 
 meyer-labels-net:
   type: Web
@@ -43,7 +46,7 @@ meyer-labels-net:
   author: Meyer, Alex
   url:
     value: https://alexdmeyer.com/2018/03/20/getting-d365fo-object-labels-in-net/
-    date: 2026-09-10
+    date: 2026-10-22
   date: 2018-03-20
 
 ms-extensibility-models:
@@ -51,18 +54,20 @@ ms-extensibility-models:
   title: Choose the right Visual Studio extensibility model for you
   author: Microsoft
   publisher: Microsoft Learn
+  date: 2024-10-16
   url:
     value: https://learn.microsoft.com/en-us/visualstudio/extensibility/visualstudio.extensibility/extensibility-models
-    date: 2026-09-10
+    date: 2026-10-22
 
 ms-inproc-extensions:
   type: Web
   title: VSSDK-compatible VisualStudio.Extensibility extensions
   author: Microsoft
   publisher: Microsoft Learn
+  date: 2023-03-31
   url:
     value: https://learn.microsoft.com/en-us/visualstudio/extensibility/visualstudio.extensibility/get-started/in-proc-extensions
-    date: 2026-09-10
+    date: 2026-10-22
 
 saxblog-xref:
   type: Web
@@ -70,7 +75,7 @@ saxblog-xref:
   author: Miroshnikov, Ievgen
   url:
     value: https://ievgensaxblog.wordpress.com/2018/12/09/msdyn365fo-code-to-build-cross-reference-data-without-a-full-compile/
-    date: 2026-09-10
+    date: 2026-10-22
   date: 2018-12-09
 
 ms-assembly-loadfrom:
@@ -80,16 +85,17 @@ ms-assembly-loadfrom:
   publisher: Microsoft Learn
   url:
     value: https://learn.microsoft.com/en-us/dotnet/api/system.reflection.assembly.loadfrom
-    date: 2026-09-25
+    date: 2026-10-22
 
 ms-assembly-unload:
   type: Web
   title: "How to: Load and unload assemblies"
   author: Microsoft
   publisher: Microsoft Learn
+  date: 2019-08-19
   url:
     value: https://learn.microsoft.com/en-us/dotnet/standard/assembly/load-unload
-    date: 2026-09-25
+    date: 2026-10-22
 
 ms-models:
   type: Web
@@ -98,7 +104,7 @@ ms-models:
   publisher: Microsoft Learn
   url:
     value: https://learn.microsoft.com/en-us/dynamics365/fin-ops-core/dev-itpro/dev-tools/models
-    date: 2026-09-25
+    date: 2026-10-22
   date: 2026-03-30
 
 ms-field-help:
@@ -108,7 +114,7 @@ ms-field-help:
   publisher: Microsoft Learn
   url:
     value: https://learn.microsoft.com/en-us/dynamics365/fin-ops-core/dev-itpro/user-interface/customize-field-help
-    date: 2026-09-25
+    date: 2026-10-22
   date: 2026-03-12
 
 ms-overlayering:
@@ -118,7 +124,7 @@ ms-overlayering:
   publisher: Microsoft Learn
   url:
     value: https://learn.microsoft.com/en-us/dynamics365/fin-ops-core/dev-itpro/extensibility/customization-overlayering-extensions
-    date: 2026-09-25
+    date: 2026-10-22
   date: 2026-03-27
 
 teko-richtlinien:
@@ -134,7 +140,7 @@ deepl-translate:
   publisher: DeepL Developer Documentation
   url:
     value: https://developers.deepl.com/api-reference/translate
-    date: 2026-09-25
+    date: 2026-10-22
 
 deepl-languages:
   type: Web
@@ -143,7 +149,7 @@ deepl-languages:
   publisher: DeepL Developer Documentation
   url:
     value: https://developers.deepl.com/docs/getting-started/supported-languages
-    date: 2026-09-25
+    date: 2026-10-22
 
 deepl-swiss-german:
   type: Web
@@ -153,7 +159,7 @@ deepl-swiss-german:
   date: 2026-07-31
   url:
     value: https://www.deepl.com/en/blog/how-we-brought-swiss-german-to-deepl
-    date: 2026-09-26
+    date: 2026-10-22
 
 ms-try-parse:
   type: Web
@@ -162,16 +168,17 @@ ms-try-parse:
   publisher: Microsoft Learn
   url:
     value: https://learn.microsoft.com/en-us/dotnet/standard/design-guidelines/exceptions-and-performance
-    date: 2026-09-26
+    date: 2026-10-22
 
 ms-net-standard:
   type: Web
   title: .NET Standard overview
   author: Microsoft
   publisher: Microsoft Learn
+  date: 2025-11-06
   url:
     value: https://learn.microsoft.com/en-us/dotnet/standard/net-standard
-    date: 2026-10-07
+    date: 2026-10-22
 
 ms-tap:
   type: Web
@@ -181,7 +188,7 @@ ms-tap:
   date: 2026-04-17
   url:
     value: https://learn.microsoft.com/en-us/dotnet/standard/asynchronous-programming-patterns/task-based-asynchronous-pattern-tap
-    date: 2026-09-26
+    date: 2026-10-22
 
 ms-using:
   type: Web
@@ -191,17 +198,17 @@ ms-using:
   date: 2026-01-16
   url:
     value: https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/using
-    date: 2026-09-26
+    date: 2026-10-22
 
 ms-vs-shortcuts:
   type: Web
   title: Keyboard shortcuts, Visual Studio (Windows)
   author: Microsoft
   publisher: Microsoft Learn
-  date: 2026-06-26
+  date: 2026-10-14
   url:
     value: https://learn.microsoft.com/en-us/visualstudio/ide/default-keyboard-shortcuts-in-visual-studio
-    date: 2026-09-26
+    date: 2026-10-22
 
 ms-vs-customize-shortcuts:
   type: Web
@@ -211,7 +218,7 @@ ms-vs-customize-shortcuts:
   date: 2026-05-07
   url:
     value: https://learn.microsoft.com/en-us/visualstudio/ide/identifying-and-customizing-keyboard-shortcuts-in-visual-studio
-    date: 2026-09-26
+    date: 2026-10-22
 
 ms-ude-tools:
   type: Web
@@ -221,7 +228,7 @@ ms-ude-tools:
   date: 2026-02-02
   url:
     value: https://learn.microsoft.com/en-us/power-platform/developer/unified-experience/finance-operations-install-config-tools
-    date: 2026-09-28
+    date: 2026-10-22
 
 bucher-ude:
   type: Web
@@ -231,7 +238,7 @@ bucher-ude:
   date: 2024-09-11
   url:
     value: https://raphaelbucher.ch/power%20platform/dynamics%20365/x++/2024/09/11/unified-developer-environment-shortcomings.html
-    date: 2026-09-28
+    date: 2026-10-22
 
 ms-vc-navigation:
   type: Web
@@ -241,7 +248,7 @@ ms-vc-navigation:
   date: 2026-03-30
   url:
     value: https://learn.microsoft.com/en-us/dynamics365/fin-ops-core/dev-itpro/dev-tools/version-control-metadata-navigation
-    date: 2026-09-30
+    date: 2026-10-22
 
 deepl-auth:
   type: Web
@@ -250,7 +257,7 @@ deepl-auth:
   publisher: DeepL Developer Documentation
   url:
     value: https://developers.deepl.com/docs/getting-started/auth
-    date: 2026-10-01
+    date: 2026-10-22
 
 osi-mit:
   type: Web
@@ -259,34 +266,37 @@ osi-mit:
   publisher: Open Source Initiative
   url:
     value: https://opensource.org/license/mit
-    date: 2026-10-01
+    date: 2026-10-22
 
 ms-remote-ui:
   type: Web
   title: Remote UI
   author: Microsoft
   publisher: Microsoft Learn
+  date: 2023-03-31
   url:
     value: https://learn.microsoft.com/en-us/visualstudio/extensibility/visualstudio.extensibility/inside-the-sdk/remote-ui
-    date: 2026-10-19
+    date: 2026-10-22
 
 ms-data-protection:
   type: Web
   title: How to use data protection
   author: Microsoft
   publisher: Microsoft Learn
+  date: 2026-07-22
   url:
     value: https://learn.microsoft.com/en-us/dotnet/standard/security/how-to-use-data-protection
-    date: 2026-10-19
+    date: 2026-10-22
 
 ms-max-path:
   type: Web
   title: Maximum Path Length Limitation
   author: Microsoft
   publisher: Microsoft Learn
+  date: 2024-07-15
   url:
     value: https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation
-    date: 2026-10-19
+    date: 2026-10-22
 
 ms-extensibility-license:
   type: Web
@@ -295,7 +305,7 @@ ms-extensibility-license:
   publisher: NuGet
   url:
     value: https://www.nuget.org/packages/Microsoft.VisualStudio.Extensibility.Sdk/17.14.40608/License
-    date: 2026-10-19
+    date: 2026-10-22
 
 ms-xpp:
   type: Web
@@ -305,7 +315,7 @@ ms-xpp:
   date: 2026-03-31
   url:
     value: https://learn.microsoft.com/en-us/dynamics365/fin-ops-core/dev-itpro/dev-ref/xpp-language-reference
-    date: 2026-10-20
+    date: 2026-10-22
 
 ms-service-description:
   type: Web
@@ -315,7 +325,7 @@ ms-service-description:
   date: 2026-03-26
   url:
     value: https://learn.microsoft.com/en-us/dynamics365/fin-ops-core/dev-itpro/get-started/service-description
-    date: 2026-10-20
+    date: 2026-10-22
 
 ms-ude-overview:
   type: Web
@@ -325,4 +335,24 @@ ms-ude-overview:
   date: 2026-02-02
   url:
     value: https://learn.microsoft.com/en-us/power-platform/developer/unified-experience/finance-operations-dev-overview
-    date: 2026-10-20
+    date: 2026-10-22
+
+ms-build-operations:
+  type: Web
+  title: Build operations
+  author: Microsoft
+  publisher: Microsoft Learn
+  date: 2026-01-20
+  url:
+    value: https://learn.microsoft.com/en-us/dynamics365/fin-ops-core/dev-itpro/dev-tools/build-operations
+    date: 2026-10-22
+
+ms-element-usage:
+  type: Web
+  title: Commands for determining how elements are used
+  author: Microsoft
+  publisher: Microsoft Learn
+  date: 2026-03-03
+  url:
+    value: https://learn.microsoft.com/en-us/dynamics365/fin-ops-core/dev-itpro/dev-tools/element-usage
+    date: 2026-10-22

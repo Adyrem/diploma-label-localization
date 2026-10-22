@@ -15,9 +15,13 @@
 // X++ darf nicht zwischen den Pluszeichen umbrechen.
 #show "X++": it => box(it)
 
-// Lange Namen mit Punkt dürfen nach dem Punkt umbrechen, sonst laufen sie in
-// schmalen Tabellenspalten über den Zellrand.
-#show "VisualStudio.Extensibility": [VisualStudio.#{sym.zws}Extensibility]
+// Lange Namen mit Punkt dürfen in Tabellen nach dem Punkt umbrechen, sonst laufen
+// sie in schmalen Spalten über den Zellrand. Nur in Tabellen, damit URLs im
+// Literaturverzeichnis unverändert bleiben.
+#show table: it => {
+  show "VisualStudio.Extensibility": [VisualStudio.#{sym.zws}Extensibility]
+  it
+}
 
 // Verweise auf ein Kapitel heissen «Kapitel», nicht «Abschnitt».
 #show heading.where(level: 1): set heading(supplement: [Kapitel])
@@ -140,9 +144,10 @@ Unterschrift:
         [*Betroffene Stellen*],
       ),
       [Claude Code (Anthropic)],
-      [Analysieren und Überarbeiten der Kapiteltexte nach meinen inhaltlichen
-       Vorgaben, Erstellen der Diagramme als PlantUML-Quelltext, Recherche zu den
-       Schnittstellen von Visual Studio und Dynamics 365.],
+      [Analysieren und Überarbeiten der Kapiteltexte nach den inhaltlichen
+       Vorgaben des Autors, Erstellen der Diagramme als PlantUML-Quelltext,
+       Recherche zu den Schnittstellen von Visual Studio und Dynamics 365, Prüfung
+       der Quellen und Review.],
       [@initialisierung, @konzept, @realisierung, Abkürzungsverzeichnis, Glossar,
        sämtliche Abbildungen ausser den Screenshots],
       [Claude Code (Anthropic)],
@@ -198,6 +203,8 @@ Unterschrift:
       [EFZ], [Eidgenössisches Fähigkeitszeugnis],
       [ERP], [Enterprise Resource Planning],
       [FA], [Funktionale Anforderung],
+      [GIBB], [gibb Berufsfachschule Bern, früher Gewerblich-Industrielle
+       Berufsschule Bern],
       [GUI], [Graphical User Interface],
       [GUID], [Globally Unique Identifier],
       [HF], [Höhere Fachschule],
@@ -216,6 +223,7 @@ Unterschrift:
       [SDK], [Software Development Kit],
       [SHA-256], [Secure Hash Algorithm mit 256 Bit],
       [TC], [Test Case, Testfall],
+      [TEKO], [TEKO Schweizerische Fachschule],
       [TO], [Testobjekt],
       [UC], [Use Case],
       [UDE], [Unified Developer Experience],

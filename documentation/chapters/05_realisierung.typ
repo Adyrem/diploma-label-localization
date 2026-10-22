@@ -305,8 +305,9 @@ Teilen aus dem klassischen Visual Studio SDK, wie in @architektur festgelegt.
 ]
 
 Das Tool Window nutzt Remote UI wie die übrigen Teile aus VisualStudio.Extensibility.
-Die Extension schickt die XAML an Visual Studio, das sie selbst darstellt und dabei
-die Farben des gewählten Themes verwendet @ms-remote-ui. Ein Fallback auf WPF über
+Die Extension schickt die XAML an Visual Studio, das sie selbst darstellt. Weil die
+XAML die Styles und Farben von Visual Studio verwendet, passt sich das Tool Window
+dem gewählten Theme an @ms-remote-ui. Ein Fallback auf WPF über
 das Visual Studio SDK war nicht nötig. Für die Optionsseite und die Rückfrage beim
 Beenden von Visual Studio fand sich in VisualStudio.Extensibility kein stabiler Weg.
 Dafür liegt im selben VSIX ein AsyncPackage aus dem Visual Studio SDK.
@@ -478,7 +479,10 @@ die Dynamics 365 und Visual Studio ohnehin haben.
   ) <datenzugriff>
 ]
 
-Visual Studio ist standardmässig nicht für lange Pfade ausgerichtet. Windows nimmt einen Pfad über 260 Zeichen dann nur mit dem Prefix `\\?\` an @ms-max-path. In D1 waren 18 Label-Dateien von Microsoft deshalb nicht lesbar. Seither setzt die
+Windows begrenzt Pfade auf 260 Zeichen, solange eine Anwendung lange Pfade nicht
+ausdrücklich unterstützt. Längere Pfade nimmt es dann nur mit dem Prefix `\\?\` an
+@ms-max-path. Im Prozess von Visual Studio galt diese Grenze, in D1 waren 18
+Label-Dateien von Microsoft deshalb nicht lesbar. Seither setzt die
 Extension den Prefix ab 248 Zeichen. Für Verzeichnisse liegt die Grenze 12 Zeichen
 unter 260, damit noch ein Dateiname im Format 8.3 Platz hat @ms-max-path.
 
@@ -1399,7 +1403,7 @@ weil die Realisierung vor dem Plan lag.
 - Die Verwendungssuche über alle Models dauert bis knapp eine Minute. Stört das im
   Alltag, ist die Cross-Reference-Datenbank aus E4 (Verwendungssuche) der nächste Schritt.
 - Die Label-Eigenschaften einer Node zeigt die Extension im Tool Window, weil das
-  Properties Window keinen Erweiterungspunkt hat, siehe @befunde_tabelle. Der
+  Properties Window keinen Erweiterungspunkt hat, siehe @technisch_geklaert. Der
   Experte im Betrieb regte im Review an, nach dem Projekt nach einer schöneren
   Lösung zu suchen, siehe @protokoll_experte.
 - Im Review wirkte der Start von Visual Studio langsam, siehe @protokoll_experte.

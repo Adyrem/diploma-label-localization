@@ -22,7 +22,7 @@ Meldungen ins Output Window.
 
 Ausserhalb der Systemgrenze liegen der Build von Dynamics 365, der die
 Label-Dateien kompiliert, und der Best-Practice-Check, der hardcodierte Texte
-meldet. Die Extension greift in keinen der beiden ein, muss ihre Dateien aber so
+meldet @ms-build-operations. Die Extension greift in keinen der beiden ein, muss ihre Dateien aber so
 hinterlassen, dass der Build sie weiterhin liest.
 
 == Geschäftsprozessanalyse
@@ -909,8 +909,8 @@ auch beim Kopieren und Verschieben.
 #heading(outlined: false, level: 4)[Extraktion im Properties Window] <festlegung_extraktion>
 
 Gelesen wird über das Selection Tracking. Geschrieben wird direkt in die XML-Datei
-des Elements, wie in den Befunden aus der Testumgebung festgelegt, siehe
-@befunde_testumgebung. Ein geöffneter Designer
+des Elements, wie in der Machbarkeitsbeurteilung festgelegt, siehe
+@technisch_geklaert. Ein geöffneter Designer
 meldet die Änderung danach und bietet an, das Element neu zu laden. Das Element muss
 vorher gespeichert sein, siehe @festlegung_schreiben. Die XML-Datei findet die
 Extension über Elementtyp und Elementname aus dem Selection Tracking, die Stelle
