@@ -1,0 +1,42 @@
+@startuml
+' Sequenz beim Sprung an eine Fundstelle der Verwendungssuche.
+' Rendern: plantuml -tpng -charset UTF-8 Sequenz_Sprung.puml
+' Höhere Auflösung, damit das Bild im PDF scharf bleibt.
+skinparam dpi 240
+
+skinparam defaultFontSize 13
+skinparam shadowing false
+skinparam sequence {
+  ParticipantBackgroundColor White
+  ParticipantBorderColor Black
+  ActorBackgroundColor White
+  ActorBorderColor Black
+  LifeLineBorderColor Gray
+  ArrowColor Black
+}
+hide footbox
+
+actor "Entwickler" as DEV
+participant "Tool\nWindow" as TW
+participant "Developer\nTools" as DT
+participant "X++-Editor" as ED
+participant "Designer und\nProperties Window" as DES
+
+DEV -> TW : klickt das Symbol\neiner Fundstelle
+activate TW
+TW -> TW : Element und Stelle\naus der Fundstelle
+alt Label-ID steht im Code
+  TW -> TW : n-tes Vorkommen der\nLabel-ID im Code des XML
+  TW -> DT : Element im Code öffnen
+  DT -> ED : .xpp aus XppSource\nerzeugen und anzeigen
+  TW -> ED : Cursor auf das n-te\nVorkommen setzen
+else Label-ID steht in einer Eigenschaft
+  TW -> DT : Element im Designer öffnen
+  DT -> DES : Designer anzeigen
+  TW -> DES : Node mit der Eigenschaft wählen,\nEigenschaft markieren
+end
+opt Sprung gelingt nicht
+  TW -> DEV : Element ist geöffnet,\nohne Sprung an die Fundstelle
+end
+deactivate TW
+@enduml

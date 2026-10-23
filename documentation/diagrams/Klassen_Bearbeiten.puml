@@ -2,6 +2,8 @@
 ' Klassenmodell der Kernlogik, Teil 2: Suche, Bearbeiten, Übersetzung, Querschnitt.
 ' Klassen aus Teil 1 erscheinen ohne Members im weissen Paket.
 ' Rendern: plantuml -tpng -charset UTF-8 Klassen_Bearbeiten.puml
+' Höhere Auflösung, damit das Bild im PDF scharf bleibt.
+skinparam dpi 240
 
 skinparam defaultFontSize 13
 skinparam classAttributeIconSize 0
@@ -87,20 +89,25 @@ package "Laden und Speichern" #FFFFFF {
   class LabelFileWatcher
 }
 
-LabelSearch --> LabelStore
+LabelSearch -up-> LabelStore
 LabelSearch ..> SearchQuery
 LabelSearch ..> SearchHit
 SearchQuery --> SearchMode
 
 LabelOperations --> LabelIdGenerator
 LabelOperations --> UsageSearch
-LabelOperations --> LabelStore
-LabelOperations --> LabelFileFormat
-LabelOperations --> LabelFileWatcher
+LabelOperations -up-> LabelStore
+LabelOperations -up-> LabelFileFormat
+LabelOperations -up-> LabelFileWatcher
 UsageSearch ..> LabelUsage
 
 ITranslationService <|.. DeepLTranslationService
 
+' Anordnung: Laden und Speichern als Zeile oben, Suche und Bearbeiten darunter,
+' Übersetzung und Querschnitt zuunterst.
+LabelStore -[hidden]right- LabelFileFormat
+LabelFileFormat -[hidden]right- LabelFileWatcher
 SearchMode -[hidden]down- ITranslationService
 LabelUsage -[hidden]down- LabelSettings
+LabelSettings -[hidden]down- IMessageSink
 @enduml

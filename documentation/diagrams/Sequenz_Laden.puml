@@ -32,7 +32,7 @@ MD --> STORE : Models
 loop je Model und Quelle
   STORE -> SRC : Load(model, LoadLanguages)
   SRC -> PKG : Label-Dateien je Sprache\noder kompilierte Ressourcen lesen
-  opt Datei beschädigt oder gesperrt
+  opt Datei beschädigt oder blockiert
     SRC -> OUT : Warnung mit Dateiname
   end
   SRC --> STORE : lesbare Label-Dateien

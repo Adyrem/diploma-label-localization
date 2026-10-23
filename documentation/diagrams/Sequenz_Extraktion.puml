@@ -1,6 +1,9 @@
 @startuml
 ' Sequenz beim Extrahieren eines hardcodierten Textes im X++-Editor.
 ' Rendern: plantuml -tpng -charset UTF-8 Sequenz_Extraktion.puml
+' Kurze, umbrochene Nachrichten halten das Diagramm schmal, damit die Schrift
+' im PDF lesbar bleibt.
+skinparam dpi 240
 
 skinparam defaultFontSize 13
 skinparam shadowing false
@@ -15,45 +18,45 @@ skinparam sequence {
 hide footbox
 
 actor "Entwickler" as DEV
-participant "X++-Editor" as ED
+participant "X++-\nEditor" as ED
 participant "Command\nExtraktion" as CMD
-participant "Label-Erkennung" as REC
+participant "Label-\nErkennung" as REC
 participant "ModelDiscovery" as MD
-participant "Tool Window" as TW
+participant "Tool\nWindow" as TW
 participant "ITranslationService" as TR
 participant "LabelOperations" as OPS
 
-DEV -> CMD : ruft die Extraktion auf\neinem markierten String Literal auf
+DEV -> CMD : ruft die Extraktion\nauf einem markierten\nString Literal auf
 activate CMD
-CMD -> REC : String Literal an der Markierung
-REC --> CMD : Span mit "X++ String" oder keiner
+CMD -> REC : String Literal\nan der Markierung
+REC --> CMD : Span mit\n"X++ String"\noder keiner
 alt kein String Literal
   CMD -> DEV : Hinweis, nichts geändert
 else String Literal gefunden
-  CMD -> MD : FindModelFor(Pfad der Datei)
-  MD --> CMD : Model mit Label-Dateien
-  CMD -> TW : neues Label mit Inhalt des String Literals\nund vorgeschlagener Label-Datei
+  CMD -> MD : FindModelFor(\nPfad der Datei)
+  MD --> CMD : Model mit\nLabel-Dateien
+  CMD -> TW : neues Label mit Inhalt\ndes String Literals und\nvorgeschlagener Label-Datei
   activate TW
-  TW -> TR : TranslateAsync(Text, SourceLanguage,\nCreateLanguages)
+  TW -> TR : TranslateAsync(Text,\nSourceLanguage,\nCreateLanguages)
   loop je Zielsprache
-    TR -> TR : Anfrage an den Dienst
+    TR -> TR : Anfrage\nan den Dienst
   end
-  alt Vorschläge erhalten
+  alt Vorschläge\nerhalten
     TR --> TW : Übersetzungen
-  else kein API-Schlüssel oder Fehler
+  else kein Schlüssel\noder Fehler
     TR --> TW : Fehler
-    TW -> TW : Ausgangstext in allen Sprachen,\nMeldung mit Grund
+    TW -> TW : Ausgangstext in\nallen Sprachen,\nMeldung mit Grund
   end
-  DEV -> TW : prüft, ändert und bestätigt
-  TW -> OPS : Create(Label-Datei, Übersetzungen)
+  DEV -> TW : prüft, ändert\nund bestätigt
+  TW -> OPS : Create(Label-Datei,\nÜbersetzungen)
   activate OPS
-  OPS -> OPS : NewId, Label im LabelStore eintragen,\nDateiüberwachung anhalten,\nalle Sprachen schreiben
+  OPS -> OPS : NewId, im\nLabelStore\neintragen,\nÜberwachung\nanhalten, alle\nSprachen\nschreiben
   OPS --> TW : Label
   deactivate OPS
   TW --> CMD : Label-ID
   deactivate TW
-  CMD -> ED : Inhalt des String Literals\ndurch die Label-ID ersetzen
-  note right of ED : ein Edit im Text Buffer,\nrückgängig machbar
+  CMD -> ED : String Literal\ndurch die Label-ID\nersetzen
+  note right of ED : ein Edit im\nText Buffer,\nrückgängig\nmachbar
 end
 deactivate CMD
 @enduml

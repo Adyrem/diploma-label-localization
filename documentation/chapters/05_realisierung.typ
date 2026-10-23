@@ -4,7 +4,7 @@
 
 == Vorgehen <vorgehen_realisierung>
 
-Die Phasen des Projekts liefen wie in @projektplanung geplant nacheinander.
+Die Phasen des Projekts liefen wie geplant nacheinander.
 Innerhalb der Realisierung wiederholte sich dagegen ein Ablauf aus Umsetzung,
 Prüfung und Rückmeldung, den @ablauf_realisierung zeigt. Vier dieser Runden endeten
 mit einem Durchgang auf der Testumgebung. Was dort auffiel, setzte der Agent in den
@@ -16,16 +16,14 @@ folgenden Arbeitspaketen um.
 ) <ablauf_realisierung>
 
 Den Code schrieb Claude Code als Agent in einer eigenen Session auf dem privaten
-Gerät, siehe @hilfsmittelverzeichnis. Vorgabe war das Konzept aus @konzept mit seinem
-Realisierungsplan. Nach jedem Arbeitspaket meldete der Agent, was entstanden war,
+Gerät, siehe @hilfsmittelverzeichnis. Vorgabe war das Konzept mit seinem Realisierungsplan. Nach jedem Arbeitspaket meldete der Agent, was entstanden war,
 welche Fragen offen blieben, was er selbst entschieden hatte und was ihm aufgefallen
 war. In 30 Nachrichten kamen so 17 Rückfragen, 100 Realisierungsentscheide und 53
 Befunde zusammen. Der Autor beantwortete die Rückfragen und prüfte die Entscheide.
 Weil der Agent direkt in das öffentliche Repository schrieb, prüfte der Autor
 ausserdem jeden Commit auf Daten des Arbeitgebers und Secrets.
 
-Auf den Systemen des Arbeitgebers dürfen die KI-Tools nicht laufen, siehe
-@rahmenbedingungen_prozess. Zwischen den Durchgängen prüfte der Agent deshalb mit
+Auf den Systemen des Arbeitgebers dürfen die KI-Tools nicht laufen. Zwischen den Durchgängen prüfte der Agent deshalb mit
 Unit Tests und in der experimentellen Instanz, in der der Debug-Build Tooltip und
 Inline-Anzeige an `.xpp`-Textdateien hängt. Vor jedem Durchgang schrieb er eine
 Anleitung mit Skripten, die zusammen mit dem VSIX-Paket auf die Testumgebung kamen.
@@ -33,7 +31,7 @@ Der Autor prüfte sie unter anderem darauf, dass nichts aus dem Internet geladen
 und sich schreibende Schritte rückgängig machen lassen. Den Durchgang führte er
 selbst aus und meldete Ergebnisse, Befunde und Anpassungen ohne Namen von Models,
 Benutzern oder Rechnern zurück. Der nächste Durchgang prüfte die Korrekturen nach,
-wie die Spalte Folge in den Tabellen von @testprotokoll zeigt.
+wie die Spalte Folge in den Tabellen der Durchgänge zeigt.
 
 == Programmierumgebung und Richtlinien
 
@@ -80,26 +78,24 @@ Das private Gerät ist eine Windows-VM ohne Dynamics 365.
 Die meisten Richtlinien prüft der Build selbst.
 
 - Gemeinsame Einstellungen aller Projekte stehen in `Directory.Build.props`. Jede
-  Warnung bricht den Build ab, und öffentliche Typen und Member brauchen eine
-  XML-Dokumentation (NFA05 Wartbarkeit). Ausgenommen von der Dokumentationspflicht ist nur das
+  Warnung bricht den Build ab, und öffentliche Typen und Member brauchen eine XML-Dokumentation. Ausgenommen von der Dokumentationspflicht ist nur das
   Testprojekt.
 - Nullable Reference Types sind eingeschaltet, der Build ist deterministisch.
 - Die Kernlogik referenziert Visual Studio nicht. Alles, was Visual Studio braucht,
   liegt in der Extension (Z8 Erweiterbare Architektur, NFA03 Erweiterbarkeit).
-- Jeder Einstiegspunkt läuft durch die Error Boundary, keine Exception erreicht
-  Visual Studio (NFA04 Stabilität).
+- Jeder Einstiegspunkt läuft durch die Error Boundary, keine Exception erreicht Visual Studio.
 - Fehler beim Parsen von Eingaben sind der Normalfall und kommen als Rückgabewert
   zurück, nach dem Try-Parse Pattern @ms-try-parse. Exceptions bleiben echten
   Fehlern vorbehalten.
 - Namen, Kommentare und Meldungen im Code sind englisch, wie die Oberfläche.
 - Im Repository liegen weder Code des bestehenden Tools noch Daten des Arbeitgebers.
-  Die Testdaten sind synthetisch (TC40).
+  Die Testdaten sind synthetisch.
 
 == Softwareaufbau
 
 === Projektstruktur
 
-Die Solution hat die drei Projekte aus @architektur.
+Die Solution hat die drei Projekte aus dem Konzept.
 
 #[
   #show figure: set align(left)
@@ -124,13 +120,12 @@ Die Solution hat die drei Projekte aus @architektur.
   ) <projekte>
 ]
 
-Das Klassenmodell aus @klassen_laden und @klassen_bearbeiten hat gehalten. Seine
+Das Klassenmodell aus dem Konzept hat gehalten. Seine
 Klassen gibt es alle, in der Realisierung kamen Klassen dazu und einige Signaturen
 änderten sich.
 
 - `ILabelSource.Load` liefert alle Label-Dateien eines Package-Verzeichnisses, auch
-  solche in Sprachen, die nicht geladen sind. Ohne sie wüsste die Extension nicht, in welchen
-  Sprachen ein neues Label angelegt werden kann (FA02 Label-Erstellung).
+  solche in Sprachen, die nicht geladen sind. Ohne sie wüsste die Extension nicht, in welchen Sprachen ein neues Label angelegt werden kann.
 - Eine `Translation` kennt ihre Label-Datei, weil eine Übersetzung in einer anderen
   Datei liegen kann als das Label. Das kommt vor, wenn ein anderes Model die
   Label-Datei mit einer Erweiterung um Übersetzungen ergänzt, wie es auf der
@@ -195,7 +190,7 @@ Speichern schreibt nur die geänderten Labels einer Datei. Die Datei entsteht da
 als temporäre Datei daneben und ersetzt dann das Original, ein Abbruch hinterlässt
 also nie eine halbe Label-Datei. Die Kodierung und die Zeilenenden der Datei bleiben,
 wie sie waren. Während die Extension selbst schreibt, schweigt `LabelFileWatcher`,
-damit nur Änderungen von aussen das Neuladen anbieten (FA15 Dateiüberwachung).
+damit nur Änderungen von aussen das Neuladen anbieten.
 
 Neue IDs bestehen aus `L` und 16 hexadezimalen Ziffern aus einem kryptografischen
 Zufallsgenerator, etwa `@BDM1:L8583DF5058DD2AD2`. Sollte es zu einer Kollision mit einer bestehenden ID kommen, wird eine weitere ID generiert.
@@ -255,22 +250,95 @@ Modi liefern 303 dieselben Treffer in derselben Reihenfolge. Die eine Suche fäl
 weg, weil das bestehende Tool bei Match word den Begriff als Regex auswertet, siehe
 @abweichungen_realisierung.
 
-In D1 brauchte Anything like that ohne Beachtung der Gross- und Kleinschreibung
-über 392'858 Labels 623 bis 656 ms und verfehlte die 500 ms aus NFA02
-(Performance). Vier Änderungen brachten
-die längste Suche in D4 auf 253 ms.
+=== Performance <performance>
+
+D1 lieferte die ersten Messwerte mit der echten Datenmenge. Anything like that,
+ignore case brauchte über 392'858 Labels 623 bis 656 ms und verfehlte die 500 ms
+aus NFA02 Performance. Der Speicher von Visual Studio stieg beim Laden um rund 1 GB.
+Beides wurde in AP3.4 optimiert, bevor das Tool Window auf dem Label Store aufbaute.
+
+Damit sich die Wirkung ohne Testumgebung prüfen liess, misst ein Unit Test Laden und
+Suche auf dem privaten Gerät. Er erzeugt 490'000 Labels in fünf Sprachen mit
+Kommentar, rund 25~% mehr als auf der Testumgebung, und lädt sie ohne Dateien durch
+den Label Store. Gemessen werden die Ladezeit, der Speicher danach und je Suchmodus
+drei Suchen. TC04 lief nach jeder Änderung mit, das Ranking blieb also gleich.
+
+Beim Laden sparen drei Änderungen Speicher und Zeit.
 
 - Die Übersetzungen eines Labels liegen in einem Array statt in einem Dictionary.
-- Gleiche Texte und Kommentare teilen sich eine Instanz.
+- Eine Label-ID ist ein einziger String mit der Position des Doppelpunkts. Label-Datei
+  und Schlüssel schneidet die Extension erst bei Bedarf heraus, und die Prüfung der ID
+  kommt ohne Regex aus.
+- Gleiche Texte und Kommentare der Sprachen eines Labels teilen sich eine Instanz.
+  Das trifft oft zu, etwa wenn de-CH denselben Text hat wie de.
+
+Bei der Suche wirken vier Änderungen.
+
+- Der Label Store hält die Labels in einem nach ID sortierten Array. Die Suche teilt
+  es in Bereiche für die Prozessoren auf und fasst jeden Treffer mit Wert und
+  Position zu einer Zahl zusammen. Diese Zahlen zu sortieren ergibt die Reihenfolge
+  nach Wert und ID, ohne Strings zu vergleichen.
 - Der Vergleich ohne Gross- und Kleinschreibung läuft über eine eigene Tabelle aller
   65'536 Zeichen. `IndexOf` mit `OrdinalIgnoreCase` war unter .NET Framework der
-  langsamste Teil der Suche.
-- Match word prüft vor der Regex, ob der Begriff überhaupt vorkommt.
+  langsamste Teil der Suche. Unit Tests mit Umlauten, ß, Kelvin-Zeichen, türkischem
+  i, Griechisch und Kyrillisch zeigen, dass die Tabelle dasselbe findet wie das
+  Framework.
+- Match word prüft vor der Regex, ob der Begriff überhaupt vorkommt. Die meisten
+  Felder scheiden damit schon aus.
+- Haben mehrere Sprachen eines Labels denselben Text, prüft die Suche ihn nur einmal.
+
+@optimierung_suche stellt die Suchdauer vor und nach diesen Änderungen gegenüber,
+lokal im Unit Test und auf der UDE in D1 und D2. Auf der UDE brauchte die langsamste
+Suche in D2 noch 301 ms. Nur Exact match wurde dort etwas langsamer, blieb aber
+unter 100 ms. Lokal sank die Ladezeit im Label Store von 6,5 bis 6,8 s auf 3,2 bis
+3,6 s und der Speicher danach von 840 MB auf 421 MB.
+
+#[
+  #show figure: set align(left)
+  #show figure: set block(breakable: false)
+  #set text(size: 9.5pt)
+  #figure(
+    table(
+      align: (left, right, right, right, right),
+      columns: (1fr, auto, auto, auto, auto),
+      table.header(
+        [*Suchmodus*], [*Lokal vorher*], [*Lokal nachher*], [*UDE D1*],
+        [*UDE D2*],
+      ),
+      [Exact match], [51--55], [25--36], [64--83], [87--98],
+      [Exact match, ignore case], [49--59], [26--31], [65--70], [85--86],
+      [Substring], [109--200], [56--118], [159--250], [100--105],
+      [Substring, ignore case], [272--335], [67--80], [403--414], [149--152],
+      [Match word], [590--650], [132--149], [363--405], [142--152],
+      [Anything like that], [357--415], [89--118], [281--362], [195--206],
+      [Anything like that, ignore case], [749--853], [167--194], [623--656],
+      [256--301],
+    ),
+    caption: [Suchdauer in ms vor und nach der Optimierung, lokal mit 490'000
+              synthetischen Labels auf 8 Prozessoren, auf der UDE mit rund
+              393'000 Labels auf 2 Prozessoren (eigene Darstellung)]
+  ) <optimierung_suche>
+]
+
+Für das Laden mit Dateien gibt es einen zweiten lokalen Vergleich mit 393'000
+synthetischen Labels in 4100 Dateien, auf zwei Prozessoren wie die UDE. Der Stand von
+D1 lud in 6,9 bis 7,3 s, der Stand von D2 in 4,3 bis 4,9 s, brauchte also rund ein
+Drittel weniger Zeit. Auf der UDE zeigte sich das erst in D3, weil Visual Studio in
+D2 kurz nach dem Start noch beschäftigt war. D3 und D4 luden in 8,6 bis 9,1 s, 25 bis
+30~% weniger als die 12,2 s aus D1. Seit D3 nennt die Meldung nach dem Laden die
+Phasen. Davon entfielen 0,1 s auf das Finden der Models, 7,5 bis 7,9 s auf das Lesen
+der Dateien und 1,0 bis 1,1 s auf Zusammenführen und Sortieren. Weitere Gewinne
+liegen deshalb beim Lesen der Dateien, etwa mit einem eigenen Index nach E2 C. Die klassische VM lud in D3
+mit 15,0 s halb so lang wie in D2. Lokal lud der Stand von D3 gleich schnell wie der
+von D2, den Unterschied machten also die Bedingungen der Messung, nicht der Code.
+
+Im Prozess von Visual Studio sank der Speicher weniger stark als im Unit Test, von
+rund 1 GB in D1 auf 853 bis 869 MB in D3. Gemessen wird dort der ganze Prozess.
 
 === Anbindung an Visual Studio
 
 Die Extension verbindet VisualStudio.Extensibility im Prozess von Visual Studio mit
-Teilen aus dem klassischen Visual Studio SDK, wie in @architektur festgelegt.
+Teilen aus dem klassischen Visual Studio SDK, wie im Konzept festgelegt.
 
 #[
   #show figure: set align(left)
@@ -296,7 +364,7 @@ Teilen aus dem klassischen Visual Studio SDK, wie in @architektur festgelegt.
        Auswahl im Designer],
       [Elemente], [Visual Studio SDK], [Sprung an Fundstellen, ungespeicherte
        Elemente erkennen],
-      [Output Window], [Visual Studio SDK], [Bereich BE-LabelExtension (FA17 Meldungsprotokoll)],
+      [Output Window], [Visual Studio SDK], [Bereich BE-LabelExtension],
       [Probes], [VisualStudio.Extensibility], [Nur im Debug-Build, Diagnostics und
        Testing auf der Testumgebung],
     ),
@@ -324,7 +392,7 @@ Ein Klick auf eine Fundstelle im Code öffnet die `.xpp`-Datei des Elements im O
 
 == GUI-Implementierung
 
-Die Oberfläche folgt dem GUI-Design aus @gui_design. Die Bilder stammen aus der
+Die Oberfläche folgt dem GUI-Design aus dem Konzept. Die Bilder stammen aus der
 experimentellen Instanz mit den synthetischen Testdaten. Der Editor darin ist der
 Ersatz des Debug-Builds für den X++-Editor, deshalb fehlen über dem Tooltip der
 Eintrag und über den Methoden die Referenzanzeige der Developer Tools.
@@ -460,7 +528,7 @@ die Dynamics 365 und Visual Studio ohnehin haben.
       table.header(
         [*Daten*], [*Lesen*], [*Schreiben*],
       ),
-      [Label-Dateien `.label.txt`], [Eigener Parser, siehe @fachliche_regeln],
+      [Label-Dateien `.label.txt`], [Eigener Parser],
       [Nur geänderte Labels, über eine temporäre Datei, Kodierung und Zeilenenden
        bleiben],
       [Kompilierte Ressourcen `.Resources.dll`], [Direkt aus der Datei mit
@@ -508,11 +576,9 @@ Zeichen gleich.
 Jeder Übersetzungsdienst setzt `ITranslationService` um, mit Name, der Angabe, ob er
 eingerichtet ist, und `TranslateAsync`. Ein Fehler kommt als Ergebnis mit Grund
 zurück, nicht als Exception. Die Extension findet alle Klassen, die das Interface
-umsetzen. Ein weiterer Dienst ist deshalb eine neue Klasse, an bestehenden Klassen
-ändert sich nichts (NFA03 Erweiterbarkeit, TC38).
+umsetzen. Ein weiterer Dienst ist deshalb eine neue Klasse, an bestehenden Klassen ändert sich nichts.
 
-Für DeepL schickt die Extension je Zielsprache eine Anfrage @deepl-translate, mit den
-Sprachcodes aus @klassen (Zeile `DeepLTranslationService`). Der Schlüssel steht im Header, Schlüssel der freien
+Für DeepL schickt die Extension je Zielsprache eine Anfrage @deepl-translate, mit den Sprachcodes aus dem Konzept. Der Schlüssel steht im Header, Schlüssel der freien
 Variante gehen an `api-free.deepl.com` @deepl-auth. Antwortet DeepL nicht innerhalb
 von 20 s, lehnt den Schlüssel ab oder meldet ein aufgebrauchtes Kontingent, nennen
 Statuszeile und Output Window den Grund, und das neue Label behält den Ausgangstext.
@@ -521,7 +587,7 @@ Vorschläge gibt es nur für Sprachen, die die Label-Datei hat.
 Den API-Schlüssel verschlüsselt die Extension mit der Data Protection API von Windows
 für den angemeldeten Benutzer, nur derselbe Benutzer kann ihn wieder entschlüsseln
 @ms-data-protection. Gelesen und entschlüsselt wird er erst für eine Übersetzung, in
-keiner Meldung und keinem Feld steht er im Klartext (NFA06 Sicherheit, TC23). Der Debug-Build
+keiner Meldung und keinem Feld steht er im Klartext. Der Debug-Build
 hat zusätzlich einen simulierten Dienst, damit sich die Vorschläge ohne Schlüssel
 prüfen lassen.
 
@@ -543,8 +609,7 @@ prüfen lassen.
       [Was die Realisierung brauchte, etwa die Label-Dateien nicht geladener
        Sprachen für FA02 Label-Erstellung.],
 
-      [Die Optionsseite ist ein Property Grid statt der Seite aus
-       @gui_einstellungen und hat keinen Button Apply.],
+      [Die Optionsseite ist ein Property Grid statt der Seite aus dem Wireframe und hat keinen Button Apply.],
       [Eine Seite im Dialog Options von Visual Studio bringt das Property Grid und
        nur OK und Cancel mit.],
 
@@ -560,13 +625,13 @@ prüfen lassen.
       [Kopieren und Verschieben übernehmen den Text aus de-CH in de, wenn dem
        Ziel de-CH fehlt. FA03 Label-Bearbeitung sieht nur gemeinsame Sprachen
        vor.],
-      [Anpassung aus D4, siehe @d4_ergebnisse. Die eine Label-Datei hatte nur
+      [Anpassung aus D4. Die eine Label-Datei hatte nur
        de-CH, die andere nur de.],
 
       [Side by side, sortierbare Spalten, eigene Sprachen und Anzahl der
        Inline-Anzeige, Rückfrage beim Schliessen des Tool Window, Wiederherstellen
        gelöschter Labels, Delete-Taste, Search Label am Wort.],
-      [Anpassungen aus D2 bis D4, siehe @testprotokoll.],
+      [Anpassungen aus D2 bis D4.],
 
       table.cell(colspan: 2)[*Gegenüber dem bestehenden Tool*],
       [Speichern schreibt nur geänderte Labels und erreicht auch Sprachen, die
@@ -602,7 +667,7 @@ in ihrer Produktversion. Das Paket hat die SHA-256-Prüfsumme
 `EBFCC8F3787BC6815CED43287C4B8871B1F37C50E20CC7716A326A18549E3E3B`.
 
 Das Paket enthält die Lizenz des Codes, der VSIX Installer zeigt einen Link darauf.
-Install bleibt der einzige Schritt (OA01 Bereitstellung). Im öffentlichen Repository liegt das Paket
+Install bleibt der einzige Schritt. Im öffentlichen Repository liegt das Paket
 nicht. Das SDK packt Bibliotheken von VisualStudio.Extensibility hinein, deren Lizenz
 das Weitergeben und Veröffentlichen untersagt @ms-extensibility-license. Das Paket
 liegt der Abgabe bei und wird bei BE-terna intern verteilt.
@@ -629,7 +694,7 @@ liegt der Abgabe bei und wird bei BE-terna intern verteilt.
   ) <voraussetzungen>
 ]
 
-Installiert wird in drei Schritten, siehe auch @einfuehrung.
+Installiert wird in drei Schritten.
 
 + Visual Studio schliessen.
 + Doppelklick auf das VSIX-Paket, Install, danach Close.
@@ -663,9 +728,7 @@ Tooltip, Inline-Anzeige, der Sprung in den X++-Editor und der Bereich zum Design
 brauchen die Developer Tools. Der Debug-Build bietet dafür einen Ersatz, den
 `source/README.md` beschreibt.
 
-Auf der Testumgebung ist die Installation in allen vier Durchgängen auf beiden
-Systemen geprüft, siehe @durchgaenge_uebersicht. Für die Weiterentwicklung beschreibt `source/README.md` Aufbau, Build und
-Erweiterungspunkte (OA02 Dokumentation).
+Auf der Testumgebung ist die Installation in allen vier Durchgängen auf beiden Systemen geprüft. Für die Weiterentwicklung beschreibt `source/README.md` Aufbau, Build und Erweiterungspunkte.
 
 == Testprotokoll <testprotokoll>
 
@@ -1117,9 +1180,9 @@ Korrekturen nach D4 sind nur auf dem privaten Gerät geprüft.
 #heading(outlined: false, level: 4)[Messwerte]
 
 @messwerte fasst die Messungen auf der UDE zusammen. Die längste Suche liegt seit D2
-unter den 500 ms aus NFA02, gestrichelt eingezeichnet. Die längere Ladezeit in D2
-geht darauf zurück, dass Visual Studio kurz nach dem Start noch beschäftigt war,
-siehe @d3_ergebnisse. Die Suche wurde in D3 nicht gemessen. Das bestehende Tool hatte
+unter den 500 ms aus NFA02, gestrichelt eingezeichnet. Mit welchen Änderungen Laden
+und Suche kürzer wurden, steht im Softwareaufbau, siehe @performance. Die längere Ladezeit in D2
+geht darauf zurück, dass Visual Studio kurz nach dem Start noch beschäftigt war. Die Suche wurde in D3 nicht gemessen. Das bestehende Tool hatte
 in D1 nur zwei Sprachen geladen.
 
 #let balken(zeilen, max, grenze: none) = {
@@ -1197,7 +1260,7 @@ in D1 nur zwei Sprachen geladen.
       [TC08], [Labels aus kompilierten Ressourcen lesen], [Bestanden], [Unit Test],
       [TC09], [Änderung von aussen bei ungespeichertem Label], [Bestanden],
        [Unit Test],
-      [TC10], [Laden mit beschädigten, fehlenden und gesperrten Dateien],
+      [TC10], [Laden mit beschädigten, fehlenden und blockierten Dateien],
        [Bestanden], [Unit Test],
       [TC11], [Simulierter Übersetzungsdienst], [Bestanden], [Unit Test],
       [TC12], [Sprache aus Ordner und Dateiname], [Bestanden], [Unit Test],
@@ -1289,7 +1352,7 @@ dem Stand des Code Freeze noch einmal in der experimentellen Instanz.
         [*ID*], [*Ziel*], [*Erreicht*], [*Bemerkung*],
       ),
       [Z1], [Feature Parity zum bestehenden Tool], [Ja],
-      [Alle Funktionen aus @ist_funktionen, TC04 mit denselben Treffern. Die
+      [Alle Funktionen des bestehenden Tools, TC04 mit denselben Treffern. Die
        Abweichungen stehen in @abweichungen_realisierung.],
       [Z2], [Übersetzungen im Code einsehbar], [Ja],
       [Tooltip und Inline-Anzeige mit allen konfigurierten Sprachen (TC26, TC27).],
@@ -1310,9 +1373,9 @@ dem Stand des Code Freeze noch einmal in der experimentellen Instanz.
   ) <zielerreichung>
 ]
 
-Alle Ziele aus @projektziele sind erreicht, auch die der Stufen 2 und 3. Damit ist
+Alle Ziele sind erreicht, auch die der Stufen 2 und 3. Damit ist
 das Erfolgskriterium aus @aufgabenstellung erfüllt. Die Funktionen des bestehenden
-Tools sind übernommen (Z1) und um die IDE-Funktionen erweitert (Z2 bis Z7). Ein
+Tools sind übernommen und um die IDE-Funktionen erweitert. Ein
 vorhandenes Label findet der Entwickler wie im Sollablauf aus @sollablauf_label in
 vier statt sieben Schritten, ohne Visual Studio zu verlassen.
 
@@ -1334,10 +1397,8 @@ nach dem Projekt entscheidet, sind alle Anforderungen erfüllt.
       [FA01 Label-Suche], [Ja], [TC02, TC04, TC12, TC16],
       [FA02 Label-Erstellung], [Ja], [TC03, TC07, TC18, TC34],
       [FA03 Label-Bearbeitung], [Ja], [TC01, TC06, TC07, TC17, TC30, TC34. Beim
-       Kopieren und Verschieben füllt de-CH auch de, siehe
-       @abweichungen_realisierung.],
-      [FA04 Verwendungssuche], [Ja], [TC05, TC29, TC37. Eine Eigenschaft öffnet das
-       Element ohne gewählte Node, siehe @abweichungen_realisierung.],
+       Kopieren und Verschieben füllt de-CH auch de.],
+      [FA04 Verwendungssuche], [Ja], [TC05, TC29, TC37. Eine Eigenschaft öffnet das Element ohne gewählte Node.],
       [FA05 Hover-Tooltip], [Ja], [TC02, TC26, TC37],
       [FA06 Inline-Anzeige], [Ja], [TC27],
       [FA07 Inline-Suche], [Ja], [TC28],
@@ -1345,8 +1406,7 @@ nach dem Projekt entscheidet, sind alle Anforderungen erfüllt.
       [FA09 Extraktion hardcodierter Texte], [Ja], [TC13, TC31, TC32],
       [FA10 Automatische Übersetzung], [Ja], [TC11, TC33],
       [FA11 Einstellungen], [Ja], [TC14, TC21, TC25],
-      [FA12 Erweiterte Suchmodi], [Ja], [TC04, TC16. Match word wertet den Begriff
-       als Text, nicht als Regex, siehe @abweichungen_realisierung.],
+      [FA12 Erweiterte Suchmodi], [Ja], [TC04, TC16. Match word wertet den Begriff als Text, nicht als Regex.],
       [FA13 Label ersetzen], [Ja], [TC05],
       [FA14 Label-ID einfügen], [Ja], [TC19],
       [FA15 Dateiüberwachung], [Ja], [TC09, TC24],
@@ -1354,14 +1414,15 @@ nach dem Projekt entscheidet, sind alle Anforderungen erfüllt.
       [FA17 Meldungsprotokoll], [Ja], [TC22],
       table.cell(colspan: 3)[*Nicht-funktionale Anforderungen*],
       [NFA01 Kompatibilität], [Teilweise], [UDE und
-       klassische VM mit Visual Studio 2026 (TC25, TC37). Unter Visual
+       klassische VM mit Visual Studio 2026 (TC14, TC25, TC37). Unter Visual
        Studio 2022 nur Installation, TC24, TC25 und TC37, siehe @tc_36.],
       [NFA02 Performance], [Ja], [Längste Suche 253 ms, das Laden blockiert die
-       Oberfläche nicht (TC35).],
+       Oberfläche nicht (TC15, TC35).],
       [NFA03 Erweiterbarkeit], [Ja], [Kernlogik ohne Visual Studio, zweiter
        Übersetzungsdienst ohne Änderung bestehender Klassen (TC38).],
       [NFA04 Stabilität], [Ja], [Error Boundary an jedem Einstiegspunkt, Visual
-       Studio lief in allen Durchgängen weiter (TC10, TC22, TC25).],
+       Studio lief in allen Durchgängen weiter (TC10, TC11, TC22, TC25, TC30,
+       TC33).],
       [NFA05 Wartbarkeit], [Ja], [Build ohne Warnungen, öffentliche Typen
        dokumentiert (TC39).],
       [NFA06 Sicherheit], [Ja], [API-Schlüssel nirgends im Klartext (TC23).],
@@ -1384,9 +1445,9 @@ Inline-Anzeige, KA04 Labels des geöffneten Elements, KA05 Übersetzungen im Des
 KA08 Duplicates beim Anlegen und KA09 Unbenutzte Labels. Sie kamen nach AP4.1 dazu,
 weil die Realisierung vor dem Plan lag.
 
-== Empfehlungen
+== Empfehlungen <empfehlungen>
 
-- Pilotphase mit einzelnen Entwicklern, wie in @einfuehrung vorgesehen. Das
+- Pilotphase mit einzelnen Entwicklern, wie im Konzept vorgesehen. Das
   bestehende Tool kann daneben weiterlaufen, TC24 zeigt, dass beide dieselben Dateien
   bearbeiten können. Vorher den Release-Build einmal auf der UDE mit Visual Studio 2026 prüfen, auf der Testumgebung lief er nur unter
   Visual Studio 2022.
@@ -1402,8 +1463,7 @@ weil die Realisierung vor dem Plan lag.
   umgebaut werden.
 - Die Verwendungssuche über alle Models dauert bis knapp eine Minute. Stört das im
   Alltag, ist die Cross-Reference-Datenbank aus E4 (Verwendungssuche) der nächste Schritt.
-- Die Label-Eigenschaften einer Node zeigt die Extension im Tool Window, weil das
-  Properties Window keinen Erweiterungspunkt hat, siehe @technisch_geklaert. Der
+- Die Label-Eigenschaften einer Node zeigt die Extension im Tool Window, weil das Properties Window keinen Erweiterungspunkt hat. Der
   Experte im Betrieb regte im Review an, nach dem Projekt nach einer schöneren
   Lösung zu suchen, siehe @protokoll_experte.
 - Im Review wirkte der Start von Visual Studio langsam, siehe @protokoll_experte.
@@ -1423,5 +1483,4 @@ weil die Realisierung vor dem Plan lag.
   werden, bevor jemand sie umsetzt. KA10,
   GitHub Copilot als Übersetzungsdienst, war für dieses Projekt zu aufwändig und
   bleibt zurückgestellt. Nach dem Projekt lässt sie sich noch einmal prüfen.
-- Nutzt BE-terna Visual Studio 2022 weiter, sollten die Systemtests dort noch laufen,
-  siehe @tc_36.
+- Nutzt BE-terna Visual Studio 2022 weiter, sollten die Systemtests dort noch laufen.

@@ -73,12 +73,17 @@ legt eine Metadaten-Konfiguration fest, von der immer eine aktiv ist @ms-ude-too
 Angezeigte Texte stehen bei Dynamics 365 nicht direkt im Code, sondern als Labels.
 Ein Label ist ein Platzhalter mit einer eindeutigen ID, den die Anwendung zur
 Laufzeit durch die Übersetzung in der Sprache des Benutzers ersetzt. Labels sind in
-Label-Dateien zusammengefasst. Eine Label-Datei wie `BDM1` ist eine logische Einheit,
-abgelegt wird sie als eine physische Datei pro Sprache @ms-field-help. Jede Zeile
+Label-Dateien zusammengefasst. Eine Label-Datei wie `BDM1` hat einen Namen, über den
+der Code ihre Labels anspricht, unabhängig von der Sprache. Auf der Festplatte besteht
+sie aus einer Textdatei je Sprache, etwa `BDM1.de.label.txt` und
+#box[`BDM1.en-US.label.txt`] @ms-field-help. Jede Zeile
 enthält ein Label mit ID und Text, ein Kommentar folgt in der Zeile darunter, wie
 @label_datei zeigt. Jedes Label gehört damit zu einer Label-Datei innerhalb eines
 Models, was sich an der Label-ID ablesen lässt. Bei `@BDM1:BDM110000003` steht `BDM1`
-für die Label-Datei und der Rest für das Label selbst @ms-field-help.
+für die Label-Datei und der Rest für das Label selbst @ms-field-help. Neben dieser
+neuen Form gibt es die alte Form ohne Doppelpunkt, etwa `@SYS12345`. Label-Datei und
+Label sind darin nicht getrennt. Im Code und in Eigenschaften kommt sie noch vor,
+siehe @befundprotokoll.
 
 #figure(
   kind: image,
@@ -418,7 +423,7 @@ Aus der öffentlichen Ablage ergeben sich zwei Auflagen. Der Quellcode des
 bestehenden BE-LabelEditors ist Eigentum von BE-terna und wird nicht veröffentlicht.
 Ebenso wenig veröffentlicht werden Quellcode und Metadaten der Standardanwendung von
 Dynamics 365, die mit jeder Installation der Developer Tools einsehbar sind, aber
-Microsoft gehören. Das Vorgehen ist in @konfigurationsmanagement beschrieben.
+Microsoft gehören.
 
 === Produktbezogene Rahmenbedingungen
 
@@ -519,8 +524,7 @@ steht ausserdem als R09 in der Risikoanalyse.
 == Grobe Anforderungen an das neue System
 
 Die meisten Anforderungen gehören zu einem Projektziel, die übrigen gelten für
-die ganze Extension. Verfeinert werden sie mit Akzeptanzkriterien und
-Abhängigkeiten in @detailanforderungen.
+die ganze Extension.
 
 #[
   #show figure: set align(left)
@@ -675,8 +679,7 @@ Lauf gegen echte Label-Dateien.
 Microsoft liefert mit den Developer Tools eine Metadata-API aus. Das ist eine
 Sammlung von Assemblies, über die sich die Elemente eines Models lesen und schreiben
 lassen, ohne die Dateien selbst zu kennen. Ein Disk-Provider richtet diesen Zugriff
-auf das Package-Verzeichnis, also den Ordner, in dem die lokale Installation ihre
-Models ablegt, siehe @verzeichnisstruktur.
+auf das Package-Verzeichnis, also den Ordner, in dem die lokale Installation ihre Models ablegt.
 
 #[
   #show figure: set align(left)
@@ -726,7 +729,7 @@ Models ablegt, siehe @verzeichnisstruktur.
 ]
 
 Die Angaben zu Target Framework, Geschwindigkeit und Parsen stammen aus der
-Machbarkeitsstudie, siehe @befundprotokoll.
+Machbarkeitsstudie. Ihre Folgen für E1 zeigt @befunde_tabelle.
 
 #heading(outlined: false, level: 4)[E2 Ablage der Label-Daten zur Laufzeit]
 
@@ -749,7 +752,7 @@ Machbarkeitsstudie, siehe @befundprotokoll.
        bestehende BE-LabelEditor.],
       [Zusätzliche Ablage in einer Datenbank oder einem eigenen Format, inkrementell
        nachgeführt.],
-      [Startzeit], [Keine], [Rund zwei Sekunden mit dem synthetischen Datensatz, siehe @ist_konsole], [Einmalig
+      [Startzeit], [Keine], [Rund zwei Sekunden mit dem synthetischen Datensatz], [Einmalig
        hoch, danach gering],
       [Suchgeschwindigkeit], [Gering], [Hoch], [Hoch],
       [Metadaten], [Nicht möglich], [Nur flüchtig], [Dauerhaft speicherbar],
@@ -823,7 +826,8 @@ Inline-Anzeige ist.
 ]
 
 Die Zeilen zu Tooltip, Einblendung, Reifegrad und Add-in-Modell stammen aus der
-Machbarkeitsstudie, siehe @befundprotokoll.
+Machbarkeitsstudie. Ihre Folgen für E3 stehen im Prototypenvergleich, siehe
+@prototypenvergleich, und in @befunde_tabelle.
 
 #figure(
   image("../diagrams/Extensionmodelle.png", width: 100%),
@@ -886,13 +890,11 @@ Machbarkeitsstudie mit fünf Prototypen. Deren Protokoll steht in @befundprotoko
 Der Zugriff auf die Label-Dateien ist auf beiden Wegen machbar. Der direkte Weg ist
 im bestehenden BE-LabelEditor seit Jahren im Einsatz. Labels lassen sich über die
 Assemblies von Microsoft auch aus eigenem .NET-Code auslesen @meyer-labels-net, und
-den Zugriff über einen Disk-Provider hat die Machbarkeitsstudie belegt, siehe
-@befundprotokoll.
+den Zugriff über einen Disk-Provider hat die Machbarkeitsstudie belegt.
 
 Die Developer Tools haben zudem ein eigenes Add-in-Modell. Ein Add-in ist eine
 Klassenbibliothek, die in ihren Installationsordner kopiert wird und Einträge im
-Menü Dynamics 365 und im Kontextmenü des Element-Designers erhält @ms-addins, siehe
-auch @befundprotokoll. Die Editor-Erweiterbarkeit von Visual Studio mit QuickInfo,
+Menü Dynamics 365 und im Kontextmenü des Element-Designers erhält @ms-addins. Die Editor-Erweiterbarkeit von Visual Studio mit QuickInfo,
 Taggern und CodeLens ist ebenfalls dokumentiert @ms-editor-extension-points
 @ms-editor-extensibility.
 
@@ -901,8 +903,7 @@ anderem als `"X++ Modern Label"`. Die Extension findet Label-IDs damit über die
 vorhandene Classification, statt X++ selbst parsen zu müssen. Für das Properties
 Window gibt es keinen Erweiterungspunkt. Über das Selection Tracking erfährt eine
 Extension aber, welches Element im Designer gewählt ist, einschliesslich seiner
-Label-Eigenschaften. Das genügt für Z6. Geschrieben wird direkt in die Dateien, das
-Schreiben über den Designer wird nicht weiter verfolgt, siehe @befundprotokoll.
+Label-Eigenschaften. Das genügt für Z6. Geschrieben wird direkt in die Dateien, das Schreiben über den Designer wird nicht weiter verfolgt.
 
 Die Verwendungssuche ist über die Textsuche gesichert, weil das bestehende Tool
 genau so arbeitet. Die Cross-Reference-Datenbank ist eine Verbesserung, kein
@@ -924,14 +925,12 @@ Ausserhalb des Prozesses fehlen die WPF-Editor-Typen. An ihre Stelle tritt eine
 deutlich kleinere Oberfläche, in der kein QuickInfo-Typ vorkommt. Ein Tooltip hängt
 dort nur an einer CodeLens-Zeile, nicht am Text selbst. Am Text bleiben Tags zum
 Einfärben, die Margin und CodeLens, keines davon zeigt beim Überfahren eines Tokens
-Text an. Tagger und CodeLens sind in dieser Fassung des SDK als Vorschau
-markiert. Die Einzelheiten stehen im @befundprotokoll.
+Text an. Tagger und CodeLens sind in dieser Fassung des SDK als Vorschau markiert.
 
 #heading(outlined: false, level: 4)[Befunde aus der Testumgebung] <befunde_testumgebung>
 
 In einer zweiten Runde wurden die Developer Tools von Dynamics 365 statisch
-ausgewertet und eine Testerweiterung auf der Testumgebung des Arbeitgebers
-ausgeführt, siehe @befundprotokoll.
+ausgewertet und eine Testerweiterung auf der Testumgebung des Arbeitgebers ausgeführt.
 
 #[
   #show figure: set align(left)
@@ -967,8 +966,7 @@ ausgeführt, siehe @befundprotokoll.
       [E3],
       [Eine klassische Erweiterung mit MEF-Anteilen lädt in Visual Studio 2026 und
        läuft neben den Developer Tools, ohne diese erkennbar zu stören.],
-      [Der MEF-Anteil der Extension ist auf der Testumgebung belegt, siehe
-       R06.],
+      [Der MEF-Anteil der Extension ist auf der Testumgebung belegt.],
 
       [E1],
       [Die Metadata-API lief auf einem privaten Gerät ohne Anwendungsserver,
@@ -1003,8 +1001,7 @@ Der Betrieb ausserhalb des Visual-Studio-Prozesses würde NFA04 am besten erfül
 denn ein Fehler bliebe auf die Extension beschränkt. Er schliesst aber den Zugriff
 auf VSSDK und MEF aus. Davon betroffen sind QuickInfo, freie Einblendungen im Code
 und die Anbindung an das Add-in-Modell. CodeLens bleibt erreichbar, allerdings über
-eine als Vorschau markierte Schnittstelle. Damit stehen Z2 und Z6 gegen NFA04. Der
-Entscheid dazu steht in @variantenentscheid.
+eine als Vorschau markierte Schnittstelle. Damit stehen Z2 und Z6 gegen NFA04.
 
 #heading(outlined: false, level: 4)[Zeitliche Machbarkeit]
 
@@ -1017,11 +1014,10 @@ acht Arbeitstage. Nach dem Grundgerüst am ersten Tag erhält Stufe 1 vier Tage,
 Stufe 2 zwei und Stufe 3 einen. Für Tests und Restarbeiten folgen drei weitere
 Tage.
 
-Entlastend wirkt der Befund zum Classifier, siehe @technisch_geklaert. Ohne eigenes
+Entlastend wirkt der Befund zum Classifier. Ohne eigenes
 Parsen von X++ fällt der vorher grösste Unsicherheitsposten von Z2 und Z3 weg.
 
-Die Ziele sind damit erreichbar, aber ohne Reserve. Die Reihenfolge aus
-@projektziele ist die Vorkehrung dagegen. Fällt Zeit aus, wird an den Zielen der
+Die Ziele sind damit erreichbar, aber ohne Reserve. Die Reihenfolge der Ziele ist die Vorkehrung dagegen. Fällt Zeit aus, wird an den Zielen der
 Stufe 3 gekürzt.
 
 === Variantenentscheid <variantenentscheid>
@@ -1045,14 +1041,14 @@ des Kriteriums. Die jeweils unterlegene Variante bleibt vorgemerkt.
         [*Kriterium*], [*Gewicht*], [*Grund für das Gewicht*],
       ),
       [Aufwand bis zum Code Freeze], [35 %],
-      [Der Plan hat keinen Puffer, siehe R01.],
+      [Der Plan hat keinen Puffer.],
       [Erprobtheit], [20 %],
       [Ein erprobtes Verfahren senkt das Risiko, dass sich ein Problem erst in der
        Realisierung zeigt.],
       [Erweiterbarkeit und Wartbarkeit], [20 %],
       [Z8 verlangt eine Architektur, die sich ohne Umbau erweitern lässt.],
       [Testbarkeit ohne Dynamics 365], [15 %],
-      [Entwickelt wird ohne Dynamics 365, siehe R04.],
+      [Entwickelt wird ohne Dynamics 365.],
       [Kriterium der jeweiligen Entscheidung], [10 %],
       [Ladezeit, Aktualität, Zukunftssicherheit oder Genauigkeit, je nachdem,
        worin sich die Varianten zusätzlich unterscheiden.],
@@ -1104,7 +1100,7 @@ Möglichkeit vorgemerkt.
 #block(breakable: false)[
 #heading(outlined: false, level: 4)[E2 Ablage der Label-Daten zur Laufzeit]
 
-Variante A scheidet an NFA02 aus, siehe @variante_ablage.
+Variante A scheidet an NFA02 aus.
 
 #[
   #show figure: set align(left)
@@ -1332,7 +1328,7 @@ ein und entscheidet erst nach Projektabschluss über die Einführung. Die Richtl
 aufgebaute Dokumentation von der Aufgabenstellung bis zur Reflexion @teko-richtlinien, was ein phasenweises
 Vorgehen ohnehin nahelegt.
 
-Innerhalb der Realisierung wird nach der Reihenfolge aus @projektziele umgesetzt.
+Innerhalb der Realisierung wird nach der Reihenfolge der Ziele umgesetzt.
 Zuerst entsteht die Feature Parity zum bestehenden Tool, danach folgen die
 Funktionen, die den Kontextwechsel beseitigen, zuletzt die Textextraktion und die
 Anbindung des Übersetzungsdienstes. Die Dokumentation läuft über alle Phasen
@@ -1410,8 +1406,7 @@ keine geschlossene Schreibphase notwendig ist.
 Nach dem Review der Initialisierung wurde der Terminplan am 24.09.2026
 überarbeitet. Das Konzept ist von fünf auf drei Tage verkürzt, weil der
 Architekturentscheid bereits in der Initialisierung gefallen ist. Die beiden Tage
-gehen an die Realisierung, die jetzt nach den Stufen aus @projektziele gegliedert
-ist.
+gehen an die Realisierung, die jetzt nach den Stufen der Ziele gegliedert ist.
 
 === Arbeitspakete (Soll/Ist)
 
@@ -1508,7 +1503,7 @@ bewertet. Der Risikowert ist ihr Produkt.
        Ranking, Referenzaktualisierung und Überwachung der Label-Dateien.
        Dafür stehen in der Realisierung vier Arbeitstage zur Verfügung.],
       [4], [3], [12],
-      [Die Funktionen aus @ist_funktionen werden im Konzept einzeln als
+      [Die Funktionen des bestehenden Tools werden im Konzept einzeln als
        Detailanforderung erfasst. Das Ranking entsteht zuerst in einer
        einfachen Form und wird nur bei verbleibender Zeit verfeinert.],
 
@@ -1671,9 +1666,8 @@ Was dort offen geblieben ist, steht als R06 bis R08 in der Tabelle.
 
 === Qualitätsmanagement
 
-Die Qualitätsziele stehen als NFA01 bis NFA06 in @grobe_anforderungen und werden im
-Testkonzept mit Testfällen hinterlegt. Ob ein Ziel erreicht ist, entscheidet das
-Messkriterium aus @projektziele und nicht der Eindruck beim Ausprobieren.
+Die Qualitätsziele sind NFA01 bis NFA06 und werden im
+Testkonzept mit Testfällen hinterlegt. Ob ein Ziel erreicht ist, entscheidet das Messkriterium des Ziels und nicht der Eindruck beim Ausprobieren.
 
 #[
   #show figure: set align(left)
@@ -1706,8 +1700,7 @@ Messkriterium aus @projektziele und nicht der Eindruck beim Ausprobieren.
       [Einheitliche Programmierrichtlinien, Kompilieren ohne Warnungen.],
       [laufend in AP3],
       [Quellcode],
-      [Prüfung der neu hinzugekommenen Dateien gegen die Auflagen aus
-       @konfigurationsmanagement.],
+      [Prüfung der neu hinzugekommenen Dateien gegen die Auflagen des Konfigurationsmanagements.],
       [vor jedem Commit],
       [Zielerreichung],
       [Abgleich der umgesetzten Funktionen gegen die Messkriterien aller acht
@@ -1795,8 +1788,7 @@ akzeptiert, siehe @protokoll_1.
       [Übersetzung im Code, Sprache und Position offen.],
       [Z2 verlangt alle konfigurierten Sprachen, nicht nur Englisch. Die Position
        legt das Konzept fest. Oberhalb der Zeile ginge es mit derselben Technik,
-       mit der die Developer Tools ihre Referenzanzeige zeichnen, erprobt ist das
-       aber nicht, siehe R08.],
+       mit der die Developer Tools ihre Referenzanzeige zeichnen, erprobt ist das aber nicht.],
 
       [FA12 bis FA17],
       [Nicht enthalten.],

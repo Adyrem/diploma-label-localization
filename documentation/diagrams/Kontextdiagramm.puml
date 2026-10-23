@@ -1,27 +1,52 @@
 @startuml
 ' Kontext der Extension: Benutzer, Host und Nachbarsysteme.
+' Visual Studio als Rahmen, Ablagen und Dienst darunter, der Build
+' ausserhalb der Systemgrenze gestrichelt.
 ' Rendern: plantuml -tpng -charset UTF-8 Kontextdiagramm.puml
+' Höhere Auflösung, damit das Bild im PDF scharf bleibt.
+skinparam dpi 240
 
 skinparam defaultFontSize 13
 skinparam shadowing false
+skinparam ArrowColor #333333
+skinparam rectangle {
+  BackgroundColor #F5F5F5
+  BorderColor #555555
+}
+skinparam database {
+  BackgroundColor #F5F5F5
+  BorderColor #555555
+}
+skinparam cloud {
+  BackgroundColor #F5F5F5
+  BorderColor #555555
+}
 
 actor "Entwickler" as DEV
-rectangle "**Extension**" as EXT #E8E8E8
-rectangle "Visual Studio\n(Editor, Properties Window,\nOutput Window)" as VS
-rectangle "Developer Tools von Dynamics 365\n(X++-Editor, Designer)" as D365
-rectangle "Build und Best-Practice-Check\nder Developer Tools" as BUILD
-database "Package-Verzeichnis" as PKG
+rectangle "Build und Best-Practice-Check\nder Developer Tools" as BUILD #FFFFFF;line:888888;line.dashed;text:666666
+
+rectangle "Visual Studio" as VSF #FFFFFF {
+  rectangle "Developer Tools\n(X++-Editor, Designer)" as DT
+  rectangle "**Extension**" as EXT #D9D9D9
+  rectangle "Editor, Properties Window,\nOutput Window" as VS
+}
+
 database "Metadaten-Konfiguration\n(XPPConfig)" as CFG
 cloud "Übersetzungsdienst" as SVC
+database "Package-Verzeichnis\n(Label-Dateien, Descriptor,\nkompilierte Labels,\nXML der Elemente)" as PKG
+
+' Reihenfolge innerhalb der Zeilen festlegen
+DEV -[hidden]right- BUILD
+CFG -[hidden]right- SVC
+SVC -[hidden]right- PKG
 
 DEV --> EXT : sucht, legt an,\nbearbeitet, extrahiert
-EXT --> VS : fügt Text ein und ersetzt ihn,\nschreibt Meldungen
-D365 --> EXT : Classification der Label-Token,\ngewähltes Element
-EXT --> PKG : Label-Dateien, Descriptor,\nkompilierte Labels, XML der Elemente
+DT -right-> EXT : Classification,\ngewähltes Element
+EXT -right-> VS : fügt Text ein,\nschreibt Meldungen
+DT --> CFG : pflegt
 EXT --> CFG : liest Ordner der\nPackage-Verzeichnisse
-D365 --> CFG : pflegt
-EXT --> SVC : Text und Zielsprachen
-SVC --> EXT : Übersetzungsvorschläge
-BUILD --> PKG : liest Label-Dateien
-BUILD --> DEV : meldet hardcodierte Texte
+EXT --> SVC : Text und Zielsprachen,\nzurück Vorschläge
+EXT --> PKG : liest und schreibt
+BUILD ..> PKG #888888 : liest Label-Dateien
+BUILD .left.> DEV #888888 : meldet hardcodierte Texte
 @enduml

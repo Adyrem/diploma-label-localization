@@ -13,7 +13,7 @@ class Model {
   schreibgeschützt
 }
 class "Label-Datei" as LabelFile {
-  Kürzel
+  Name
 }
 class Label {
   ID
@@ -29,9 +29,8 @@ LabelFile "1" *-- "0..*" Label
 Label "1" *-- "1..*" Uebersetzung
 
 note left of LabelFile
-  logische Einheit,
-  abgelegt als eine Datei
-  pro Sprache
+  ein Name für alle Sprachen,
+  eine Textdatei je Sprache
 end note
 
 note right of Label

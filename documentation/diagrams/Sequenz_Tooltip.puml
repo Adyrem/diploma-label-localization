@@ -28,7 +28,7 @@ QI -> REC : Label an der Mausposition
 activate REC
 REC -> CL : GetClassificationSpans(Zeile)
 CL --> REC : Spans mit Classification
-REC -> REC : Span mit "X++ Modern Label"\noder "X++ Legacy Label" wählen,\nAnführungszeichen entfernen,\nLabelId.TryParse
+REC -> REC : Span mit "X++ Modern Label"\noder "X++ Legacy Label" wählen,\nLabelId.TryParse
 REC --> QI : LabelId oder keine
 deactivate REC
 alt Label-ID erkannt und Labels geladen
