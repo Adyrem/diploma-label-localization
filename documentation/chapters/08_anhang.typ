@@ -52,7 +52,7 @@ Der Soll-Aufwand beträgt pro Arbeitstag acht Stunden.
       table.cell(colspan: 7)[*AP5 Dokumentation finalisieren*],
       [5.1], [29.10.], [Kapitel Realisierung und Testprotokoll], [8], [12], [Testprotokoll mit D1 bis D4, Programmierumgebung, Softwareaufbau, GUI-Implementierung, Datenzugriff, Abweichungen, Deployment, Testergebnisse aller Testfälle, Zielerreichung und Empfehlungen. Kompetenzprofil nachgeführt. Zwischen dem 15.10. und dem 20.10. vorgezogen], [Erledigt],
       [5.2], [30.10.], [Management Summary, Reflexion, Schlusswort], [8], [], [], [],
-      [5.3], [31.10.], [Gesamtreview, Verzeichnisse, Korrektorat, PDF], [8], [10], [Gesamtreview der Dokumentation begonnen, am 22.10. Review der Projektinitialisierung, am 23.10. Review des Konzepts. Auf den 22.10. vorgezogen], [In Arbeit],
+      [5.3], [31.10.], [Gesamtreview, Verzeichnisse, Korrektorat, PDF], [8], [13], [Gesamtreview der Dokumentation begonnen, am 22.10. Review der Projektinitialisierung, am 23.10. Review des Konzepts und der Realisierung. Auf den 22.10. vorgezogen], [In Arbeit],
       table.cell(colspan: 7)[*AP6 Präsentation vorbereiten*],
       [6.1], [05.11.], [Storyline und Foliengerüst], [8], [], [], [],
       [6.2], [06.11.], [Folien ausarbeiten], [8], [], [], [],

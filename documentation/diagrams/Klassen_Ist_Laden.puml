@@ -1,0 +1,96 @@
+@startuml
+' Klassenmodell der Kernlogik im Ist-Zustand, Teil 1: Laden und Speichern.
+' Weiss wie im Konzept, gelb geändert, grün neu.
+' Rendern: plantuml -tpng -charset UTF-8 Klassen_Ist_Laden.puml
+' Höhere Auflösung, damit das Bild im PDF scharf bleibt.
+skinparam dpi 240
+
+skinparam defaultFontSize 13
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam class {
+  BackgroundColor White
+  BorderColor Black
+}
+skinparam package {
+  BackgroundColor #F4F4F4
+}
+hide empty members
+skinparam nodesep 18
+skinparam ranksep 30
+
+package "Laden und Speichern" {
+  class LabelStore #FFF2CC {
+    IsLoaded : bool
+    IsLoading : bool
+    Changed : event
+    ExternalChange : event
+    LoadAsync(settings, token) : Task
+    Find(id) : Label
+    FindModelFor(filePath) : ModelInfo
+  }
+  class ModelDiscovery #FFF2CC {
+    ReadConfiguration(name)
+    FindModels(directories, messages, token)
+    {static} FindModelFor(filePath, models)
+    {static} FindClassicDirectory()
+  }
+  interface ILabelSource #FFF2CC {
+    Load(request, token) : LabelSourceResult
+  }
+  class LabelFileSource
+  class CompiledLabelSource
+  class ResourceAssemblyReader #DDEFD5
+  class LabelLoadRequest #DDEFD5
+  class LabelSourceResult #DDEFD5
+  class LabelDocument #DDEFD5
+  class LabelFileFormat #FFF2CC {
+    {static} Read(stream) : LabelFileContent
+    {static} Write(stream, entries)
+    {static} WriteFile(path, entries)
+  }
+  class LabelFileContent #DDEFD5
+  class LabelEntry #DDEFD5
+  class LabelFileIssue #DDEFD5
+  class LabelFileWatcher {
+    ExternalChange : event
+    Start(files)
+    Suspend() : IDisposable
+  }
+  class LabelFilesChangedEventArgs #DDEFD5
+  class ModelAccessRule #DDEFD5
+  class MetadataConfiguration #DDEFD5
+  class PackageDirectory #DDEFD5
+}
+
+LabelStore --> ModelDiscovery
+LabelStore --> "1..*" ILabelSource
+LabelStore --> LabelFileWatcher
+ILabelSource <|.. LabelFileSource
+ILabelSource <|.. CompiledLabelSource
+ILabelSource ..> LabelLoadRequest
+ILabelSource ..> LabelSourceResult
+LabelSourceResult *-- "0..*" LabelDocument
+LabelDocument *-- "0..*" LabelEntry
+LabelFileSource --> LabelFileFormat
+CompiledLabelSource --> ResourceAssemblyReader
+LabelFileFormat ..> LabelFileContent
+LabelFileContent *-- "0..*" LabelEntry
+LabelFileContent *-- "0..*" LabelFileIssue
+LabelFileWatcher ..> LabelFilesChangedEventArgs
+ModelDiscovery ..> MetadataConfiguration
+MetadataConfiguration ..> PackageDirectory
+ModelDiscovery ..> ModelAccessRule
+
+' Anordnung
+LabelLoadRequest -[hidden]down- LabelSourceResult
+LabelFileWatcher -[hidden]down- LabelFilesChangedEventArgs
+MetadataConfiguration -[hidden]down- PackageDirectory
+
+legend right
+  |<#FFFFFF> wie im Konzept |
+  |<#FFF2CC> geändert |
+  |<#DDEFD5> neu |
+endlegend
+@enduml

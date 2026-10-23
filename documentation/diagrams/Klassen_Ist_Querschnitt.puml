@@ -1,0 +1,74 @@
+@startuml
+' Klassenmodell der Kernlogik im Ist-Zustand, Teil 4: Übersetzung, Elemente und Querschnitt.
+' Weiss wie im Konzept, gelb geändert, grün neu. 
+' Rendern: plantuml -tpng -charset UTF-8 Klassen_Ist_Querschnitt.puml
+' Höhere Auflösung, damit das Bild im PDF scharf bleibt.
+skinparam dpi 240
+
+skinparam defaultFontSize 13
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam class {
+  BackgroundColor White
+  BorderColor Black
+}
+skinparam package {
+  BackgroundColor #F4F4F4
+}
+hide empty members
+skinparam nodesep 18
+skinparam ranksep 30
+
+package "Übersetzung" {
+  interface ITranslationService #FFF2CC {
+    Name : string
+    IsConfigured : bool
+    TranslateAsync(text, source, targets, token)
+  }
+  class DeepLTranslationService
+  class TranslationResult #DDEFD5
+  class TranslationServiceDiscovery #DDEFD5
+}
+
+package "Elemente" {
+  class ElementXmlLocator #DDEFD5
+  class ElementPropertyEditor #DDEFD5
+}
+
+package "Querschnitt" {
+  class LabelSettings #FFF2CC {
+    MetadataConfiguration : string
+    PackageDirectories : IList<string>
+    LoadLanguages : IList<string>
+    CreateLanguages : IList<string>
+    SourceLanguage : string
+    TranslationService : string
+    ProtectedApiKey : string
+    InlineDisplay : bool
+    InlineLanguages : IList<string>
+    SideBySide : bool
+  }
+  class LabelSettingsFile #DDEFD5
+  interface IMessageSink {
+    Report(severity, message)
+  }
+  class ErrorBoundary #DDEFD5
+}
+
+ITranslationService <|.. DeepLTranslationService
+ITranslationService ..> TranslationResult
+TranslationServiceDiscovery ..> ITranslationService
+
+LabelSettingsFile ..> LabelSettings
+ErrorBoundary --> IMessageSink
+
+' Anordnung: Elemente unter der Übersetzung
+DeepLTranslationService -[hidden]down- ElementXmlLocator
+
+legend right
+  |<#FFFFFF> wie im Konzept |
+  |<#FFF2CC> geändert |
+  |<#DDEFD5> neu |
+endlegend
+@enduml

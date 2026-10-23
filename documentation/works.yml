@@ -356,3 +356,13 @@ ms-element-usage:
   url:
     value: https://learn.microsoft.com/en-us/dynamics365/fin-ops-core/dev-itpro/dev-tools/element-usage
     date: 2026-10-22
+
+ms-character-encoding:
+  type: Web
+  title: Introduction to character encoding in .NET
+  author: Microsoft
+  publisher: Microsoft Learn
+  date: 2024-10-22
+  url:
+    value: https://learn.microsoft.com/en-us/dotnet/standard/base-types/character-encoding-introduction
+    date: 2026-10-23

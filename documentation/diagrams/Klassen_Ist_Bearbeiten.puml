@@ -1,0 +1,108 @@
+@startuml
+' Klassenmodell der Kernlogik im Ist-Zustand, Teil 3: Suche und Bearbeiten.
+' Weiss wie im Konzept, gelb geändert, grün neu. Klassen aus Teil 1 ohne Members im weissen Paket.
+' Rendern: plantuml -tpng -charset UTF-8 Klassen_Ist_Bearbeiten.puml
+' Höhere Auflösung, damit das Bild im PDF scharf bleibt.
+skinparam dpi 240
+
+skinparam defaultFontSize 13
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam class {
+  BackgroundColor White
+  BorderColor Black
+}
+skinparam package {
+  BackgroundColor #F4F4F4
+}
+hide empty members
+skinparam nodesep 18
+skinparam ranksep 30
+
+package "Suche" {
+  class LabelSearch {
+    Search(query) : IReadOnlyList<SearchHit>
+  }
+  class SearchQuery {
+    Term : string
+    Mode : SearchMode
+    CaseSensitive : bool
+  }
+  enum SearchMode {
+    ExactMatch
+    Substring
+    AnythingLike
+    MatchWord
+    Id
+  }
+  class SearchHit {
+    Label : Label
+    Score : int
+  }
+  class CharFolding #DDEFD5
+}
+
+package "Bearbeiten" {
+  class LabelChanges #DDEFD5 {
+    Create(file, texts) : Label
+    Edit(label, language, text, comment)
+    Delete(label)
+    Restore(label)
+    Save() : int
+  }
+  class LabelOperations #FFF2CC {
+    Copy(label, target, references) : Label
+    Move(label, target, references) : Label
+    Replace(oldId, newId, files) : int
+    FindReferences(id)
+  }
+  class LabelKeyGenerator <<Konzept: LabelIdGenerator>> #FFF2CC {
+    {static} NewKey() : string
+  }
+  class LabelReferences <<Konzept: UsageSearch>> #FFF2CC {
+    {static} Find(models, id)
+    {static} Replace(files, oldId, newId)
+  }
+  class LabelUsageSearch <<Konzept: UsageSearch>> #FFF2CC {
+    {static} Run(own, others, id, found)
+  }
+  class LabelUsage #FFF2CC {
+    Model : ModelInfo
+    Path : string
+    Line : int
+    Column : int
+    CodeOccurrence : int
+  }
+  class UnusedLabels #DDEFD5
+}
+
+package "Laden und Speichern" #FFFFFF {
+  class LabelStore #FFF2CC
+  class LabelFileFormat #FFF2CC
+}
+
+LabelSearch --> LabelStore
+LabelSearch ..> SearchQuery
+LabelSearch ..> SearchHit
+LabelSearch --> CharFolding
+SearchQuery --> SearchMode
+
+LabelChanges --> LabelStore
+LabelChanges --> LabelKeyGenerator
+LabelChanges --> LabelFileFormat
+LabelOperations --> LabelChanges
+LabelOperations --> LabelReferences
+LabelUsageSearch --> LabelReferences
+UnusedLabels --> LabelReferences
+LabelReferences ..> LabelUsage
+
+' Anordnung: Bearbeiten unter der Suche
+SearchMode -[hidden]down- LabelOperations
+
+legend right
+  |<#FFFFFF> wie im Konzept |
+  |<#FFF2CC> geändert |
+  |<#DDEFD5> neu |
+endlegend
+@enduml

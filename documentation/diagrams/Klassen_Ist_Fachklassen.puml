@@ -1,0 +1,85 @@
+@startuml
+' Klassenmodell der Kernlogik im Ist-Zustand, Teil 2: Fachklassen.
+' Weiss wie im Konzept, gelb geändert, grün neu.
+' Rendern: plantuml -tpng -charset UTF-8 Klassen_Ist_Fachklassen.puml
+' Höhere Auflösung, damit das Bild im PDF scharf bleibt.
+skinparam dpi 240
+
+skinparam defaultFontSize 13
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam class {
+  BackgroundColor White
+  BorderColor Black
+}
+skinparam package {
+  BackgroundColor #F4F4F4
+}
+hide empty members
+skinparam nodesep 18
+skinparam ranksep 30
+
+package "Laden und Speichern" #FFFFFF {
+  class LabelStore #FFF2CC
+  class ModelDiscovery #FFF2CC
+}
+
+package "Fachklassen" {
+  class ModelInfo #FFF2CC {
+    Name : string
+    Package : string
+    Layer : ModelLayer
+    IsLocked : bool
+    IsReadOnly : bool
+  }
+  enum ModelLayer #DDEFD5
+  class LabelFile #FFF2CC {
+    Name : string
+    IdPrefix : string
+    IsCompiled : bool
+    IsReadOnly : bool
+    GetPath(language) : string
+  }
+  class Label #FFF2CC {
+    Id : LabelId
+    LabelFile : LabelFile
+    IsModified : bool
+    IsDeleted : bool
+    GetText(language) : string
+  }
+  class Translation #FFF2CC {
+    Language : string
+    Text : string
+    Comment : string
+    LabelFile : LabelFile
+    IsReadOnly : bool
+  }
+  class LabelId <<struct>> #FFF2CC {
+    FullId : string
+    File : string
+    Key : string
+    IsLegacy : bool
+    IsStrict : bool
+    {static} TryParse(text, out id) : bool
+    {static} Parse(text) : LabelId
+    {static} TryCreate(prefix, key, out id) : bool
+    {static} FindAll(text)
+  }
+}
+
+ModelDiscovery ..> ModelInfo
+ModelInfo --> ModelLayer
+LabelStore o-- "0..*" LabelFile
+ModelInfo "1" *-- "0..*" LabelFile
+LabelFile "1" *-- "0..*" Label
+Label "1" *-- "1..*" Translation
+Translation --> "1" LabelFile
+Label --> "1" LabelId
+
+legend right
+  |<#FFFFFF> wie im Konzept |
+  |<#FFF2CC> geändert |
+  |<#DDEFD5> neu |
+endlegend
+@enduml

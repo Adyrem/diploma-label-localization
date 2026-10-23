@@ -24,8 +24,7 @@ Weil der Agent direkt in das öffentliche Repository schrieb, prüfte der Autor
 ausserdem jeden Commit auf Daten des Arbeitgebers und Secrets.
 
 Auf den Systemen des Arbeitgebers dürfen die KI-Tools nicht laufen. Zwischen den Durchgängen prüfte der Agent deshalb mit
-Unit Tests und in der experimentellen Instanz, in der der Debug-Build Tooltip und
-Inline-Anzeige an `.xpp`-Textdateien hängt. Vor jedem Durchgang schrieb er eine
+Unit Tests und in der experimentellen Instanz. Vor jedem Durchgang schrieb er eine
 Anleitung mit Skripten, die zusammen mit dem VSIX-Paket auf die Testumgebung kamen.
 Der Autor prüfte sie unter anderem darauf, dass nichts aus dem Internet geladen wird
 und sich schreibende Schritte rückgängig machen lassen. Den Durchgang führte er
@@ -82,7 +81,7 @@ Die meisten Richtlinien prüft der Build selbst.
   Testprojekt.
 - Nullable Reference Types sind eingeschaltet, der Build ist deterministisch.
 - Die Kernlogik referenziert Visual Studio nicht. Alles, was Visual Studio braucht,
-  liegt in der Extension (Z8 Erweiterbare Architektur, NFA03 Erweiterbarkeit).
+  liegt in der Extension.
 - Jeder Einstiegspunkt läuft durch die Error Boundary, keine Exception erreicht Visual Studio.
 - Fehler beim Parsen von Eingaben sind der Normalfall und kommen als Rückgabewert
   zurück, nach dem Try-Parse Pattern @ms-try-parse. Exceptions bleiben echten
@@ -120,9 +119,11 @@ Die Solution hat die drei Projekte aus dem Konzept.
   ) <projekte>
 ]
 
-Das Klassenmodell aus dem Konzept hat gehalten. Seine
-Klassen gibt es alle, in der Realisierung kamen Klassen dazu und einige Signaturen
-änderten sich.
+Das Klassenmodell aus dem Konzept hat im Kern gehalten. @klassen_ist_laden bis
+@klassen_ist_querschnitt zeigen es im Ist-Zustand, mit derselben Aufteilung wie im
+Konzept. Gelb sind Klassen, die sich gegenüber dem Konzept geändert haben, grün
+neue. Nicht gezeigt sind kleine Hilfsklassen ohne eigene Fachlogik, etwa für lange
+Pfade, die Kodierung von Textdateien und den Text von Tooltip und Inline-Anzeige.
 
 - `ILabelSource.Load` liefert alle Label-Dateien eines Package-Verzeichnisses, auch
   solche in Sprachen, die nicht geladen sind. Ohne sie wüsste die Extension nicht, in welchen Sprachen ein neues Label angelegt werden kann.
@@ -132,8 +133,41 @@ Klassen gibt es alle, in der Realisierung kamen Klassen dazu und einige Signatur
   Testumgebung eine kompilierte `_Extension`-Datei tut. Ob eine Übersetzung
   schreibgeschützt ist, hängt deshalb an ihrer Datei.
 - `FindModelFor` ist statisch, `LabelStore` ruft es auf.
+- Anlegen, Ändern, Löschen und Speichern liegen in der neuen Klasse
+  `LabelChanges`. `LabelOperations` kopiert, verschiebt und ersetzt samt
+  Referenzen und greift dafür auf `LabelChanges` zurück.
+- `LabelKeyGenerator` heisst im Konzept `LabelIdGenerator`. Er erzeugt nur den
+  Schlüssel, die Label-Datei setzt `LabelChanges` davor.
+- Die Verwendungssuche des Konzepts ist auf zwei Klassen verteilt. `LabelReferences`
+  findet und ersetzt Referenzen, `LabelUsageSearch` sucht zuerst in den eigenen
+  Models und meldet die Fundstellen laufend.
 - Neu sind Klassen für den Inhalt einer Label-Datei, das Lesen kompilierter
-  Ressourcen, den Descriptor der Models und die Metadaten-Konfiguration.
+  Ressourcen, den Descriptor der Models, die Metadaten-Konfiguration, die
+  XML-Dateien der Elemente, das Finden der Übersetzungsdienste, die Datei der
+  Einstellungen und die Error Boundary.
+
+#figure(
+  image("../diagrams/Klassen_Ist_Laden.png", width: 100%),
+  caption: [Klassen der Kernlogik im Ist-Zustand, Laden und Speichern (eigene
+            Darstellung)]
+) <klassen_ist_laden>
+
+#figure(
+  image("../diagrams/Klassen_Ist_Fachklassen.png", width: 34%),
+  caption: [Klassen der Kernlogik im Ist-Zustand, Fachklassen (eigene Darstellung)]
+) <klassen_ist_fachklassen>
+
+#figure(
+  image("../diagrams/Klassen_Ist_Bearbeiten.png", width: 83%),
+  caption: [Klassen der Kernlogik im Ist-Zustand, Suche und Bearbeiten (eigene
+            Darstellung)]
+) <klassen_ist_bearbeiten>
+
+#figure(
+  image("../diagrams/Klassen_Ist_Querschnitt.png", width: 77%),
+  caption: [Klassen der Kernlogik im Ist-Zustand, Übersetzung, Elemente und
+            Querschnitt (eigene Darstellung)]
+) <klassen_ist_querschnitt>
 
 === Kernlogik
 
@@ -237,24 +271,13 @@ Beachtung der Gross- und Kleinschreibung.
   ) <ranking_beispiel>
 ]
 
-Ein Label erhält den höchsten Wert über alle Sprachen. Die Trefferliste zeigt die
-1000 Labels mit dem höchsten Wert, absteigend sortiert und bei Gleichstand nach ID,
-die Statuszeile nennt die Gesamtzahl. Ein Klick auf einen Spaltenkopf sortiert diese
-Treffer alphabetisch nach der Spalte, ein zweiter absteigend und ein dritter wieder
-nach dem Wert. Gesucht wird 250 ms nach dem letzten Tastendruck oder sofort mit
-Enter.
-
-TC04 vergleicht die Extension mit Ergebnissen, die ein Skript über UI Automation
-aus dem bestehenden Tool gelesen hat. Von 304 Suchen mit 38 Begriffen in allen acht
-Modi liefern 303 dieselben Treffer in derselben Reihenfolge. Die eine Suche fällt
-weg, weil das bestehende Tool bei Match word den Begriff als Regex auswertet, siehe
-@abweichungen_realisierung.
+Ein Label erhält den höchsten Wert über alle Sprachen. Die Suche liefert die 1000
+Labels mit dem höchsten Wert, absteigend sortiert und bei Gleichstand nach ID.
 
 === Performance <performance>
 
 D1 lieferte die ersten Messwerte mit der echten Datenmenge. Anything like that,
-ignore case brauchte über 392'858 Labels 623 bis 656 ms und verfehlte die 500 ms
-aus NFA02 Performance. Der Speicher von Visual Studio stieg beim Laden um rund 1 GB.
+ignore case brauchte über 392'858 Labels 623 bis 656 ms und verfehlte die 500 ms aus NFA02. Der Speicher von Visual Studio stieg beim Laden um rund 1 GB.
 Beides wurde in AP3.4 optimiert, bevor das Tool Window auf dem Label Store aufbaute.
 
 Damit sich die Wirkung ohne Testumgebung prüfen liess, misst ein Unit Test Laden und
@@ -269,8 +292,12 @@ Beim Laden sparen drei Änderungen Speicher und Zeit.
 - Eine Label-ID ist ein einziger String mit der Position des Doppelpunkts. Label-Datei
   und Schlüssel schneidet die Extension erst bei Bedarf heraus, und die Prüfung der ID
   kommt ohne Regex aus.
-- Gleiche Texte und Kommentare der Sprachen eines Labels teilen sich eine Instanz.
-  Das trifft oft zu, etwa wenn de-CH denselben Text hat wie de.
+- Jede Zeile einer Label-Datei ergibt beim Lesen einen eigenen String im Speicher,
+  auch wenn derselbe Text schon in einer anderen Sprache vorkommt. Hat ein Label in
+  de und de-CH denselben Text, lagen so zwei gleiche Strings im Speicher. Beim
+  Zusammenführen prüft der Label Store deshalb, ob das Label denselben Text oder
+  Kommentar schon in einer anderen Sprache hat. Dann verweist er auf diesen String,
+  statt einen zweiten zu behalten.
 
 Bei der Suche wirken vier Änderungen.
 
@@ -278,11 +305,14 @@ Bei der Suche wirken vier Änderungen.
   es in Bereiche für die Prozessoren auf und fasst jeden Treffer mit Wert und
   Position zu einer Zahl zusammen. Diese Zahlen zu sortieren ergibt die Reihenfolge
   nach Wert und ID, ohne Strings zu vergleichen.
-- Der Vergleich ohne Gross- und Kleinschreibung läuft über eine eigene Tabelle aller
-  65'536 Zeichen. `IndexOf` mit `OrdinalIgnoreCase` war unter .NET Framework der
-  langsamste Teil der Suche. Unit Tests mit Umlauten, ß, Kelvin-Zeichen, türkischem
-  i, Griechisch und Kyrillisch zeigen, dass die Tabelle dasselbe findet wie das
-  Framework.
+- Der Vergleich ohne Gross- und Kleinschreibung läuft über eine Lookup-Tabelle.
+  `IndexOf` mit `OrdinalIgnoreCase` war unter .NET Framework der langsamste Teil der
+  Suche. Die Tabelle enthält für jeden der 65'536 möglichen `char`-Werte von UTF-16
+  @ms-character-encoding die Grossschreibung nach der Regel von `OrdinalIgnoreCase`.
+  Die Suche springt zu den Stellen, an denen der erste Buchstabe des Begriffs steht,
+  und vergleicht nur dort weiter, je Zeichen mit einem Zugriff auf die Tabelle. Unit
+  Tests zeigen, dass sie dasselbe findet wie das Framework, auch bei Sonderfällen wie
+  ß, dem türkischen i oder dem Kelvin-Zeichen, das wie ein K aussieht.
 - Match word prüft vor der Regex, ob der Begriff überhaupt vorkommt. Die meisten
   Felder scheiden damit schon aus.
 - Haben mehrere Sprachen eines Labels denselben Text, prüft die Suche ihn nur einmal.
@@ -382,8 +412,7 @@ Dafür liegt im selben VSIX ein AsyncPackage aus dem Visual Studio SDK.
 
 Label-IDs im Editor erkennt die Extension über die Classifications der Developer
 Tools, `"X++ Modern Label"` und `"X++ Legacy Label"`. Fehlen sie, erkennt eine Regex
-die IDs im Text, wie beim Risiko R07 (Unbelegte Annahmen erzwingen Nacharbeit)
-vorgesehen. Auf dem privaten Gerät gibt es keinen
+die IDs im Text, wie im Konzept als Fallback vorgesehen. Auf dem privaten Gerät gibt es keinen
 X++-Editor. Der Debug-Build hängt Tooltip und Inline-Anzeige deshalb zusätzlich an
 `.xpp`-Dateien, die als Text offen sind.
 
@@ -406,9 +435,12 @@ Eintrag und über den Methoden die Referenzanzeige der Developer Tools.
 @gui_toolwindow_real zeigt das Tool Window übereinander aufgebaut wie im Wireframe
 @gui_toolwindow. Labels schreibgeschützter Models tragen ein Schloss, fehlende
 Übersetzungen stehen kursiv als missing. de-CH ist gesperrt, weil die Label-Datei
-diese Sprache nicht hat. Ein Klick auf einen Spaltenkopf sortiert die Trefferliste.
+diese Sprache nicht hat. Gesucht wird 250 ms nach dem letzten Tastendruck oder sofort
+mit Enter. Die Trefferliste zeigt höchstens 1000 Treffer, die Statuszeile nennt die
+Gesamtzahl. Ein Klick auf einen Spaltenkopf sortiert die Treffer alphabetisch nach
+der Spalte, ein zweiter absteigend und ein dritter wieder nach dem Wert.
 Gegenüber dem Wireframe hat die Toolbar zwei Buttons und eine Checkbox mehr,
-Element labels für die Labels des offenen Elements (Kann-Anforderung KA04), Unused labels für
+Element labels für die Labels des offenen Elements (KA04), Unused labels für
 unbenutzte Labels (KA09) und Side by side.
 
 #figure(
@@ -504,10 +536,14 @@ info("@BDM1:L3F2A9C15B8047DE1");
             Darstellung)]
 ) <gui_optionen>
 
-Die Optionsseite in @gui_optionen weicht vom Wireframe @gui_einstellungen ab. Eine
-Seite im Dialog Options von Visual Studio bringt ein Property Grid mit, das die
-Einstellungen nach Gruppen und darin alphabetisch ordnet. Die Einstellungen sind
-dieselben, dazu kommen die beiden Optionen der Inline-Anzeige. Mehrere
+Die Optionsseite in @gui_optionen weicht vom Wireframe @gui_einstellungen ab. Statt
+die Seite aus dem Wireframe als eigene Oberfläche nachzubauen, hängt sich die
+Extension mit einer Standardseite in den Dialog Options von Visual Studio ein. Eine
+eigene Oberfläche hätte mehr Kontrolle über die Darstellung gebracht, dafür gab es
+aber keinen ausreichenden Grund. Die Standardseite bringt ein Property Grid mit, das
+die Einstellungen nach Gruppen und darin alphabetisch ordnet, und sieht aus wie die
+übrigen Seiten der Optionen. Die Einstellungen sind dieselben wie im Wireframe, dazu
+kommen die beiden Optionen der Inline-Anzeige. Mehrere
 Package-Verzeichnisse trägt der Entwickler im String Collection Editor von Visual
 Studio ein, ein Verzeichnis pro Zeile.
 
@@ -605,13 +641,15 @@ prüfen lassen.
       ),
       table.cell(colspan: 2)[*Gegenüber dem Konzept*],
       [Signaturen und zusätzliche Klassen im Klassenmodell, siehe
-       @projekte und die Liste darunter.],
+       @klassen_ist_laden bis @klassen_ist_querschnitt.],
       [Was die Realisierung brauchte, etwa die Label-Dateien nicht geladener
-       Sprachen für FA02 Label-Erstellung.],
+       Sprachen für das Anlegen neuer Labels.],
 
       [Die Optionsseite ist ein Property Grid statt der Seite aus dem Wireframe und hat keinen Button Apply.],
-      [Eine Seite im Dialog Options von Visual Studio bringt das Property Grid und
-       nur OK und Cancel mit.],
+      [Die Extension hängt sich an die Standardseite der Optionen von Visual Studio
+       an, statt eine eigene Oberfläche nachzubauen. Für mehr Kontrolle über die
+       Darstellung gab es keinen ausreichenden Grund. Die Standardseite bringt das
+       Property Grid und nur OK und Cancel mit.],
 
       [Der Sprung in eine Eigenschaft öffnet das Element, wählt aber die Node
        nicht.],
@@ -669,8 +707,9 @@ in ihrer Produktversion. Das Paket hat die SHA-256-Prüfsumme
 Das Paket enthält die Lizenz des Codes, der VSIX Installer zeigt einen Link darauf.
 Install bleibt der einzige Schritt. Im öffentlichen Repository liegt das Paket
 nicht. Das SDK packt Bibliotheken von VisualStudio.Extensibility hinein, deren Lizenz
-das Weitergeben und Veröffentlichen untersagt @ms-extensibility-license. Das Paket
-liegt der Abgabe bei und wird bei BE-terna intern verteilt.
+das Weitergeben und Veröffentlichen untersagt @ms-extensibility-license. Auch der
+Abgabe liegt es nicht bei, weil diese nur aus dem vorliegenden Dokument besteht. Das
+Paket kann beim Autor angefragt werden und wird bei BE-terna intern verteilt.
 
 #[
   #show figure: set align(left)
@@ -771,7 +810,9 @@ und eine `_Extension`-Datei.
 ]
 
 TC04 vergleicht jede Suche mit dem Ergebnis des bestehenden Tools auf denselben
-Testdaten, erfasst mit dem Skript `Capture-ExistingToolResults.ps1`. TC11 prüft die
+Testdaten. Diese Ergebnisse hat das Skript `Capture-ExistingToolResults.ps1`  erfasst. Von 304 Suchen mit 38 Begriffen in allen acht Modi
+liefern 303 dieselben Treffer in derselben Reihenfolge. Die eine Suche fällt weg,
+weil das bestehende Tool bei Match word den Begriff als Regex auswertet. TC11 prüft die
 Anfragen an DeepL mit simulierten Antworten, auch mit den Fehlern 403, 429, 456 und
 500.
 
@@ -1288,7 +1329,7 @@ in D1 nur zwei Sprachen geladen.
       [TC29], [Verwendungen suchen und anspringen], [Bestanden], [D2 bis D4],
       [TC30], [Verschieben bei offenen Elementen], [Bestanden], [D2, D4],
       [TC31], [Extraktion im X++-Editor], [Bestanden], [D3, D4],
-      [TC32], [Extraktion im Designer], [Bestanden], [D3, D4],
+      [TC32], [Extraktion im Designer], [Teilweise], [D3, D4],
       [TC33], [Übersetzungsdienst mit und ohne Schlüssel], [Bestanden], [D3, D4],
       [TC34], [Kompilieren nach Änderungen], [Bestanden], [D3, D4],
       [TC35], [Suchdauer und Laden], [Bestanden], [D4],
@@ -1306,10 +1347,40 @@ in D1 nur zwei Sprachen geladen.
   ) <testergebnisse>
 ]
 
-Bis auf TC36 haben alle Testfälle bestanden. TC29 bestand in D2 auf der UDE nicht, weil die Extension die `.xpp`-Datei im falschen Ordner
+Bis auf TC32 und TC36 haben alle Testfälle bestanden. TC29 bestand in D2 auf der UDE nicht, weil die Extension die `.xpp`-Datei im falschen Ordner
 suchte. Nach der Korrektur bestand er in D3 und D4. TC26 und TC28 hatten in D2
 Befunde, die D3 nachprüfte. Die Systemtests TC15 bis TC24 liefen am 19.10.2026 auf
 dem Stand des Code Freeze noch einmal in der experimentellen Instanz.
+
+#[
+  #show figure: set align(left)
+  #figure(
+    table(
+      columns: (auto, 1fr),
+      [*ID*], [TC32],
+      [*Beschreibung*],
+      [Im Designer ein Element mit hardcodiertem Label und Help Text wählen und
+       extrahieren.],
+      [*Vorgehen*],
+      [In D3 und D4 auf der UDE, über den Button Extract im Bereich zur gewählten
+       Node im Tool Window.],
+      [*Erwartetes Ergebnis*],
+      [Beide Eigenschaften stehen zur Wahl. Die gewählte enthält danach die
+       Label-ID. Der Designer meldet die Änderung und lädt das Element nach
+       Bestätigung neu.],
+      [*Tatsächliches Ergebnis*],
+      [Label und Help Text standen zur Wahl, die gewählte Eigenschaft enthielt
+       danach die Label-ID, und der Designer lud das Element neu. Ein Command im
+       Kontextmenü des Designers, also per Rechtsklick auf die Node, liess sich
+       nicht umsetzen und wurde nicht weiter verfolgt.],
+      [*Status*],
+      [Teilweise. Die Extraktion im Designer funktioniert, aber nur über das Tool
+       Window.],
+      [*Referenz*], [FA09, UC08, D3, D4],
+    ),
+    caption: [Testergebnis TC32 (eigene Darstellung)]
+  ) <tc_32>
+]
 
 #[
   #show figure: set align(left)
@@ -1362,8 +1433,8 @@ dem Stand des Code Freeze noch einmal in der experimentellen Instanz.
        Label in der Detailansicht (TC28).],
       [Z5], [Verwendungssuche in der IDE], [Ja], [Fundstellen mit Model, Datei, Zeile
        und Spalte, Sprung in Editor und Designer seit D3 (TC29).],
-      [Z6], [Extraktion hardcodierter Texte], [Ja], [Im X++-Editor und im Designer
-       (TC31, TC32).],
+      [Z6], [Extraktion hardcodierter Texte], [Ja], [Im X++-Editor und im Designer,
+       dort nur über das Tool Window (TC31, TC32).],
       [Z7], [Automatische Übersetzung], [Ja], [Vorschläge von DeepL, vor dem
        Speichern änderbar (TC33).],
       [Z8], [Erweiterbare Architektur], [Ja], [Kernlogik ohne Visual Studio, 394 Unit
@@ -1403,7 +1474,7 @@ nach dem Projekt entscheidet, sind alle Anforderungen erfüllt.
       [FA06 Inline-Anzeige], [Ja], [TC27],
       [FA07 Inline-Suche], [Ja], [TC28],
       [FA08 Im Tool Window öffnen], [Ja], [TC28],
-      [FA09 Extraktion hardcodierter Texte], [Ja], [TC13, TC31, TC32],
+      [FA09 Extraktion hardcodierter Texte], [Ja], [TC13, TC31, TC32. Im Designer nur über das Tool Window, siehe @tc_32.],
       [FA10 Automatische Übersetzung], [Ja], [TC11, TC33],
       [FA11 Einstellungen], [Ja], [TC14, TC21, TC25],
       [FA12 Erweiterte Suchmodi], [Ja], [TC04, TC16. Match word wertet den Begriff als Text, nicht als Regex.],
@@ -1447,10 +1518,13 @@ weil die Realisierung vor dem Plan lag.
 
 == Empfehlungen <empfehlungen>
 
+=== Einführung und Betrieb
+
 - Pilotphase mit einzelnen Entwicklern, wie im Konzept vorgesehen. Das
   bestehende Tool kann daneben weiterlaufen, TC24 zeigt, dass beide dieselben Dateien
-  bearbeiten können. Vorher den Release-Build einmal auf der UDE mit Visual Studio 2026 prüfen, auf der Testumgebung lief er nur unter
-  Visual Studio 2022.
+  bearbeiten können. Vorher den Release-Build einmal auf der UDE mit Visual Studio
+  2026 prüfen, auf der Testumgebung lief er nur unter Visual Studio 2022.
+- Nutzt BE-terna Visual Studio 2022 weiter, sollten die Systemtests dort noch laufen.
 - Das Paket darf wegen der Lizenz der mitgepackten Bibliotheken von
   VisualStudio.Extensibility nicht öffentlich liegen @ms-extensibility-license.
   BE-terna braucht dafür einen internen Ablageort, von dem Entwickler neue Versionen
@@ -1461,26 +1535,45 @@ weil die Realisierung vor dem Plan lag.
   Schlüssel dann gegen andere Benutzer, nicht gegen die anderen Personen auf derselben
   VM. Soll jede Person einen eigenen Schlüssel haben, muss die Ablage des Schlüssels
   umgebaut werden.
-- Die Verwendungssuche über alle Models dauert bis knapp eine Minute. Stört das im
-  Alltag, ist die Cross-Reference-Datenbank aus E4 (Verwendungssuche) der nächste Schritt.
-- Die Label-Eigenschaften einer Node zeigt die Extension im Tool Window, weil das Properties Window keinen Erweiterungspunkt hat. Der
-  Experte im Betrieb regte im Review an, nach dem Projekt nach einer schöneren
-  Lösung zu suchen, siehe @protokoll_experte.
+
+=== Performance und Speicher
+
 - Im Review wirkte der Start von Visual Studio langsam, siehe @protokoll_experte.
   Sind beim Start Elemente geöffnet, lädt die Extension die Labels fast immer schon
   dann. Das Laden läuft im Hintergrund, konkurriert aber mit dem Start von Visual
   Studio, wie sich in D2 zeigte. Abhilfe wäre, erst zu laden, wenn Visual Studio
-  ruht oder ein Label tatsächlich gebraucht wird. Kürzer würde das Laden mit einem
-  eigenen Index nach Variante C aus E2.
+  ruht oder ein Label tatsächlich gebraucht wird.
 - Die Labels belegen im Prozess von Visual Studio rund 0,9 GB. Wird der Speicher
-  knapp, ist ein eigener Index die Variante C aus E2 (Ablage zur Laufzeit).
+  knapp oder dauert das Laden zu lange, ist ein eigener Index nach Variante C aus E2
+  der nächste Schritt.
+- Die Verwendungssuche über alle Models dauert bis knapp eine Minute. Stört das im
+  Alltag, ist die Cross-Reference-Datenbank aus E4 der nächste Schritt. Label-IDs in
+  Kommentaren fände sie nicht mehr. Ob sie Verwendungen in allen Elementen erfasst,
+  etwa in Reports, ist nicht geklärt und müsste vor einem Umbau geprüft werden.
+
+=== Bedienung
+
+- Enthält eine Codezeile mehrere Label-IDs, hängt die Inline-Anzeige ihre
+  Übersetzungen in einer einzigen Zeile hintereinander, ohne Umbruch. Mit mehreren
+  Labels und Sprachen kann diese Zeile weit über den sichtbaren Bereich des Editors
+  hinauslaufen. Der Fall fiel erst nach dem Code Freeze auf. Besser wäre eine eigene
+  Zeile je Label oder ein Umbruch an der Breite des Editors.
+- Die Label-Eigenschaften einer Node zeigt die Extension im Tool Window, weil das
+  Properties Window keinen Erweiterungspunkt hat. Der Experte im Betrieb regte im
+  Review an, nach dem Projekt nach einer schöneren Lösung zu suchen, siehe
+  @protokoll_experte.
 - Die aktive Metadaten-Konfiguration erkennt die Extension nicht, sie nimmt die
   zuletzt geänderte. Wer oft zwischen Konfigurationen wechselt, muss sie in den
   Optionen wählen. Eine automatische Erkennung wäre eine Verbesserung.
+
+=== Offene Kann-Anforderungen
+
 - Offen sind KA01 und KA02 für fehlende Übersetzungen im Code, KA06 für die Suche im
   Code nach dem Labeltext und KA07 für die Extraktion als Vorschlag im Editor. Sie
   sollten nach dem Projekt mit den Erfahrungen aus der Pilotphase neu beurteilt
-  werden, bevor jemand sie umsetzt. KA10,
-  GitHub Copilot als Übersetzungsdienst, war für dieses Projekt zu aufwändig und
-  bleibt zurückgestellt. Nach dem Projekt lässt sie sich noch einmal prüfen.
-- Nutzt BE-terna Visual Studio 2022 weiter, sollten die Systemtests dort noch laufen.
+  werden, bevor jemand sie umsetzt.
+- KA10, GitHub Copilot als Übersetzungsdienst, bleibt zurückgestellt. Einen dafür
+  vorgesehenen Weg, Copilot aus einer Extension anzusprechen, hat der Autor nicht
+  gefunden. Ohne ihn ist KA10 nicht gut machbar und war für dieses Projekt zu
+  aufwändig. Nach dem Projekt lässt sich prüfen, ob es inzwischen einen solchen Weg
+  gibt.
